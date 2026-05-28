@@ -1,0 +1,9 @@
+{
+  "cleanUrls": true,
+  "rewrites": [
+    {
+      "source": "/(?!assets|auth|dashboard|widget|hq|supabase|business\\.html|dashboard-mobile\\.html|dashboard\\.html|index\\.html|pricing\\.html|mobile\\.html|favicon\\.ico|.*\\.js|.*\\.css|.*\\.png|.*\\.jpg|.*\\.svg|.*\\.json).*$",
+      "destination": "/business.html"
+    }
+  ]
+}

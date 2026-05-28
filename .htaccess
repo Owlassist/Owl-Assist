@@ -1,0 +1,44 @@
+# Owl Assist - Clean URLs and Vanity Rewrite
+# This file handles:
+# 1. Removing .html from visible URLs (redirects page.html to page)
+# 2. Internally rewriting clean URLs back to .html files
+# 3. Vanity URLs (/username -> /business.html?u=username)
+
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # 0. Force no trailing slash (External Redirect)
+    # Only if it's not an actual directory
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)/$ /$1 [R=301,L]
+
+    # 1. Redirect /page.html to /page (External Redirect)
+    # Only if it's not business.html (which is used for vanity URLs)
+    RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\ /.*\.html\ HTTP/
+    RewriteCond %{REQUEST_URI} !^/business\.html$
+    RewriteRule ^(.*)\.html$ /$1 [R=301,L]
+
+    # 2. Map /page to /page.html internally if it exists (Internal Rewrite)
+    # Special case: dashboard (ignore if it's a directory because we have dashboard.html)
+    RewriteRule ^dashboard/?$ dashboard.html [L]
+
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME}.html -f
+    RewriteRule ^(.*)$ $1.html [L]
+
+    # 3. Vanity URLs (/username -> /business.html?u=username)
+    # Only if the file/dir doesn't exist and it's not a known system path
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    # Exclude specific folders and common file extensions
+    RewriteCond %{REQUEST_URI} !^/(assets|auth|dashboard|widget|hq|supabase) [NC]
+    RewriteCond %{REQUEST_URI} !(\.js|\.css|\.png|\.jpg|\.jpeg|\.ico|\.svg|\.json|\.webmanifest)$ [NC]
+    # This captures the first path segment as the 'u' parameter
+    RewriteRule ^([^/]+)/?$ business.html?u=$1 [L,QSA]
+</IfModule>

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Authenticating... | Owl Assist</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/auth.css">
+
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+    }
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      border-top-color: var(--primary);
+      animation: spin 1s ease-in-out infinite;
+      margin: 0 auto 1.5rem;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .text-center { text-align: center; }
+  </style>
+</head>
+<body>
+
+  <div class="text-center">
+    <div class="spinner"></div>
+    <h2 style="font-weight: 500;">Signing you in...</h2>
+    <p style="color: var(--text-dim); margin-top: 0.5rem;">Securely completing your login.</p>
+  </div>
+
+  <script src="../assets/js/clerk-auth.js"></script>
+  <script>
+    // Just trigger the callback handler 
+    window.addEventListener('load', async () => {
+      try {
+        await window.owlAuth.handleCallback();
+      } catch(err) {
+        console.error("SSO Callback Error:", err);
+        // If it fails, bounce back to login
+        window.location.href = 'login.html';
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <base href="/">
+  <script src="assets/js/device-detect.js"></script>
+  <meta name="description"
+    content="Owl Assist - The AI Receptionist for Modern Businesses. Automate scheduling, inquiries, and customer support with human-like intelligence.">
+  <title>Owl Assist | AI Receptionist for Modern Businesses</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    rel="stylesheet" />
+
+  <!-- Favicons & Manifest -->
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/img/logo/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/img/logo/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/img/logo/favicon-16x16.png">
+  <link rel="manifest" href="assets/img/logo/site.webmanifest">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="assets/css/components.css">
+</head>
+
+<body>
+
+  <!-- Navigation -->
+  <nav class="nav-bar">
+    <div class="container">
+      <a href="index" class="nav-logo">
+        <img src="assets/img/logo/logo.png" alt="Owl Assist Logo" class="nav-logo-img">
+        Owl Assist
+      </a>
+      <div class="nav-links">
+        <a href="#features" class="active">Features</a>
+        <a href="pricing">Pricing</a>
+        <a href="#testimonials">Testimonials</a>
+      </div>
+      <div class="nav-actions">
+        <a href="auth/login" class="btn btn-primary">Get Started</a>
+        <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+          <span class="material-symbols-outlined">menu</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="container">
+        <div class="hero-content">
+          <div class="badge">
+            <span>New Release v2.4</span>
+            <span class="material-symbols-outlined" style="font-size: 10px; color: var(--tertiary);">circle</span>
+            AI Scheduling Now Live
+          </div>
+          <h1 class="hero-title">
+            Automate your <span class="text-gradient">customer experience</span> with AI.
+          </h1>
+          <p class="hero-description">
+            Owl Assist handles 24/7 reception, scheduling, and inquiries with human-like precision. Give your business
+            the digital concierge it deserves.
+          </p>
+          <div class="hero-actions">
+            <a href="auth/signup" class="btn btn-primary btn-large">Start Free Trial</a>
+            <button class="btn btn-outline btn-large">
+              <span class="material-symbols-outlined">play_circle</span>
+              Watch Demo
+            </button>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <img
+            src="https://lh3.googleusercontent.com/aida-public/AB6AXuA52k-b6z7ksU1uBF8AZFWRm6cbi7Jj03uu1dvOvyHkvxQWP2n48MOxfn15rXsX7iIucMJv_PrjL9neZsG2jvf_e0OTpWgm-DkfmgtRa8i_uaXM1yIJ4VefYyCQ99oIh9V6wfD87N_PQMNSFxMtSWLg46B-vMZG1L3fSrbyul7QVcorWXn1qqoyQ4Yg4E0uYuxlObxu2sLOR1XNb37ipr8_M9kBpnIQS7ZW9y-1gLdWVGKxxx1_VidhSSDcdTxgZOBA0Go98q_OUcKC"
+            alt="Owl Assist Dashboard">
+          <div class="floating-card floating-1">
+            <span class="material-symbols-outlined" style="color: #4ade80;">check_circle</span>
+            <div style="display: flex; flex-direction: column;">
+              <span style="font-weight: 700; font-size: 0.75rem; color: white;">Call Resolved</span>
+              <span style="font-size: 0.65rem; color: var(--text-dim);">Booking confirmed</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="section" id="features" style="background: rgba(21, 27, 45, 0.4);">
+      <div class="container">
+        <div class="section-head">
+          <span class="label">Core Capabilities</span>
+          <h2>Built for High-Growth Teams</h2>
+        </div>
+
+        <div class="feature-grid">
+          <!-- Main Feature -->
+          <div class="feature-box wide">
+            <div class="glass-card feature-card">
+              <span class="material-symbols-outlined icon">smart_toy</span>
+              <h3>Advanced Conversational Intelligence</h3>
+              <p>Our LLM-powered engine doesn't just read scripts. It understands intent, sentiment, and context,
+                providing a seamless human-like experience for every caller.</p>
+            </div>
+          </div>
+          <!-- Side Feature -->
+          <div class="feature-box">
+            <div class="glass-card feature-card">
+              <span class="material-symbols-outlined icon" style="color: var(--tertiary);">calendar_month</span>
+              <h3>Auto-Scheduling</h3>
+              <p>Syncs with your business hours and calendar to manage bookings without a single double-booking.</p>
+            </div>
+          </div>
+          <!-- bottom row -->
+          <div class="feature-box">
+            <div class="glass-card feature-card">
+              <span class="material-symbols-outlined icon">translate</span>
+              <h3>Multi-Lingual</h3>
+              <p>Support for over 45 languages with perfect native accents and cultural nuance.</p>
+            </div>
+          </div>
+          <div class="feature-box wide">
+            <div class="glass-card feature-card" style="display: flex; gap: 2rem; align-items: center;">
+              <div style="flex: 1">
+                <span class="material-symbols-outlined icon" style="color: var(--primary-container);">insights</span>
+                <h3>Sentiment Dashboard</h3>
+                <p>Track customer satisfaction in real-time. Understand why users are calling and how to serve them
+                  better.</p>
+              </div>
+              <img
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDkbfO5S4EbKo2YkxdcLL0Zd7WiFvQZ15ImW48gr8vJTkn_q4_HSMLvsDclC26uCA2BSm-u5NfXCtZGJdGgHZK2yxCy7iVcG-VA0M9jUew0N482Ap4TjOMJohmk8abbDc2mZNC4JrvmVQ3SFLpoqq8S22g4enpKDLiQENYSv7cSH0L-dMgehS2W8OeZk3HZG2Lk-NTwCJpVpw1YG8Oqv6tteU8I_YjYNsNaZ5vQZmsvZWuikS7pE8zQeY1Ezkz2dRt5sfBF4wHIgjTy"
+                alt="Analytics" style="width: 250px; border-radius: var(--radius-md); border: 1px solid var(--border);">
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="section" id="testimonials">
+      <div class="container">
+        <div class="testimonials-layout">
+          <div class="t-intro">
+            <h2>Trusted by the industry leaders.</h2>
+            <p>Join over 2,000+ businesses using Owl Assist to reclaim their time and delight their customers.</p>
+            <div
+              style="margin-top: 2rem; padding: 1rem; border-left: 2px solid var(--primary); background: rgba(192, 193, 255, 0.05);">
+              <p style="color: var(--primary); font-weight: 700;">Rated 4.9/5 stars</p>
+            </div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+            <div class="glass-card t-review">
+              <span class="material-symbols-outlined" style="color: var(--tertiary);">star star star star star</span>
+              <p class="t-text">"Owl Assist handled 400 calls in our first week without dropping a lead. It's
+                essentially a team of 10 for the price of a gym membership."</p>
+              <div class="t-author">
+                <span class="name">Marcus Thorne</span>
+                <span class="role">CEO at CloudScale</span>
+              </div>
+            </div>
+            <div class="glass-card t-review">
+              <span class="material-symbols-outlined" style="color: var(--tertiary);">star star star star star</span>
+              <p class="t-text">"The voice modulation is incredible. Our patients genuinely believe they are speaking to
+                a receptionist. Flawless integration."</p>
+              <div class="t-author">
+                <span class="name">Sarah Jenkins</span>
+                <span class="role">Operations at Peak Health</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="section">
+      <div class="container">
+        <div class="glass-card glow-effect" style="text-align: center; padding: 5rem 2rem; border-radius: 3rem;">
+          <h2 style="font-size: 3.5rem; margin-bottom: 1.5rem;">Ready to evolve your reception?</h2>
+          <p style="font-size: 1.25rem; max-width: 700px; margin: 0 auto 3rem;">Start your 14-day free trial today. No
+            credit card required. No setup fees. Unlimited potential.</p>
+          <div style="display: flex; gap: 1.5rem; justify-content: center;">
+            <a href="auth/signup" class="btn btn-primary btn-large">Get Started Now</a>
+            <button class="btn btn-outline btn-large">Speak to Sales</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-top">
+        <div class="footer-info">
+          <div class="nav-logo">
+            <img src="assets/img/logo/logo.png" alt="Owl Assist Logo" class="nav-logo-img">
+            Owl Assist
+          </div>
+          <p>Pioneering the future of AI reception and automated customer experiences for global enterprises.</p>
+        </div>
+        <div class="footer-links-container">
+          <div class="footer-links">
+            <h4>Platform</h4>
+            <a href="#">Features</a>
+            <a href="pricing">Pricing</a>
+            <a href="#">API</a>
+          </div>
+          <div class="footer-links">
+            <h4>Company</h4>
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms</a>
+            <a href="#">Contact</a>
+          </div>
+          <div class="footer-links">
+            <h4>Social</h4>
+            <a href="#">Twitter</a>
+            <a href="#">LinkedIn</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        © 2026 Owl Assist AI. All rights reserved.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Chat Widget Demo -->
+  <script src="widget/owl-assist.js" data-business="demo_123" data-name="Noctra AI"></script>
+
+  <!-- Mobile Menu Script -->
+  <script>
+    function toggleMobileMenu() {
+      const navLinks = document.querySelector('.nav-links');
+      navLinks.classList.toggle('mobile-active');
+    }
+  </script>
+
+</body>
+
+</html>
