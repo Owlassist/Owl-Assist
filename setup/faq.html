@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Owl Assist | FAQ</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+
+  <!-- Favicons & Manifest -->
+  <link rel="icon" type="image/x-icon" href="/assets/img/logo/favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/logo/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/logo/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/img/logo/favicon-16x16.png">
+  <link rel="manifest" href="/assets/img/logo/site.webmanifest">
+
+  <style>
+    body {
+      background: #0c1324;
+      color: #dce1fb;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .glass {
+      background: rgba(35, 41, 60, 0.55);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .glow {
+      box-shadow: 0 0 80px rgba(99, 102, 241, 0.15);
+    }
+
+    .faq-item {
+      overflow: hidden;
+      transition: all 0.4s ease;
+    }
+
+    .faq-content {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease;
+    }
+
+    .faq-item.active .faq-content {
+      max-height: 200px;
+      margin-top: 10px;
+    }
+
+    .highlight {
+      background: rgba(99, 102, 241, 0.3);
+      padding: 2px 4px;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- NAV -->
+  <nav class="fixed top-0 w-full z-50 border-b border-[#c7c4d7]/10 bg-[#0c1324]/70 backdrop-blur-xl">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+
+      <!-- Logo -->
+      <a href="/" class="text-xl font-black tracking-tight text-white flex items-center gap-2" style="text-decoration:none;">
+        <img src="/assets/img/logo/logo.png" alt="Owl Assist Logo" class="h-8 w-8 object-contain" />
+        Owl Assist
+      </a>
+
+      <!-- Desktop Menu -->
+      <div class="hidden md:flex items-center gap-8 font-medium text-sm">
+        <a class="text-[#c7c4d7] hover:text-white" href="/">Home</a>
+        <a class="text-[#c7c4d7] hover:text-white" href="/pricing">Pricing</a>
+        <a class="text-[#c7c4d7] hover:text-white" href="/faq/">FAQ</a>
+      </div>
+
+      <!-- CTA -->
+      <div class="hidden md:flex items-center gap-4">
+        <a href="/auth/login" class="text-white font-bold text-sm hover:text-primary transition-colors">
+          Log In
+        </a>
+        <a href="/auth/signup"
+          class="bg-primary text-on-primary px-6 py-2.5 rounded-xl font-bold text-sm shadow-lg hover:scale-105 transition-all">
+          Get Started
+        </a>
+      </div>
+
+      <!-- Hamburger -->
+      <button id="menuBtn" class="md:hidden text-white">
+        <span class="material-symbols-outlined text-3xl">menu</span>
+      </button>
+
+    </div>
+
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="hidden md:hidden px-6 pb-6 space-y-4 bg-[#0c1324]/95 backdrop-blur-xl">
+
+      <a href="/" class="block text-white font-semibold">Home</a>
+      <a href="/pricing" class="block text-[#c7c4d7]">Pricing</a>
+      <a href="/faq/" class="block text-[#c7c4d7]">FAQ</a>
+
+      <div class="flex flex-col gap-3 mt-4">
+        <a href="/auth/login"
+          class="w-full text-center border border-outline-variant text-white py-3 rounded-xl font-bold">
+          Log In
+        </a>
+        <a href="/auth/signup" class="w-full text-center bg-primary text-on-primary py-3 rounded-xl font-bold">
+          Get Started
+        </a>
+      </div>
+
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="pt-32 pb-16 px-6 text-center relative">
+    <div
+      class="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-indigo-500/10 blur-[120px] rounded-full">
+    </div>
+
+    <h1 class="text-5xl font-extrabold text-white mb-4 relative z-10">
+      Help Center
+    </h1>
+
+    <p class="text-gray-400 max-w-xl mx-auto relative z-10">
+      Everything you need to know about Owl Assist.
+    </p>
+
+    <!-- SEARCH -->
+    <div class="mt-10 max-w-xl mx-auto relative z-10">
+      <input id="search" type="text" placeholder="Search anything..."
+        class="w-full p-5 rounded-2xl glass outline-none focus:ring-2 focus:ring-indigo-500 transition">
+    </div>
+
+    <!-- CATEGORY PILLS -->
+    <div class="flex flex-wrap justify-center gap-3 mt-6 relative z-10">
+      <button class="pill">General</button>
+      <button class="pill">Setup</button>
+      <button class="pill">Bookings</button>
+      <button class="pill">Pricing</button>
+      <button class="pill active">All</button>
+
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="px-6 pb-24">
+    <div class="max-w-3xl mx-auto space-y-4">
+
+      <!-- ITEM -->
+      <div class="faq-item glass p-6 rounded-2xl cursor-pointer" data-category="general">
+        <div class="flex justify-between items-center">
+          <h3 class="font-semibold text-lg">What is Owl Assist?</h3>
+          <span>+</span>
+        </div>
+        <div class="faq-content text-gray-400">
+          Owl Assist is an AI-powered receptionist that helps businesses respond to customer enquiries
+          instantly and manage bookings automatically through a chat interface on their website
+        </div>
+      </div>
+
+      <div class="faq-item glass p-6 rounded-2xl cursor-pointer" data-category="general">
+        <div class="flex justify-between items-center">
+          <h3 class="font-semibold text-lg">How does it work?</h3>
+          <span>+</span>
+        </div>
+        <div class="faq-content text-gray-400">
+          Once you sign up, you provide information about your business (or your website URL). Owl Assist
+          uses this to answer customer questions and assist with bookings through a chat widget on your
+          website.
+        </div>
+      </div>
+      <div class="faq-item glass p-6 rounded-2xl cursor-pointer" data-category="general">
+        <div class="flex justify-between items-center">
+          <h3 class="font-semibold text-lg">Do I need a website to use Owl Assist?</h3>
+          <span>+</span>
+        </div>
+        <div class="faq-content text-gray-400">
+          No. You can still use Owl Assist by manually entering your business details. However, having a
+          website allows the AI to learn faster by importing your content.
+        </div>
+      </div>
+      <div class="faq-item glass p-6 rounded-2xl cursor-pointer" data-category="general">
+        <div class="flex justify-between items-center">
+          <h3 class="font-semibold text-lg">Can Owl Assist replace a human receptionist?</h3>
+          <span>+</span>
+        </div>
+        <div class="faq-content text-gray-400">
+          Owl Assist handles common questions and booking requests automatically, but you still remain in
+          control. It works as a smart assistant, not a full replacement.
+        </div>
+      </div>
+
+      <div class="faq-item glass p-6 rounded-2xl cursor-pointer" data-category="setup">
+        <div class="flex justify-between items-center">
+          <h3 class="font-semibold text-lg">How long does setup take?</h3>
+          <span>+</span>
+        </div>
+        <div class="faq-content text-gray-400">
+          You can set up Owl Assist in just a few minutes by entering your business information or
+          providing your website URL.
+        </div>
+      </div>
+      <div class="faq-item glass p-6 rounded-2xl cursor-pointer" data-category="setup">
+        <div class="flex justify-between items-center">
+          <h3 class="font-semibold text-lg">Can I customize what the AI says?</h3>
+          <span>+</span>
+        </div>
+        <div class="faq-content text-gray-400">
+          Yes. You can control the information the AI uses by editing your business details, FAQs, and
+          services in your dashboard.
+        </div>
+      </div>
+      <div class="faq-item glass p-6 rounded-2xl cursor-pointer" data-category="setup">
+        <div class="flex justify-between items-center">
+          <h3 class="font-semibold text-lg">Can I update my business information later?</h3>
+          <span>+</span>
+        </div>
+        <div class="faq-content text-gray-400">
+          Yes. You can edit your business details anytime from your dashboard, and the AI will
+          automatically use the updated information.
+        </div>
+      </div>
+      <div class="faq-item glass p-6 rounded-2xl cursor-pointer" data-category="setup">
+        <div class="flex justify-between items-center">
+          <h3 class="font-semibold text-lg">What kind of businesses can use Owl Assist?</h3>
+          <span>+</span>
+        </div>
+        <div class="faq-content text-gray-400">
+          Any business that receives customer enquiries or bookings can use Owl Assist, including salons,
+          clinics, agencies, tutors, and more.
+        </div>
+      </div>
+
+      <div class="faq-item glass p-6 rounded-2xl cursor-pointer" data-category="bookings">
+        <div class="flex justify-between items-center">
+          <h3 class="font-semibold text-lg">How do bookings work?</h3>
+          <span>+</span>
+        </div>
+        <div class="faq-content text-gray-400">
+          When a customer wants to book, Owl Assist will guide them through a simple form. The booking
+          details are then saved and displayed in your dashboard.
+        </div>
+      </div>
+      <div class="faq-item glass p-6 rounded-2xl cursor-pointer" data-category="bookings">
+        <div class="flex justify-between items-center">
+          <h3 class="font-semibold text-lg">Will customers need to create an account?</h3>
+          <span>+</span>
+        </div>
+        <div class="faq-content text-gray-400">
+          No. Customers can chat and book instantly without signing up.
+        </div>
+      </div>
+      <div class="faq-item glass p-6 rounded-2xl cursor-pointer" data-category="bookings">
+        <div class="flex justify-between items-center">
+          <h3 class="font-semibold text-lg">How will I know when someone books?</h3>
+          <span>+</span>
+        </div>
+        <div class="faq-content text-gray-400">
+          All bookings appear in your dashboard with the customer’s details, so you can follow up directly.
+        </div>
+      </div>
+      <div class="faq-item glass p-6 rounded-2xl cursor-pointer" data-category="bookings">
+        <div class="flex justify-between items-center">
+          <h3 class="font-semibold text-lg">Does Owl Assist send emails to customers?</h3>
+          <span>+</span>
+        </div>
+        <div class="faq-content text-gray-400">
+          Not in the current version. After booking, customers receive a confirmation message, and you
+          can contact them directly using the details provided.
+        </div>
+      </div>
+
+      <div class="faq-item glass p-6 rounded-2xl cursor-pointer" data-category="pricing">
+        <div class="flex justify-between items-center">
+          <h3 class="font-semibold text-lg"> Is Owl Assist free?</h3>
+          <span>+</span>
+        </div>
+        <div class="faq-content text-gray-400">
+          Owl Assist may offer a free plan or beta access. Paid plans will be introduced with additional
+          Home.
+        </div>
+      </div>
+      <div class="faq-item glass p-6 rounded-2xl cursor-pointer" data-category="pricing">
+        <div class="flex justify-between items-center">
+          <h3 class="font-semibold text-lg">What currencies do you support?</h3>
+          <span>+</span>
+        </div>
+        <div class="faq-content text-gray-400">
+          We currently support payments in:
+          US Dollars($) & Nigerian Naira (₦)
+        </div>
+      </div>
+      <div class="faq-item glass p-6 rounded-2xl cursor-pointer" data-category="pricing">
+        <div class="flex justify-between items-center">
+          <h3 class="font-semibold text-lg"> Can I upgrade or cancel anytime?</h3>
+          <span>+</span>
+        </div>
+        <div class="faq-content text-gray-400">
+          Yes. You can upgrade or cancel your subscription at any time from your dashboard.
+        </div>
+      </div>
+
+    </div>
+
+    <!-- CTA -->
+    <div class="text-center mt-20">
+      <p class="text-gray-400 mb-8">Still stuck?</p>
+      <a href="mailto:support@owlassist.app"
+        class="px-10 py-5 bg-indigo-500 rounded-2xl font-bold text-white hover:scale-105 transition shadow-lg shadow-indigo-500/20">
+        Talk to Support
+      </a>
+    </div>
+
+  </section>
+
+  <!-- SCRIPT -->
+  <script>
+    const items = document.querySelectorAll(".faq-item");
+    const search = document.getElementById("search");
+    const pills = document.querySelectorAll(".pill");
+
+    items.forEach(item => {
+      item.addEventListener("click", () => {
+        item.classList.toggle("active");
+      });
+    });
+
+    // SEARCH
+    search.addEventListener("input", () => {
+      let value = search.value.toLowerCase();
+
+      items.forEach(item => {
+        let text = item.innerText.toLowerCase();
+
+        if (text.includes(value)) {
+          item.style.display = "block";
+
+          // highlight
+          item.innerHTML = item.innerHTML.replace(
+            new RegExp(value, "gi"),
+            match => `<span class="highlight">${match}</span>`
+          );
+
+        } else {
+          item.style.display = "none";
+        }
+      });
+    });
+
+    // PILLS FILTER
+    pills.forEach(pill => {
+      pill.addEventListener("click", () => {
+        pills.forEach(p => p.classList.remove("active"));
+        pill.classList.add("active");
+
+        let category = pill.innerText.toLowerCase();
+
+        items.forEach(item => {
+          if (category === "all" || item.dataset.category === category) {
+            item.style.display = "block";
+          } else {
+            item.style.display = "none";
+          }
+        });
+      });
+    });
+  </script>
+
+  <!-- PILL STYLE -->
+  <style>
+    .pill {
+      padding: 8px 16px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.05);
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.3s;
+    }
+
+    .pill:hover {
+      background: rgba(99, 102, 241, 0.2);
+    }
+
+    .pill.active {
+      background: #6366f1;
+      color: white;
+    }
+  </style>
+
+<script>
+    // ── Mobile menu ───────────────────────────────────────────────────────────
+    const menuBtn = document.getElementById('menuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    if(menuBtn) {
+        menuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    }
+</script>
+
+  <!-- Footer -->
+  <footer class="w-full border-t border-[#c7c4d7]/5 bg-[#0c1324]">
+    <div class="max-w-7xl mx-auto px-8 py-12 flex flex-col md:flex-row justify-between">
+      <div class="mb-8 md:mb-0">
+        <div class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+          <img src="/assets/img/logo/logo.png" alt="Owl Assist Logo" class="h-7 w-7 object-contain" />
+          Owl Assist
+        </div>
+        <p class="font-['Inter'] text-[#c7c4d7] text-sm max-w-xs leading-relaxed">
+          Pioneering the future of AI reception and automated customer experiences for global enterprises.
+        </p>
+      </div>
+      <div class="grid grid-cols-2 lg:grid-cols-3 gap-12">
+        <div class="flex flex-col gap-4">
+          <h4 class="text-white font-bold text-sm uppercase tracking-widest">Platform</h4>
+          <a class="font-['Inter'] text-[#c7c4d7] text-sm hover:text-white transition-colors duration-200"
+            href="/pricing">Pricing</a>
+        </div>
+        <div class="flex flex-col gap-4">
+          <h4 class="text-white font-bold text-sm uppercase tracking-widest">Company</h4>
+          <a class="font-['Inter'] text-[#c7c4d7] text-sm hover:text-white transition-colors duration-200"
+            href="#">Privacy Policy</a>
+          <a class="font-['Inter'] text-[#c7c4d7] text-sm hover:text-white transition-colors duration-200"
+            href="#">Terms of Service</a>
+          <a class="font-['Inter'] text-[#c7c4d7] text-sm hover:text-white transition-colors duration-200"
+            href="mailto:Hello@owlassist.app">Contact Us</a>
+          <a class="font-['Inter'] text-[#c7c4d7] text-sm hover:text-white transition-colors duration-200"
+            href="mailto:support@owlassist.app">Support</a>
+        </div>
+        <div class="flex flex-col gap-4">
+          <h4 class="text-white font-bold text-sm uppercase tracking-widest">Social</h4>
+          <a class="font-['Inter'] text-[#c7c4d7] text-sm hover:text-white transition-colors duration-200"
+            href="https://X.com/owlassistapp" target="_blank">Twitter / X</a>
+          <a class="font-['Inter'] text-[#c7c4d7] text-sm hover:text-white transition-colors duration-200"
+            href="https://instagram.com/owlassistapp" target="_blank">Instagram</a>
+          <a class="font-['Inter'] text-[#c7c4d7] text-sm hover:text-white transition-colors duration-200"
+            href="https://tiktok.com/@owlassist" target="_blank">TikTok</a>
+        </div>
+      </div>
+    </div>
+    <div class="max-w-7xl mx-auto px-8 pb-8 text-center md:text-left">
+      <p class="font-['Inter'] text-[#c7c4d7] text-xs opacity-50">© 2026 Owl Assist AI. All rights reserved.</p>
+    </div>
+  </footer>
+
+</body>
+
+</html>
+
+
+

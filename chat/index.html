@@ -1,0 +1,1435 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <base href="/">
+  <title>Business | Owl Assist</title>
+
+  <!-- Favicons -->
+  <link rel="icon" type="image/x-icon" href="/assets/img/logo/favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/logo/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/logo/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/img/logo/favicon-16x16.png">
+  <link rel="manifest" href="/assets/img/logo/site.webmanifest">
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    rel="stylesheet" />
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <style>
+    :root {
+      --chat-bg: #0f172a;
+      --bubble-bot: rgba(255, 255, 255, 0.05);
+      --bubble-user: var(--primary);
+    }
+
+    body {
+      background: #020617;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      height: 100dvh;
+      overflow: hidden;
+    }
+
+    .public-header {
+      padding: 0.85rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      background: var(--glass);
+      backdrop-filter: blur(20px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+      flex-shrink: 0;
+      min-height: 0;
+    }
+
+    .biz-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .biz-logo {
+      width: 38px;
+      height: 38px;
+      flex-shrink: 0;
+      border-radius: 50%;
+      background: var(--primary-gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1.1rem;
+    }
+
+    .biz-name-wrap {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #biz-name {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 180px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-shrink: 0;
+      margin-left: 0.5rem;
+    }
+
+    .owl-branding-text {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .chat-container {
+      flex-grow: 1;
+      padding: 2rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      scroll-behavior: smooth;
+    }
+
+    .message {
+      max-width: 80%;
+      padding: 1rem 1.25rem;
+      border-radius: 1.25rem;
+      line-height: 1.5;
+      font-size: 0.95rem;
+      position: relative;
+      animation: msgPop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes msgPop {
+      from {
+        opacity: 0;
+        transform: scale(0.9) translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    .message.bot {
+      align-self: flex-start;
+      background: var(--bubble-bot);
+      border: 1px solid var(--border);
+      border-bottom-left-radius: 0.25rem;
+    }
+
+    .message.user {
+      align-self: flex-end;
+      background: #4f46e5;
+      color: white;
+      border-bottom-right-radius: 0.25rem;
+    }
+
+    .chat-input-area {
+      padding: 1.5rem 2rem;
+      background: var(--glass);
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 1rem;
+    }
+
+    .chat-input {
+      flex-grow: 1;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-full);
+      padding: 0.75rem 1.5rem;
+      color: white;
+      font-family: inherit;
+    }
+
+    .chat-input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    /* Loading / Typing indicator */
+    .typing {
+      display: flex;
+      gap: 4px;
+      padding: 0.5rem;
+    }
+
+    .dot {
+      width: 6px;
+      height: 6px;
+      background: var(--text-dim);
+      border-radius: 50%;
+      animation: bounce 1.4s infinite ease-in-out both;
+    }
+
+    .dot:nth-child(1) {
+      animation-delay: -0.32s;
+    }
+
+    .dot:nth-child(2) {
+      animation-delay: -0.16s;
+    }
+
+    @keyframes bounce {
+
+      0%,
+      80%,
+      100% {
+        transform: scale(0);
+      }
+
+      40% {
+        transform: scale(1.0);
+      }
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .verified-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      margin-left: 0.45rem;
+      flex-shrink: 0;
+      vertical-align: middle;
+      animation: badgePulse 3s infinite ease-in-out;
+    }
+
+    .verified-badge img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+
+    @keyframes badgePulse {
+      0%, 100% {
+        filter: drop-shadow(0 0 3px rgba(99,102,241,0.5));
+      }
+      50% {
+        filter: drop-shadow(0 0 8px rgba(99,102,241,0.8));
+      }
+    }
+
+    /* Booking UI Styles */
+    .booking-card {
+      background: var(--glass);
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      margin-top: 1rem;
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .slot-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+
+    .slot-btn {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+      color: white;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .slot-btn:hover {
+      background: var(--primary);
+      border-color: var(--primary);
+    }
+
+    .booking-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .booking-form input {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      color: white;
+    }
+
+    .date-heading {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      margin-top: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .lead-form-container {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
+      border-radius: 1.25rem;
+      padding: 1.5rem;
+      margin: 1rem 0;
+      width: 100%;
+      max-width: 380px;
+      animation: slideUp 0.4s ease-out;
+      backdrop-filter: blur(10px);
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(20px);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .lead-form-container h3 {
+      font-size: 1rem;
+      margin: 0 0 1rem 0;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .lead-form-container input,
+    .lead-form-container textarea {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      padding: 0.85rem;
+      border-radius: 0.75rem;
+      color: white;
+      font-size: 0.9rem;
+      margin-bottom: 0.75rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .lead-form-container input:focus,
+    .lead-form-container textarea:focus {
+      border-color: var(--primary);
+    }
+
+    .lead-form-container button {
+      width: 100%;
+      padding: 0.85rem;
+      border-radius: 0.75rem;
+      font-weight: 600;
+      margin-top: 0.5rem;
+    }
+
+    /* Mobile Chat Refinement */
+    @media (max-width: 768px) {
+      #biz-name {
+        font-size: 0.95rem !important;
+        max-width: 140px;
+      }
+
+      .chat-container {
+        padding: 0.85rem;
+        gap: 0.85rem;
+      }
+
+      .message {
+        max-width: 88%;
+        font-size: 0.875rem;
+        padding: 0.75rem 0.9rem;
+      }
+
+      .chat-input-area {
+        padding: 0.75rem 0.85rem;
+        gap: 0.5rem;
+      }
+
+      .chat-input {
+        padding: 0.6rem 1rem;
+        font-size: 0.875rem;
+      }
+
+      #send-btn {
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px;
+      }
+
+      .lead-form-container,
+      .booking-card {
+        max-width: 100%;
+        padding: 1rem;
+      }
+    }
+
+    /* Extra small screens — hide 'Powered by' prefix but keep 'Owl Assist' name */
+    @media (max-width: 480px) {
+      .branding-prefix {
+        display: none;
+      }
+
+      #btn-reset-chat span.reset-label {
+        display: none;
+      }
+
+      #btn-reset-chat {
+        padding: 0.35rem 0.5rem !important;
+        min-width: unset;
+      }
+
+      #biz-name {
+        max-width: 110px;
+      }
+
+      .owl-branding-text {
+        font-size: 0.7rem;
+        gap: 0.25rem;
+      }
+    }
+
+    /* Ensure no horizontal overflow */
+    body, html {
+      overflow-x: hidden;
+    }
+
+    /* Overlay & Pre-chat Selector CSS */
+    .overlay-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(2, 6, 23, 0.85);
+      backdrop-filter: blur(20px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      padding: 1.5rem;
+      transition: opacity 0.3s ease;
+    }
+
+    .glass-card.welcome-card {
+      background: rgba(15, 23, 42, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 1.5rem;
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 580px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      animation: scaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .welcome-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .welcome-header h2 {
+      font-size: 1.75rem;
+      font-weight: 800;
+      margin: 1rem 0 0.5rem 0;
+      background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .welcome-header p {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      margin: 0;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      margin-bottom: 1rem;
+    }
+
+    @media (max-width: 640px) {
+      .options-grid {
+        grid-template-columns: 1fr;
+      }
+      .glass-card.welcome-card {
+        padding: 1.5rem;
+      }
+    }
+
+    .option-button {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      color: white;
+    }
+
+    .option-button:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.15);
+      transform: translateY(-4px);
+    }
+
+    .option-button.highlight {
+      border-color: rgba(99, 102, 241, 0.3);
+      background: rgba(99, 102, 241, 0.03);
+    }
+
+    .option-button.highlight:hover {
+      border-color: var(--primary);
+      background: rgba(99, 102, 241, 0.07);
+    }
+
+    .option-button .icon {
+      font-size: 2.2rem;
+      color: var(--primary);
+      margin-bottom: 1rem;
+    }
+
+    .option-button .title {
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .option-button .desc {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      line-height: 1.4;
+    }
+
+    .hidden-panel {
+      display: none !important;
+    }
+
+    .welcome-footer {
+      text-align: center;
+      margin-top: 1.5rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 1rem;
+    }
+
+    .link-btn {
+      background: none;
+      border: none;
+      color: var(--primary);
+      font-size: 0.85rem;
+      cursor: pointer;
+      text-decoration: underline;
+      padding: 0.25rem 0.5rem;
+    }
+
+    .link-btn:hover {
+      color: white;
+    }
+
+    .code-box {
+      background: rgba(99, 102, 241, 0.1);
+      border: 1px dashed var(--primary);
+      padding: 0.75rem 1.25rem;
+      border-radius: 0.75rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0.5rem auto;
+    }
+
+    /* Passcode Toggle UI */
+    .passcode-toggle-row {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 0.75rem;
+      padding: 0.75rem 1rem;
+      margin-bottom: 0.75rem;
+    }
+    .toggle-label {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      cursor: pointer;
+      font-size: 0.85rem;
+      color: white;
+      font-weight: 500;
+      user-select: none;
+    }
+    .toggle-label input[type="checkbox"] {
+      accent-color: var(--primary);
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+    .toggle-hint { font-size: 0.75rem; color: var(--text-dim); margin-top: 0.3rem; display: block; }
+    .or-divider {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin: 0.2rem 0;
+      width: 100%;
+    }
+    .or-divider::before, .or-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.08);
+    }
+    .or-divider span { font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+
+    /* Floating animation for logo */
+    @keyframes float {
+      0% { transform: translateY(0px); }
+      50% { transform: translateY(-8px); }
+      100% { transform: translateY(0px); }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="public-header">
+    <div class="biz-info">
+      <div class="biz-logo" id="biz-logo">O</div>
+      <div class="biz-name-wrap">
+        <h2 id="biz-name" class="biz-name" style="font-size: 1.05rem; margin: 0; display: flex; align-items: center;">Loading...</h2>
+        <span id="biz-status" style="font-size: 0.7rem; color: #22c55e;">● Online</span>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button id="btn-reset-chat" class="btn btn-outline" style="padding: 0.35rem 0.65rem; font-size: 0.75rem; display: none; border-radius: var(--radius-sm); white-space: nowrap;" onclick="resetChatSession()">
+        <span class="material-symbols-outlined" style="font-size: 0.9rem; vertical-align: middle;">refresh</span><span class="reset-label" style="margin-left: 0.25rem;">New Chat</span>
+      </button>
+      <a id="owl-branding" class="owl-branding-text" href="https://owlassist.app" target="_blank" rel="noopener noreferrer" title="Powered by Owl Assist — Build your own AI receptionist" style="text-decoration: none; cursor: pointer; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity=''">
+        <span class="branding-prefix" style="color: var(--text-dim);">Powered by</span>
+        <img src="../assets/img/logo/logo.png" style="height: 13px; opacity: 0.65; flex-shrink: 0;" alt="Owl Assist">
+        <span style="color: var(--text-dim); font-weight: 600;">Owl Assist</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Pre-Chat Options Overlay -->
+  <div id="pre-chat-overlay" class="overlay-container" style="display: none;">
+    <div class="glass-card welcome-card">
+      <div class="welcome-header">
+        <div class="logo-animation">
+          <img src="../assets/img/logo/logo.png" alt="Owl Assist" style="height: 50px; animation: float 3s ease-in-out infinite;">
+        </div>
+        <h2 id="welcome-biz-name">Welcome!</h2>
+        <p>Choose how you would like to interact with our assistant today.</p>
+      </div>
+
+      <!-- Main Options -->
+      <div id="welcome-options" class="options-grid">
+        <button id="opt-guest" class="option-button">
+          <span class="material-symbols-outlined icon">flash_on</span>
+          <span class="title">Quick Chat (Guest)</span>
+          <span class="desc">Start chatting immediately. Chat history is temporary and will be cleared when you close this tab.</span>
+        </button>
+
+        <button id="opt-track" class="option-button highlight">
+          <span class="material-symbols-outlined icon">track_changes</span>
+          <span class="title">Tracked Chat (Save Progress)</span>
+          <span class="desc">Save progress, get responses from the business owner, and resume your chat anytime on any device.</span>
+        </button>
+      </div>
+
+      <!-- Tracked Details Form (Hidden initially) -->
+      <div id="tracked-form" class="hidden-panel booking-form">
+        <h3 style="margin-top: 0; display: flex; align-items: center; gap: 0.5rem;">
+          <span class="material-symbols-outlined">person_add</span> Create Tracked Session
+        </h3>
+        <p style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 1rem;">Enter your contact information so the business can follow up with you directly.</p>
+        <input type="text" id="cust-name" placeholder="Your Name" required>
+        <input type="email" id="cust-email" placeholder="Email Address" required>
+        <input type="tel" id="cust-phone" placeholder="Phone Number (Optional)">
+
+        <!-- Optional Passcode Toggle -->
+        <div class="passcode-toggle-row">
+          <label class="toggle-label" for="use-passcode-check">
+            <input type="checkbox" id="use-passcode-check">
+            <span>Set a personal passcode <span style="font-size: 0.7rem; color: var(--primary); font-weight: 600;">(optional)</span></span>
+          </label>
+          <span class="toggle-hint">Easier to remember than a code. You'll still get a backup access code.</span>
+        </div>
+        <div id="passcode-fields" class="hidden-panel" style="width: 100%; flex-direction: column;">
+          <input type="password" id="cust-passcode" placeholder="Create a Passcode" style="margin-bottom: 0.75rem;">
+          <input type="password" id="cust-passcode-confirm" placeholder="Confirm Passcode">
+        </div>
+
+        <div style="display: flex; gap: 1rem; margin-top: 0.5rem; width: 100%;">
+          <button class="btn btn-outline" id="btn-tracked-back" style="flex: 1;">Back</button>
+          <button class="btn btn-primary" id="btn-tracked-start" style="flex: 2;">Start Session</button>
+        </div>
+      </div>
+
+      <!-- Access Code Confirmation Panel (Hidden initially) -->
+      <div id="code-confirm-panel" class="hidden-panel" style="text-align: center; padding: 1rem 0;">
+        <span class="material-symbols-outlined" style="font-size: 3rem; color: #6366f1; margin-bottom: 1rem;">verified_user</span>
+        <h3>Session Created!</h3>
+        <p style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 1.5rem;" id="code-confirm-desc">
+          Your <strong>Backup Access Code</strong> is below. Save it so you can always resume your chat, even if you forget your passcode.
+        </p>
+        <div class="code-box">
+          <span id="display-access-code" style="font-size: 1.5rem; font-weight: 800; letter-spacing: 2px; color: #6366f1;">OWL-XXXXXX</span>
+          <button class="btn-icon" id="btn-copy-code" style="margin-left: 0.75rem;" title="Copy Code">
+            <span class="material-symbols-outlined" style="font-size: 1.25rem;">content_copy</span>
+          </button>
+        </div>
+        <button class="btn btn-primary" id="btn-code-continue" style="width: 100%; margin-top: 1.5rem;">Continue to Chat</button>
+      </div>
+
+      <!-- Resume Session Panel (Hidden initially) -->
+      <div id="resume-panel" class="hidden-panel booking-form">
+        <h3 style="margin-top: 0; display: flex; align-items: center; gap: 0.5rem;">
+          <span class="material-symbols-outlined">history</span> Resume Your Chat
+        </h3>
+        <p style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 1rem;">Enter your email and use either your passcode or backup access code.</p>
+        <input type="email" id="resume-email" placeholder="Your Email Address" required>
+
+        <!-- Passcode field -->
+        <input type="password" id="resume-passcode" placeholder="Your Passcode (if you set one)" autocomplete="current-password">
+
+        <!-- OR Divider -->
+        <div class="or-divider"><span>or use backup access code</span></div>
+
+        <!-- Backup access code field -->
+        <input type="text" id="resume-code" placeholder="Backup Code (e.g. OWL-XXXXXX)" style="text-transform: uppercase;">
+
+        <div id="resume-error" style="color: #ff9966; font-size: 0.8rem; display: none; background: rgba(255,153,102,0.1); padding: 0.5rem; border-radius: 0.5rem; text-align: center; margin-bottom: 0.5rem; width: 100%;"></div>
+
+        <div style="display: flex; gap: 1rem; margin-top: 0.5rem; width: 100%;">
+          <button class="btn btn-outline" id="btn-resume-back" style="flex: 1;">Back</button>
+          <button class="btn btn-primary" id="btn-resume-submit" style="flex: 2;">Resume Chat</button>
+        </div>
+      </div>
+
+      <!-- Footer Action -->
+      <div id="welcome-footer" class="welcome-footer">
+        <button id="btn-show-resume" class="link-btn">Already started? Resume your chat</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Session Terminated Overlay — shown via Realtime when business ends the session -->
+  <div id="session-terminated-overlay" class="overlay-container" style="display: none; z-index: 1000;">
+    <div style="background: rgba(15,23,42,0.97); border: 1px solid rgba(239,68,68,0.3); border-radius: 1.5rem; padding: 2.5rem; width: 100%; max-width: 440px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7); animation: msgPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);">
+      <span class="material-symbols-outlined" style="font-size: 3.5rem; color: #ef4444; display: block; margin-bottom: 1rem;">cancel</span>
+      <h2 style="color: white; font-size: 1.5rem; margin: 0 0 0.75rem;">Session Ended</h2>
+      <p style="color: var(--text-dim); font-size: 0.9rem; line-height: 1.6; margin-bottom: 2rem;">This chat session has been ended by the business. You may start a fresh chat if you need further help.</p>
+      <button class="btn btn-primary" id="btn-terminated-close" style="width: 100%; padding: 0.85rem; border-radius: 1rem;">Start a New Chat</button>
+    </div>
+  </div>
+
+  <!-- Customer 'New Chat' Confirmation Modal -->
+  <div id="reset-confirm-modal" class="overlay-container" style="display: none; z-index: 1001;">
+    <div style="background: rgba(15,23,42,0.97); border: 1px solid rgba(255,255,255,0.1); border-radius: 1.5rem; padding: 2.5rem; width: 100%; max-width: 440px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7); animation: msgPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);">
+      <span class="material-symbols-outlined" style="font-size: 3.5rem; color: #f59e0b; display: block; margin-bottom: 1rem;">warning</span>
+      <h2 style="color: white; font-size: 1.5rem; margin: 0 0 0.75rem;">Start a New Chat?</h2>
+      <p style="color: var(--text-dim); font-size: 0.9rem; line-height: 1.6; margin-bottom: 2rem;">Your guest chat progress will be lost. If this is a tracked session, you can always resume it later with your passcode or backup code.</p>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <button class="btn btn-outline" id="btn-reset-cancel" style="padding: 0.85rem; border-radius: 1rem;">Keep Chat</button>
+        <button class="btn btn-primary" id="btn-reset-confirm" style="background: #ef4444; border-color: #ef4444; padding: 0.85rem; border-radius: 1rem;">Yes, Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="chat-container" id="chat-messages">
+    <!-- Messages appear here -->
+  </div>
+
+  <div class="chat-input-area">
+    <input type="text" class="chat-input" id="user-input" placeholder="Ask about services or book an appointment..."
+      autocomplete="off">
+    <button class="btn btn-primary" id="send-btn"
+      style="border-radius: 50%; width: 45px; height: 45px; padding: 0; display: flex; align-items: center; justify-content: center;">
+      <span class="material-symbols-outlined">send</span>
+    </button>
+  </div>
+
+  <!-- Supabase & Logic -->
+  <script src="../assets/js/modals.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../assets/js/supabase.js?v=2.2"></script>
+  <script>
+    const chatMessages = document.getElementById('chat-messages');
+    const userInput = document.getElementById('user-input');
+    const sendBtn = document.getElementById('send-btn');
+
+    let chatHistory = []; // Local history for context
+    let businessId = null;
+    let sessionId = null;
+    let realtimeChannel = null;
+
+    const urlParams = new URLSearchParams(window.location.search);
+    let identifier = urlParams.get('u') || urlParams.get('id');
+    
+    // Fallback: Check if the path is /chat/username
+    if (!identifier) {
+      const pathParts = window.location.pathname.split('/').filter(p => p !== "");
+      if (pathParts.length >= 2 && pathParts[0] === 'chat') {
+        identifier = pathParts[1];
+      } else if (pathParts.length === 1) {
+        identifier = pathParts[0];
+      }
+    }
+
+    function formatMessage(text) {
+      if (!text) return '';
+      // Markdown bold
+      let formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      // Basic URL regex
+      const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+)/g;
+      return formatted.replace(urlRegex, (url) => {
+        const href = url.startsWith('http') ? url : `https://${url}`;
+        return `<a href="${href}" target="_blank" style="color: #8b5cf6; text-decoration: underline; font-weight: 600; cursor: pointer;">${url}</a>`;
+      });
+    }
+
+    function generateAccessCode() {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+      let code = 'OWL-';
+      for (let i = 0; i < 6; i++) {
+        code += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return code;
+    }
+
+    async function init() {
+      if (!identifier) {
+        addMessage('bot', 'Error: No identifier provided. Please use a valid link.');
+        return;
+      }
+
+      // Fetch business info
+      const businessData = await window.owlDb.fetchBusinessData(identifier);
+
+      if (!businessData) {
+        addMessage('bot', 'Sorry, I couldn\'t find that business. Please check the link and try again.');
+        return;
+      }
+
+      businessId = businessData.id; // Correctly set the ID for sub-calls
+
+      // Update UI
+      const bizName = businessData.name || 'Business User';
+      
+      const isPro = businessData.subscription_tier === 'pro' && 
+                    (!businessData.subscription_expires_at || new Date(businessData.subscription_expires_at) > new Date());
+      const showBadge = isPro && businessData.verified_badge_enabled !== false;
+
+      const bizNameEl = document.getElementById('biz-name');
+      // Set text node first, then append badge span — ensures badge always appears AFTER the name
+      bizNameEl.textContent = bizName;
+      bizNameEl.dataset.name = bizName; // Store cleanly for use in greeting
+      if (showBadge) {
+        const badgeSpan = document.createElement('span');
+        badgeSpan.className = 'verified-badge';
+        badgeSpan.title = 'Official Verified Pro Assistant';
+        badgeSpan.innerHTML = '<img src="/assets/img/verified-badge.png" alt="Verified" onerror="this.parentElement.style.display=\'none\'">';
+        bizNameEl.appendChild(badgeSpan);
+      }
+
+      // Handle branding visibility based on premium remove_branding setting
+      const brandingEl = document.getElementById('owl-branding');
+      if (brandingEl) {
+        const showBranding = !isPro || businessData.remove_branding !== true;
+        brandingEl.style.display = showBranding ? 'flex' : 'none';
+      }
+      
+      const welcomeBizName = document.getElementById('welcome-biz-name');
+      if (welcomeBizName) welcomeBizName.innerText = `Welcome to ${bizName}`;
+
+      const logoEl = document.getElementById('biz-logo');
+      if (businessData.image_url && businessData.image_url !== "") {
+        logoEl.innerHTML = `<img src="${businessData.image_url}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+        logoEl.style.background = 'transparent';
+      } else {
+        logoEl.innerText = bizName[0].toUpperCase();
+      }
+
+      document.title = `${bizName} AI Assistant | Owl Assist`;
+
+      // Check if there is an active session by attempting to fetch logs (cookie handles auth)
+      const logs = await window.owlDb.fetchChatLogs(businessId);
+      
+      if (logs && logs.length > 0) {
+        // Active session exists!
+        document.getElementById('pre-chat-overlay').style.display = 'none';
+        document.getElementById('btn-reset-chat').style.display = 'inline-flex';
+        await renderChatHistory(logs);
+      } else {
+        // Show Welcome Screen
+        document.getElementById('pre-chat-overlay').style.display = 'flex';
+      }
+    }
+
+    async function renderChatHistory(logs) {
+      chatMessages.innerHTML = '';
+      chatHistory = [];
+      const typing = showTyping();
+      try {
+        typing.remove();
+
+        if (logs.length === 0) {
+          // If no logs, fetch fresh greeting
+          const greetingTyping = showTyping();
+          try {
+            const response = await window.owlDb.chatWithAI(businessId, null, [], true, sessId);
+            greetingTyping.remove();
+            addMessage('bot', `Hello! Good to have you here. I'm the assistant for **${document.getElementById('biz-name').dataset.name || 'this business'}**. How may i assist you today?`);
+          } catch(e) {
+            greetingTyping.remove();
+            addMessage('bot', `Hello! Good to have you here. How may i assist you today?`);
+          }
+          return;
+        }
+
+        // Check if this session was already terminated by the business
+        const isTerminated = logs.some(l => l.role === 'system' && l.content === 'SESSION_TERMINATED');
+
+        logs.forEach(log => {
+          if (log.role === 'system') return;
+          const isUser = log.role === 'user';
+          addMessage(isUser ? 'user' : 'bot', log.content, log.role === 'owner');
+          chatHistory.push({ role: isUser ? 'user' : 'bot', content: log.content });
+        });
+        if (chatHistory.length > 10) {
+          chatHistory = chatHistory.slice(-10);
+        }
+
+        // If session was already terminated, show the overlay on load
+        if (isTerminated) {
+          showSessionTerminatedOverlay();
+          return;
+        }
+
+        // We can't connect to Realtime easily without the session ID, 
+        // but the Edge function now handles state. For a full production app, 
+        // the Edge function should return the public session ID for realtime subscriptions,
+        // or we rely purely on polling/HTTP.
+      } catch (err) {
+        typing.remove();
+        console.error("Error loading chat history:", err);
+        addMessage('bot', 'Could not load chat history. Starting a new chat.');
+      }
+    }
+
+    function connectRealtimeListener(sessId) {
+      if (realtimeChannel) {
+        realtimeChannel.unsubscribe();
+      }
+      window.owlDb.getSupabase().then(supabase => {
+        realtimeChannel = supabase.channel(`chat_${sessId}`)
+          .on('postgres_changes', {
+            event: 'INSERT',
+            schema: 'public',
+            table: 'chat_logs',
+            filter: `session_id=eq.${sessId}`
+          }, payload => {
+            const log = payload.new;
+            // Business terminated this session — show overlay to customer in real time
+            if (log.role === 'system' && log.content === 'SESSION_TERMINATED') {
+              showSessionTerminatedOverlay();
+              return;
+            }
+            if (log.role === 'owner') {
+               document.querySelectorAll('.typing-msg').forEach(el => el.remove());
+               addMessage('bot', log.content, true);
+               chatHistory.push({ role: 'bot', content: log.content });
+               if (chatHistory.length > 10) chatHistory.shift();
+            }
+          })
+          .subscribe();
+      });
+    }
+
+    // Show the session-terminated overlay and wipe local session state
+    function showSessionTerminatedOverlay() {
+      // Cookies handle session state. To clear session, we would need to tell the server 
+      // or simply ignore it on the frontend.
+      sessionId = null;
+      // Disable chat input so the customer cannot keep sending messages
+      const inputEl = document.getElementById('user-input');
+      const btnEl  = document.getElementById('send-btn');
+      if (inputEl) { inputEl.disabled = true; inputEl.placeholder = 'This session has ended.'; }
+      if (btnEl)   btnEl.disabled = true;
+
+      const overlay = document.getElementById('session-terminated-overlay');
+      if (overlay) overlay.style.display = 'flex';
+
+      const closeBtn = document.getElementById('btn-terminated-close');
+      if (closeBtn) {
+        closeBtn.onclick = () => {
+          overlay.style.display = 'none';
+          // Re-enable input and re-show welcome screen for a fresh start
+          if (inputEl) { inputEl.disabled = false; inputEl.placeholder = 'Ask about services or book an appointment...'; }
+          if (btnEl)   btnEl.disabled = false;
+          doResetSession(/* skipOverlayReshow */ true);
+          document.getElementById('pre-chat-overlay').style.display = 'flex';
+        };
+      }
+    }
+
+    function addMessage(sender, text, isActionable = false) {
+      let needsLeadForm = false;
+      if (text.includes('[[SHOW_LEAD_FORM]]')) {
+        needsLeadForm = true;
+        text = text.replace('[[SHOW_LEAD_FORM]]', '').trim();
+      }
+
+      if (text) {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `message ${sender}`;
+
+        // Remove any technical trigger tags from displayed text
+        let displayText = text.replace(/\[\[CONFIRM_BOOKING:.*?\]\]/g, '').trim();
+
+        // Apply formatting
+        msgDiv.innerHTML = formatMessage(displayText.replace(/\n/g, '<br>'));
+
+        if (isActionable) {
+          msgDiv.style.borderLeft = '4px solid var(--primary)';
+          msgDiv.style.background = 'rgba(82, 107, 245, 0.05)';
+        }
+
+        chatMessages.appendChild(msgDiv);
+      }
+
+      if (needsLeadForm) {
+        showLeadForm();
+      }
+
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function showLeadForm() {
+      const formDiv = document.createElement('div');
+      formDiv.className = 'lead-form-container';
+      formDiv.innerHTML = `
+         <h3><span class="material-symbols-outlined">contact_page</span> Secure Information Box</h3>
+         <p style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 1.25rem;">Please provide your details so our team can get back to you.</p>
+         <input type="text" id="lead-name" placeholder="Full Name" required>
+         <input type="email" id="lead-email" placeholder="Email Address" required>
+         <input type="tel" id="lead-phone" placeholder="Phone Number (Optional)">
+         <textarea id="lead-intent" placeholder="How can we help?" rows="2"></textarea>
+         <button class="btn btn-primary" id="lead-submit">Submit Details</button>
+       `;
+
+      formDiv.querySelector('#lead-submit').onclick = async () => {
+        const name = document.getElementById('lead-name').value.trim();
+        const email = document.getElementById('lead-email').value.trim();
+        const phone = document.getElementById('lead-phone').value.trim();
+        const intent = document.getElementById('lead-intent').value.trim();
+
+        if (!name || !email) {
+          alert('Name and Email are required.');
+          return;
+        }
+
+        const btn = formDiv.querySelector('#lead-submit');
+        btn.innerText = 'Saving...';
+        btn.disabled = true;
+
+        try {
+          // If they already submitted tracked session details on this device, reuse the code
+          const activeCode = localStorage.getItem('owl_code_' + businessId) || null;
+
+          await window.owlDb.createLead({
+            business_id: businessId,
+            customer_name: name,
+            customer_email: email,
+            phone: phone,
+            service_name: intent || 'Inquiry',
+            session_id: sessionId,
+            access_code: activeCode
+          });
+
+          formDiv.innerHTML = `
+               <div style="text-align: center; padding: 1rem 0;">
+                 <span class="material-symbols-outlined" style="font-size: 3rem; color: #22c55e; margin-bottom: 1rem;">check_circle</span>
+                 <h3 style="margin: 0;">Details Saved!</h3>
+                 <p style="font-size: 0.85rem; color: var(--text-dim); margin-top: 0.5rem;">We've received your information and will be in touch shortly.</p>
+               </div>
+            `;
+
+          // Tell AI we collected info so it can continue
+          chatHistory.push({ role: 'user', content: `[SYSTEM: User submitted lead form. Name: ${name}]` });
+        } catch (e) {
+          console.error('Lead Capture Error Detail:', e);
+          btn.innerText = 'Send Message';
+          btn.disabled = false;
+
+          const errorBanner = document.createElement('div');
+          errorBanner.id = "lead-error-banner";
+          errorBanner.style = "color: #ff9966; font-size: 0.8rem; margin-top: 0.5rem; text-align: center; background: rgba(255,153,102,0.1); padding: 0.5rem; border-radius: 0.5rem;";
+          errorBanner.innerText = "We're having a slight connection issue. Please try one more time or refresh!";
+
+          const oldBanner = formDiv.querySelector('#lead-error-banner');
+          if (oldBanner) oldBanner.remove();
+
+          btn.parentElement.appendChild(errorBanner);
+        }
+      };
+
+      chatMessages.appendChild(formDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    function showTyping() {
+      const typingDiv = document.createElement('div');
+      typingDiv.className = 'message bot typing-msg';
+      typingDiv.innerHTML = '<div class="typing"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';
+      chatMessages.appendChild(typingDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+      return typingDiv;
+    }
+
+    async function handleSend() {
+      const text = userInput.value.trim();
+      if (!text || !businessId) return;
+
+      addMessage('user', text);
+      userInput.value = '';
+
+      // Real AI Chat
+      const typing = showTyping();
+      try {
+        const response = await window.owlDb.chatWithAI(businessId, text, chatHistory, false, sessionId);
+        typing.remove();
+
+        if (response.reply === "") {
+          // Handoff is active, do nothing
+          chatHistory.push({ role: 'user', content: text });
+          return;
+        }
+
+        const aiReply = response.reply || "I'm sorry, I'm having trouble processing that right now.";
+        addMessage('bot', aiReply);
+
+        // Save to history (keep it optimized)
+        chatHistory.push({ role: 'user', content: text });
+        chatHistory.push({ role: 'bot', content: aiReply });
+        if (chatHistory.length > 10) chatHistory.splice(0, 2);
+
+      } catch (err) {
+        typing.remove();
+        console.error("AI Chat Error:", err);
+        addMessage('bot', `I'm having a bit of trouble connecting at the moment. Please try again soon.`);
+      }
+    }
+
+    document.getElementById('opt-guest').onclick = async () => {
+      document.getElementById('pre-chat-overlay').style.display = 'none';
+      document.getElementById('btn-reset-chat').style.display = 'inline-flex';
+      
+      // The server will automatically create a session and set the cookie when we first chat
+      const logs = await window.owlDb.fetchChatLogs(businessId);
+      await renderChatHistory(logs);
+    };
+
+    document.getElementById('opt-track').onclick = () => {
+      document.getElementById('welcome-options').style.display = 'none';
+      document.getElementById('welcome-footer').style.display = 'none';
+      document.getElementById('tracked-form').style.display = 'flex';
+      document.getElementById('tracked-form').classList.remove('hidden-panel');
+    };
+
+    // Toggle optional passcode fields visibility
+    document.getElementById('use-passcode-check').onchange = (e) => {
+      const fields = document.getElementById('passcode-fields');
+      if (e.target.checked) {
+        fields.classList.remove('hidden-panel');
+        fields.style.display = 'flex';
+      } else {
+        fields.classList.add('hidden-panel');
+        fields.style.display = 'none';
+        document.getElementById('cust-passcode').value = '';
+        document.getElementById('cust-passcode-confirm').value = '';
+      }
+    };
+
+    document.getElementById('btn-tracked-back').onclick = (e) => {
+      e.preventDefault();
+      document.getElementById('tracked-form').style.display = 'none';
+      document.getElementById('tracked-form').classList.add('hidden-panel');
+      document.getElementById('welcome-options').style.display = 'grid';
+      document.getElementById('welcome-footer').style.display = 'block';
+    };
+
+    document.getElementById('btn-tracked-start').onclick = async (e) => {
+      e.preventDefault();
+      const name  = document.getElementById('cust-name').value.trim();
+      const email = document.getElementById('cust-email').value.trim();
+      const phone = document.getElementById('cust-phone').value.trim();
+
+      if (!name || !email) {
+        alert('Please fill in both Name and Email to start a tracked session.');
+        return;
+      }
+
+      // Validate optional passcode
+      const usePasscode = document.getElementById('use-passcode-check').checked;
+      let passcode = null;
+      if (usePasscode) {
+        passcode = document.getElementById('cust-passcode').value.trim();
+        const passConfirm = document.getElementById('cust-passcode-confirm').value.trim();
+        if (!passcode) { alert('Please enter a passcode or uncheck the passcode option.'); return; }
+        if (passcode !== passConfirm) { alert('Passcodes do not match. Please try again.'); return; }
+      }
+
+      const btn = document.getElementById('btn-tracked-start');
+      const origText = btn.innerText;
+      btn.innerText = 'Creating...';
+      btn.disabled = true;
+
+      try {
+        sessionId = crypto.randomUUID?.() || Math.random().toString(36).substring(2, 15);
+        const accessCode = generateAccessCode();
+
+        await window.owlDb.createLead({
+          business_id: businessId,
+          customer_name: name,
+          customer_email: email,
+          phone: phone,
+          service_name: 'Persistent Chat Started',
+          access_code: accessCode,
+          customer_passcode: passcode
+        });
+
+        localStorage.setItem('owl_code_' + businessId, accessCode);
+
+        // Hide form and show code confirmation
+        document.getElementById('tracked-form').style.display = 'none';
+        document.getElementById('code-confirm-panel').style.display = 'block';
+        document.getElementById('code-confirm-panel').classList.remove('hidden-panel');
+        document.getElementById('display-access-code').innerText = accessCode;
+
+        // Update description text based on whether a passcode was set
+        const descEl = document.getElementById('code-confirm-desc');
+        if (descEl) {
+          descEl.innerHTML = passcode
+            ? 'Your <strong>Backup Access Code</strong> is below. Save it as a fallback in case you ever forget your passcode.'
+            : 'Your <strong>Access Code</strong> is below. Save this to resume your chat from any device at any time.';
+        }
+
+        // Copy button action
+        document.getElementById('btn-copy-code').onclick = () => {
+          navigator.clipboard.writeText(accessCode);
+          const icon = document.getElementById('btn-copy-code').querySelector('.material-symbols-outlined');
+          icon.innerText = 'check';
+          setTimeout(() => icon.innerText = 'content_copy', 2000);
+        };
+
+        document.getElementById('btn-code-continue').onclick = async () => {
+          document.getElementById('pre-chat-overlay').style.display = 'none';
+          document.getElementById('btn-reset-chat').style.display = 'inline-flex';
+          const logs = await window.owlDb.fetchChatLogs(businessId);
+          await renderChatHistory(logs);
+        };
+
+      } catch (err) {
+        console.error("Failed to create tracked session:", err);
+        alert("Failed to initialize session. Please check your connection and try again.");
+      } finally {
+        btn.innerText = origText;
+        btn.disabled = false;
+      }
+    };
+
+    // Show Resume Panel
+    document.getElementById('btn-show-resume').onclick = () => {
+      document.getElementById('welcome-options').style.display = 'none';
+      document.getElementById('welcome-footer').style.display = 'none';
+      document.getElementById('resume-panel').style.display = 'flex';
+      document.getElementById('resume-panel').classList.remove('hidden-panel');
+    };
+
+    document.getElementById('btn-resume-back').onclick = (e) => {
+      e.preventDefault();
+      document.getElementById('resume-panel').style.display = 'none';
+      document.getElementById('resume-panel').classList.add('hidden-panel');
+      document.getElementById('welcome-options').style.display = 'grid';
+      document.getElementById('welcome-footer').style.display = 'block';
+    };
+
+    document.getElementById('btn-resume-submit').onclick = async (e) => {
+      e.preventDefault();
+      const email    = document.getElementById('resume-email').value.trim();
+      const passcode = document.getElementById('resume-passcode').value.trim();
+      const code     = document.getElementById('resume-code').value.trim().toUpperCase();
+      const errEl    = document.getElementById('resume-error');
+      errEl.style.display = 'none';
+
+      if (!email) {
+        errEl.innerText = "Please enter your email address.";
+        errEl.style.display = 'block';
+        return;
+      }
+      if (!passcode && !code) {
+        errEl.innerText = "Please enter your passcode or backup access code.";
+        errEl.style.display = 'block';
+        return;
+      }
+
+      const btn = document.getElementById('btn-resume-submit');
+      const origText = btn.innerText;
+      btn.innerText = 'Resuming...';
+      btn.disabled = true;
+
+      try {
+        // Backend supports either passcode or access code for verification
+        const result = await window.owlDb.fetchSessionByCode(
+          email,
+          code || null,
+          businessId,
+          passcode || null
+        );
+
+        // Handle terminated sessions gracefully
+        if (result && result.session_status === 'terminated') {
+          errEl.innerText = "This session has been ended by the business and can no longer be resumed.";
+          errEl.style.display = 'block';
+          return;
+        }
+
+        if (result && result.session_id) {
+          sessionId = result.session_id;
+          localStorage.setItem('owl_session_' + businessId, sessionId);
+          if (code) localStorage.setItem('owl_code_' + businessId, code);
+
+          document.getElementById('pre-chat-overlay').style.display = 'none';
+          document.getElementById('btn-reset-chat').style.display = 'inline-flex';
+
+          await loadChatHistory(sessionId);
+          connectRealtimeListener(sessionId);
+        } else {
+          errEl.innerText = "No matching session found. Check your details and try again.";
+          errEl.style.display = 'block';
+        }
+      } catch (err) {
+        console.error("Resume error:", err);
+        errEl.innerText = "No matching session found for this business. Check your details.";
+        errEl.style.display = 'block';
+      } finally {
+        btn.innerText = origText;
+        btn.disabled = false;
+      }
+    };
+
+    // Open the styled confirmation modal before resetting
+    function resetChatSession() {
+      const modal = document.getElementById('reset-confirm-modal');
+      if (!modal) { doResetSession(); return; }
+      modal.style.display = 'flex';
+
+      document.getElementById('btn-reset-cancel').onclick = () => {
+        modal.style.display = 'none';
+      };
+      document.getElementById('btn-reset-confirm').onclick = () => {
+        modal.style.display = 'none';
+        doResetSession();
+      };
+    }
+
+    // Actually perform the session reset (split out so terminated overlay can call it too)
+    function doResetSession(skipOverlayReshow = false) {
+      sessionStorage.removeItem('owl_chat_session_id');
+      if (businessId) {
+        localStorage.removeItem('owl_session_' + businessId);
+        localStorage.removeItem('owl_code_' + businessId);
+      }
+
+      sessionId = null;
+      chatHistory = [];
+      chatMessages.innerHTML = '';
+
+      document.getElementById('btn-reset-chat').style.display = 'none';
+
+      // Reset all welcome overlay inputs
+      document.getElementById('cust-name').value = '';
+      document.getElementById('cust-email').value = '';
+      document.getElementById('cust-phone').value = '';
+      const pc = document.getElementById('cust-passcode');
+      const pcc = document.getElementById('cust-passcode-confirm');
+      const useCheck = document.getElementById('use-passcode-check');
+      const rp = document.getElementById('resume-passcode');
+      if (pc) pc.value = '';
+      if (pcc) pcc.value = '';
+      if (useCheck) useCheck.checked = false;
+      if (rp) rp.value = '';
+      document.getElementById('resume-email').value = '';
+      document.getElementById('resume-code').value = '';
+
+      // Hide passcode fields
+      const pFields = document.getElementById('passcode-fields');
+      if (pFields) { pFields.style.display = 'none'; pFields.classList.add('hidden-panel'); }
+
+      // Go back to first welcome view
+      document.getElementById('tracked-form').style.display = 'none';
+      document.getElementById('tracked-form').classList.add('hidden-panel');
+      document.getElementById('resume-panel').style.display = 'none';
+      document.getElementById('resume-panel').classList.add('hidden-panel');
+      document.getElementById('code-confirm-panel').style.display = 'none';
+      document.getElementById('code-confirm-panel').classList.add('hidden-panel');
+
+      document.getElementById('welcome-options').style.display = 'grid';
+      document.getElementById('welcome-footer').style.display = 'block';
+
+      if (!skipOverlayReshow) {
+        document.getElementById('pre-chat-overlay').style.display = 'flex';
+      }
+    }
+
+    sendBtn.addEventListener('click', handleSend);
+    userInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') handleSend();
+    });
+
+    init();
+  </script>
+</body>
+
+</html>
+

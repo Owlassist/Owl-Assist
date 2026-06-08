@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <base href="/">
+  <title>Pricing | Owl Assist</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+    rel="stylesheet" />
+
+  <!-- Favicons & Manifest -->
+  <link rel="icon" type="image/x-icon" href="/assets/img/logo/favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/logo/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/logo/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/img/logo/favicon-16x16.png">
+  <link rel="manifest" href="/assets/img/logo/site.webmanifest">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "inverse-on-surface": "#2a3043",
+            "surface-container-low": "#151b2d",
+            "surface-container": "#191f31",
+            "tertiary-fixed": "#ffdcc5",
+            "surface-container-high": "#23293c",
+            "on-tertiary": "#4f2500",
+            "primary-fixed-dim": "#c0c1ff",
+            "surface-bright": "#33394c",
+            "tertiary-fixed-dim": "#ffb783",
+            "primary-fixed": "#e1e0ff",
+            "secondary-fixed-dim": "#bec6e0",
+            "tertiary-container": "#d97721",
+            "secondary-fixed": "#dae2fd",
+            "on-tertiary-fixed": "#301400",
+            "on-secondary-fixed-variant": "#3f465c",
+            "on-background": "#dce1fb",
+            "error": "#ffb4ab",
+            "secondary-container": "#3f465c",
+            "surface-dim": "#0c1324",
+            "on-primary": "#1000a9",
+            "surface-variant": "#2e3447",
+            "on-error-container": "#ffdad6",
+            "on-secondary": "#283044",
+            "tertiary": "#ffb783",
+            "on-tertiary-fixed-variant": "#703700",
+            "on-primary-fixed-variant": "#2f2ebe",
+            "error-container": "#93000a",
+            "on-primary-container": "#0d0096",
+            "inverse-primary": "#494bd6",
+            "on-secondary-fixed": "#131b2e",
+            "on-primary-fixed": "#07006c",
+            "background": "#0c1324",
+            "on-secondary-container": "#adb4ce",
+            "outline-variant": "#464554",
+            "on-tertiary-container": "#452000",
+            "surface-container-lowest": "#070d1f",
+            "primary": "#c0c1ff",
+            "secondary": "#bec6e0",
+            "outline": "#908fa0",
+            "on-error": "#690005",
+            "surface-tint": "#c0c1ff",
+            "primary-container": "#8083ff",
+            "surface": "#0c1324",
+            "on-surface-variant": "#c7c4d7",
+            "surface-container-highest": "#2e3447",
+            "on-surface": "#dce1fb",
+            "inverse-surface": "#dce1fb"
+          },
+          fontFamily: {
+            "headline": ["Inter"],
+            "body": ["Inter"],
+            "label": ["Inter"]
+          },
+          borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+        },
+      },
+    }
+  </script>
+</head>
+
+<body class="bg-[#0c1324] text-[#dce1fb]" style="font-family:'Inter',sans-serif;">
+
+  <!-- Navigation -->
+  <nav class="fixed top-0 w-full z-50 border-b border-[#c7c4d7]/10 bg-[#0c1324]/70 backdrop-blur-xl">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+
+      <!-- Logo -->
+      <a href="/" class="text-xl font-black tracking-tight text-white flex items-center gap-2 no-underline"
+        style="text-decoration:none;">
+        <img src="/assets/img/logo/logo.png" alt="Owl Assist Logo" class="h-8 w-8 object-contain" />
+        Owl Assist
+      </a>
+
+      <!-- Desktop Menu -->
+      <div class="hidden md:flex items-center gap-8 font-medium text-sm">
+        <a class="text-[#c7c4d7] hover:text-white" href="/">Home</a>
+        <a class="text-[#c7c4d7] hover:text-white" href="/pricing/">Pricing</a>
+        <a class="text-[#c7c4d7] hover:text-white" href="/faq">FAQ</a>
+      </div>
+
+      <!-- CTA -->
+      <div class="hidden md:flex items-center gap-4">
+        <a href="/auth/login" class="text-white font-bold text-sm hover:text-primary transition-colors">
+          Log In
+        </a>
+        <a href="/auth/signup"
+          class="bg-primary text-on-primary px-6 py-2.5 rounded-xl font-bold text-sm shadow-lg hover:scale-105 transition-all">
+          Get Started
+        </a>
+      </div>
+
+      <!-- Hamburger -->
+      <button id="menuBtn" class="md:hidden text-white">
+        <span class="material-symbols-outlined text-3xl">menu</span>
+      </button>
+
+    </div>
+
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="hidden md:hidden px-6 pb-6 space-y-4 bg-[#0c1324]/95 backdrop-blur-xl">
+
+      <a href="/" class="block text-white font-semibold">Home</a>
+      <a href="/pricing/" class="block text-[#c7c4d7]">Pricing</a>
+      <a href="/faq" class="block text-[#c7c4d7]">FAQ</a>
+
+      <div class="flex flex-col gap-3 mt-4">
+        <a href="/auth/login"
+          class="w-full text-center border border-outline-variant text-white py-3 rounded-xl font-bold">
+          Log In
+        </a>
+        <a href="/auth/signup" class="w-full text-center bg-primary text-on-primary py-3 rounded-xl font-bold">
+          Get Started
+        </a>
+      </div>
+
+    </div>
+  </nav>
+
+  <main style="padding-top: 10rem;">
+    <section class="section">
+      <div class="container">
+        <div class="section-head">
+          <span class="label">Simple Transparent Pricing</span>
+          <h2>Evolve Your Reception Today</h2>
+          <p style="font-size: 1.1rem; max-width: 600px; text-align: center;">Choose the plan that fits your business
+            stage. All plans include 14-day free trial.</p>
+        </div>
+
+        <!-- Currency Toggle -->
+        <div class="flex justify-center items-center mt-12 gap-4">
+          <span id="label-usd" class="font-bold text-white transition-colors duration-300">USD</span>
+          <button id="currencyToggle"
+            class="relative inline-flex h-8 w-16 items-center rounded-full bg-surface-container-high border border-outline-variant transition-colors duration-300 focus:outline-none">
+            <span class="sr-only">Toggle currency</span>
+            <span id="toggleKnob"
+              class="inline-block h-6 w-6 transform rounded-full bg-primary transition-transform duration-300 translate-x-1"></span>
+          </button>
+          <span id="label-ngn" class="font-medium text-outline transition-colors duration-300">NGN</span>
+        </div>
+
+        <!-- Pricing Cards Container -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto mt-12">
+
+          <!-- Free Tier -->
+          <div
+            class="relative flex flex-col rounded-2xl bg-[#151b2d] border border-[#c7c4d7]/10 p-8 shadow-xl hover:border-primary/30 transition-all duration-300">
+            <div class="mb-6">
+              <h3 class="text-2xl font-bold text-white mb-2">Starter</h3>
+              <p class="text-[#c7c4d7] text-sm">Test the AI receptionist capabilities without upfront commitment.</p>
+            </div>
+
+            <div class="mb-8 flex items-baseline">
+              <span class="text-5xl font-black text-white">$0</span>
+              <span class="text-[#c7c4d7] ml-2 font-medium">/month</span>
+            </div>
+
+            <ul class="flex flex-col gap-4 mb-8 flex-grow">
+              <li class="flex items-start gap-3">
+                <span class="material-symbols-outlined text-primary text-xl">check_circle</span>
+                <span class="text-[#dce1fb] text-sm"><strong>Hosted Chat Link</strong> (No website widget)</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <span class="material-symbols-outlined text-primary text-xl">check_circle</span>
+                <span class="text-[#dce1fb] text-sm">Up to <strong>20 AI conversations</strong> per month</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <span class="material-symbols-outlined text-primary text-xl">check_circle</span>
+                <span class="text-[#dce1fb] text-sm">Manual knowledge base entry (FAQs, hours)</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <span class="material-symbols-outlined text-primary text-xl">check_circle</span>
+                <span class="text-[#dce1fb] text-sm">Basic analytics & booking management</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <span class="material-symbols-outlined text-outline text-xl">cancel</span>
+                <span class="text-outline text-sm line-through decoration-outline/50">No website scraping or document
+                  uploads</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <span class="material-symbols-outlined text-outline text-xl">info</span>
+                <span class="text-[#dce1fb] text-sm italic">Includes "Powered by Owl Assist" watermark</span>
+              </li>
+            </ul>
+
+            <a href="/auth/signup"
+              class="w-full text-center py-3 rounded-xl border border-primary text-primary font-bold hover:bg-primary/10 transition-colors">Get
+              Started Free</a>
+          </div>
+
+          <!-- Pro Tier -->
+          <div
+            class="relative flex flex-col rounded-2xl bg-gradient-to-b from-[#191f31] to-[#0c1324] border border-primary p-8 shadow-2xl hover:shadow-primary/20 transition-all duration-300">
+            <!-- Popular Badge -->
+            <div
+              class="absolute -top-4 left-1/2 -translate-x-1/2 bg-primary text-on-primary px-4 py-1 rounded-full text-xs font-black uppercase tracking-wider shadow-lg">
+              Most Popular
+            </div>
+
+            <div class="mb-6">
+              <h3 class="text-2xl font-bold text-white mb-2 flex items-center gap-2">Pro <span
+                  class="material-symbols-outlined text-[#34a853] text-xl" title="Verified Badge">verified</span></h3>
+              <p class="text-[#c7c4d7] text-sm">Full automation, professional branding, and higher volume.</p>
+            </div>
+
+            <div class="mb-8 flex items-baseline">
+              <span class="price-display text-5xl font-black text-white" data-usd="$19.99"
+                data-ngn="₦15,999">$19.99</span>
+              <span class="text-[#c7c4d7] ml-2 font-medium">/month</span>
+            </div>
+
+            <ul class="flex flex-col gap-4 mb-8 flex-grow">
+              <li class="flex items-start gap-3">
+                <span class="material-symbols-outlined text-primary text-xl">check_circle</span>
+                <span class="text-[#dce1fb] text-sm"><strong>Embeddable Website Widget</strong> (Customizable
+                  colors)</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <span class="material-symbols-outlined text-primary text-xl">check_circle</span>
+                <span class="text-[#dce1fb] text-sm"><strong>Unlimited</strong> AI conversations (fair-use limit)</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <span class="material-symbols-outlined text-primary text-xl">check_circle</span>
+                <span class="text-[#dce1fb] text-sm"><strong>Website Scraping</strong> & Document Uploads</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <span class="material-symbols-outlined text-primary text-xl">check_circle</span>
+                <span class="text-[#dce1fb] text-sm">Advanced dashboard with chat transcripts</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <span class="material-symbols-outlined text-primary text-xl">check_circle</span>
+                <span class="text-[#dce1fb] text-sm"><strong>Faster Replies</strong> & Early access</span>
+              </li>
+              <li class="flex items-start gap-3">
+                <span class="material-symbols-outlined text-primary text-xl">check_circle</span>
+                <span class="text-[#dce1fb] text-sm">Removable "Powered by Owl Assist" branding</span>
+              </li>
+            </ul>
+
+            <a href="/auth/signup.html?plan=pro"
+              class="w-full text-center py-3 rounded-xl bg-primary text-on-primary font-bold shadow-[0_0_15px_rgba(192,193,255,0.3)] hover:scale-[1.02] transition-transform">Upgrade
+              to Pro</a>
+          </div>
+
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="w-full border-t border-[#c7c4d7]/5 bg-[#0c1324]">
+    <div class="max-w-7xl mx-auto px-8 py-12 flex flex-col md:flex-row justify-between">
+      <div class="mb-8 md:mb-0">
+        <div class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+          <img src="/assets/img/logo/logo.png" alt="Owl Assist Logo" class="h-7 w-7 object-contain" />
+          Owl Assist
+        </div>
+        <p class="font-['Inter'] text-[#c7c4d7] text-sm max-w-xs leading-relaxed">
+          Pioneering the future of AI reception and automated customer experiences for global enterprises.
+        </p>
+      </div>
+      <div class="grid grid-cols-2 lg:grid-cols-3 gap-12">
+        <div class="flex flex-col gap-4">
+          <h4 class="text-white font-bold text-sm uppercase tracking-widest">Platform</h4>
+          <a class="font-['Inter'] text-[#c7c4d7] text-sm hover:text-white transition-colors duration-200"
+            href="/pricing/">Pricing</a>
+        </div>
+        <div class="flex flex-col gap-4">
+          <h4 class="text-white font-bold text-sm uppercase tracking-widest">Company</h4>
+          <a class="font-['Inter'] text-[#c7c4d7] text-sm hover:text-white transition-colors duration-200"
+            href="#">Privacy Policy</a>
+          <a class="font-['Inter'] text-[#c7c4d7] text-sm hover:text-white transition-colors duration-200"
+            href="#">Terms of Service</a>
+          <a class="font-['Inter'] text-[#c7c4d7] text-sm hover:text-white transition-colors duration-200"
+            href="mailto:Hello@owlassist.app">Contact Us</a>
+          <a class="font-['Inter'] text-[#c7c4d7] text-sm hover:text-white transition-colors duration-200"
+            href="mailto:support@owlassist.app">Support</a>
+        </div>
+        <div class="flex flex-col gap-4">
+          <h4 class="text-white font-bold text-sm uppercase tracking-widest">Social</h4>
+          <a class="font-['Inter'] text-[#c7c4d7] text-sm hover:text-white transition-colors duration-200"
+            href="https://X.com/owlassistapp" target="_blank">Twitter / X</a>
+          <a class="font-['Inter'] text-[#c7c4d7] text-sm hover:text-white transition-colors duration-200"
+            href="https://instagram.com/owlassistapp" target="_blank">Instagram</a>
+          <a class="font-['Inter'] text-[#c7c4d7] text-sm hover:text-white transition-colors duration-200"
+            href="https://tiktok.com/@owlassist" target="_blank">TikTok</a>
+        </div>
+      </div>
+    </div>
+    <div class="max-w-7xl mx-auto px-8 pb-8 text-center md:text-left">
+      <p class="font-['Inter'] text-[#c7c4d7] text-xs opacity-50">© 2026 Owl Assist AI. All rights reserved.</p>
+    </div>
+  </footer>
+
+
+
+  <script>
+    // ── Mobile menu ───────────────────────────────────────────────────────────
+    const menuBtn = document.getElementById('menuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    if (menuBtn) {
+      menuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    }
+
+    // ── Currency Toggle ────────────────────────────────────────────────────────
+    const currencyToggle = document.getElementById('currencyToggle');
+    const toggleKnob = document.getElementById('toggleKnob');
+    const labelUsd = document.getElementById('label-usd');
+    const labelNgn = document.getElementById('label-ngn');
+    const priceDisplay = document.querySelector('.price-display');
+
+    let isNgn = false;
+
+    if (currencyToggle) {
+      currencyToggle.addEventListener('click', () => {
+        isNgn = !isNgn;
+
+        if (isNgn) {
+          toggleKnob.classList.remove('translate-x-1');
+          toggleKnob.classList.add('translate-x-9');
+          labelUsd.classList.replace('font-bold', 'font-medium');
+          labelUsd.classList.replace('text-white', 'text-outline');
+          labelNgn.classList.replace('font-medium', 'font-bold');
+          labelNgn.classList.replace('text-outline', 'text-white');
+          if (priceDisplay) priceDisplay.textContent = priceDisplay.getAttribute('data-ngn');
+        } else {
+          toggleKnob.classList.remove('translate-x-9');
+          toggleKnob.classList.add('translate-x-1');
+          labelNgn.classList.replace('font-bold', 'font-medium');
+          labelNgn.classList.replace('text-white', 'text-outline');
+          labelUsd.classList.replace('font-medium', 'font-bold');
+          labelUsd.classList.replace('text-outline', 'text-white');
+          if (priceDisplay) priceDisplay.textContent = priceDisplay.getAttribute('data-usd');
+        }
+      });
+    }
+  </script>
+</body>
+
+</html>
+
+
+

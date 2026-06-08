@@ -1,0 +1,22 @@
+# API Proxies
+/api/chat-ai  https://fensjqscutikgccajwkh.supabase.co/functions/v1/chat-ai  200
+/api/manage-slots  https://fensjqscutikgccajwkh.supabase.co/functions/v1/manage-slots  200
+/api/get-business  https://fensjqscutikgccajwkh.supabase.co/functions/v1/get-business  200
+
+# Root redirect to /home
+/    /home    302
+
+# Clean vanity URLs for chat — must be before the catch-all
+/chat/:username    /chat/index.html?u=:username    200
+
+# Page routes (serve root files without .html)
+/home          /index.html               200
+/faq           /faq.html                 200
+/pricing       /pricing.html             200
+
+# Page routes (serve index.html in each folder without trailing slash)
+/dashboard     /dashboard/index.html     200
+/chat          /chat/index.html          200
+/auth/login    /auth/login/index.html    200
+/auth/signup   /auth/signup/index.html   200
+/auth/sso-callback  /auth/sso-callback/index.html  200

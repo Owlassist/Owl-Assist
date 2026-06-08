@@ -37,3 +37,13 @@ desktop.ini
 *.swo
 .project
 .settings/
+
+# Other files and documents
+.zips/
+.htaccess
+.setup/
+.old index.html
+.htaccess
+
+# Local Netlify folder
+.netlify

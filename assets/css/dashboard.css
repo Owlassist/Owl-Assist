@@ -18,6 +18,7 @@
   position: fixed;
   height: 100vh;
   z-index: 50;
+  overflow: hidden; /* prevents text/email from bleeding outside the sidebar bounds */
 }
 
 .db-sidebar .nav-logo {
@@ -72,6 +73,8 @@
   border-radius: var(--radius-md);
   cursor: pointer;
   transition: all var(--transition-fast);
+  overflow: hidden; /* prevent email/name leaking outside sidebar */
+  min-width: 0;
 }
 
 .user-profile:hover {
@@ -116,7 +119,8 @@
 .db-layout.sidebar-collapsed .db-nav-item span:not(.material-symbols-outlined) { display: none; }
 .db-layout.sidebar-collapsed .db-nav-item { padding: 1rem; justify-content: center; }
 .db-layout.sidebar-collapsed .user-info, 
-.db-layout.sidebar-collapsed .sidebar-footer h4 { display: none; }
+.db-layout.sidebar-collapsed .sidebar-footer h4 { display: none !important; }
+.db-layout.sidebar-collapsed .user-profile { padding: 0.75rem; justify-content: center; overflow: hidden; }
 .db-layout.sidebar-collapsed .db-main { margin-left: 80px; }
 .db-layout.sidebar-collapsed .desktop-toggle-btn .material-symbols-outlined { transform: rotate(180deg); }
 .db-sidebar { transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); }

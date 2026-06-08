@@ -27,26 +27,23 @@ async function getSupabase() {
  */
 async function fetchBusinessData(identifier) {
   if (!identifier) return null;
-  const supabase = await getSupabase();
   
-  // Detect if identifier is a Clerk User ID or a custom username
-  const isClerkId = identifier.startsWith('user_');
-  
-  let query = supabase.from('businesses').select('*');
-  
-  if (isClerkId) {
-    query = query.eq('id', identifier);
-  } else {
-    query = query.eq('username', identifier);
-  }
+  try {
+    const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const url = isLocal ? 'https://fensjqscutikgccajwkh.supabase.co/functions/v1/get-business' : '/api/get-business';
 
-  const { data, error } = await query.single();
-
-  if (error) {
-    console.error('Error fetching business data:', error);
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ identifier })
+    });
+    
+    if (!res.ok) return null;
+    return await res.json();
+  } catch (err) {
+    console.error('Error fetching business data:', err);
     return null;
   }
-  return data;
 }
 
 /**
@@ -64,6 +61,8 @@ async function updateBusinessSettings(businessId, settings) {
   if (settings.image_url !== undefined)         updateData.image_url = settings.image_url;
   if (settings.session_duration !== undefined)  updateData.session_duration = settings.session_duration;
   if (settings.booking_url !== undefined)      updateData.booking_url = settings.booking_url;
+  if (settings.verified_badge_enabled !== undefined) updateData.verified_badge_enabled = settings.verified_badge_enabled;
+  if (settings.remove_branding !== undefined)   updateData.remove_branding = settings.remove_branding;
 
   if (Object.keys(updateData).length === 0) return; // nothing to update
 
@@ -383,6 +382,27 @@ async function deleteLead(bookingId) {
   });
   if (error) throw error;
 }
+
+async function updateLeadStatus(bookingId, status) {
+  const supabase = await getSupabase();
+  const token = await window.owlAuth.getToken();
+  const session = await window.owlAuth.getSession();
+  const businessId = session.user.id;
+  
+  const { error } = await supabase.functions.invoke('manage-slots', {
+    body: {
+      operation: 'update_lead_status',
+      booking_id: bookingId,
+      status: status,
+      business_id: businessId
+    },
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+  if (error) throw error;
+}
+
 async function createBooking(details) {
    const supabase = await getSupabase();
    const { data, error } = await supabase.functions.invoke('manage-slots', {
@@ -399,19 +419,24 @@ async function createBooking(details) {
  * Chat with Gemini Flash AI using our secure Edge Function
  */
 async function chatWithAI(businessId, message, history = [], getGreeting = false, sessionId = null) {
-  const supabase = await getSupabase();
-  
-  const { data, error } = await supabase.functions.invoke('chat-ai', {
-    body: {
+  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  const url = isLocal ? 'https://fensjqscutikgccajwkh.supabase.co/functions/v1/chat-ai' : '/api/chat-ai';
+
+  // Use proxy for HttpOnly cookies instead of supabase.functions.invoke
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({
       business_id: businessId,
       message: message,
       history: history,
-      getGreeting: getGreeting,
-      session_id: sessionId
-    }
+      getGreeting: getGreeting
+    })
   });
-
-  if (error) throw error;
+  
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || "Failed to fetch from AI");
   return data;
 }
 
@@ -458,23 +483,38 @@ async function fetchChatSessions(businessId) {
   });
 }
 
-/**
- * Fetch full transcript for a specific session
- */
-async function fetchChatLogs(sessionId) {
-  const supabase = await getSupabase();
-  const { data, error } = await supabase
-    .from('chat_logs')
-    .select('*')
-    .eq('session_id', sessionId)
-    .order('created_at', { ascending: true });
+async function fetchChatLogs(businessId, sessionId) {
+  // Mode 1: Dashboard viewer — sessionId provided, query DB directly
+  if (sessionId) {
+    const supabase = await getSupabase();
+    const { data: logs, error } = await supabase
+      .from('chat_logs')
+      .select('*')
+      .eq('session_id', sessionId)
+      .order('created_at', { ascending: true });
+    if (error) { console.error('fetchChatLogs error:', error); return []; }
+    return logs || [];
+  }
 
-  if (error) {
-    console.error('Error fetching chat logs:', error);
+  // Mode 2: Chat page — no sessionId, use HttpOnly cookie via edge function
+  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  const url = isLocal ? 'https://fensjqscutikgccajwkh.supabase.co/functions/v1/chat-ai' : '/api/chat-ai';
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ business_id: businessId, getLogs: true })
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.logs || [];
+  } catch (err) {
+    console.error('Error fetching chat logs:', err);
     return [];
   }
-  return data;
 }
+
 
 // Expose to window
 /**
@@ -514,6 +554,7 @@ window.owlDb = {
   createBooking,
   createLead,
   deleteLead,
+  updateLeadStatus,
   chatWithAI,
   fetchChatSessions,
   fetchChatLogs,
@@ -521,3 +562,5 @@ window.owlDb = {
   fetchSessionByCode,
   terminateSession
 };
+
+

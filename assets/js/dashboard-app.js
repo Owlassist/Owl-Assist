@@ -177,6 +177,48 @@ window.app = {
         });
     },
 
+    updateLeadStatusPrompt: function (id, currentStatus) {
+        const statuses = ['pending', 'contacted', 'qualified', 'lost', 'won'];
+        
+        if (window.OwlModal && OwlModal.prompt) {
+            OwlModal.prompt(
+                'Update Status',
+                `Enter new status (options: ${statuses.join(', ')}):`,
+                currentStatus,
+                async (newStatus) => {
+                    if (!newStatus || newStatus === currentStatus) return;
+                    if (!statuses.includes(newStatus.toLowerCase())) {
+                        OwlModal.alert('Error', 'Invalid status. Please enter one of: ' + statuses.join(', '));
+                        return;
+                    }
+                    try {
+                        await window.owlDb.updateLeadStatus(id, newStatus.toLowerCase());
+                        if (typeof fetchDataFromCloud === 'function') fetchDataFromCloud();
+                    } catch (err) {
+                        OwlModal.alert('Error', 'Error updating status: ' + err.message);
+                    }
+                }
+            );
+        } else {
+            // Fallback just in case
+            const newStatus = prompt(`Enter new status (options: ${statuses.join(', ')}):`, currentStatus);
+            if (!newStatus || newStatus === currentStatus) return;
+            
+            if (!statuses.includes(newStatus.toLowerCase())) {
+                alert('Invalid status. Please enter one of: ' + statuses.join(', '));
+                return;
+            }
+
+            window.owlDb.updateLeadStatus(id, newStatus.toLowerCase())
+                .then(() => {
+                    if (typeof fetchDataFromCloud === 'function') fetchDataFromCloud();
+                })
+                .catch(err => {
+                    alert('Error updating status: ' + err.message);
+                });
+        }
+    },
+
     deleteLead: async function (id) {
         const modal = document.getElementById('custom-modal');
         if (!modal) return;
@@ -304,9 +346,17 @@ window.app = {
             
             await user.update(updateFields);
 
+            const verifiedBadgeEl = document.getElementById('settings-verified-badge');
+            const verifiedBadgeEnabled = verifiedBadgeEl ? verifiedBadgeEl.checked : true;
+
+            const removeBrandingEl = document.getElementById('settings-remove-branding');
+            const removeBrandingEnabled = removeBrandingEl ? removeBrandingEl.checked : false;
+
             await window.owlDb.updateBusinessSettings(user.id, {
                 name: businessName || `${firstName} ${lastName}`,
-                username: username || null
+                username: username || null,
+                verified_badge_enabled: verifiedBadgeEnabled,
+                remove_branding: removeBrandingEnabled
             });
 
             await initDashboard();
@@ -361,21 +411,93 @@ window.app = {
     loadAnalytics: async function(businessId, bookings) {
         try {
             const supabase = await window.owlDb.getSupabase();
-            const { data: logs } = await supabase.from('chat_logs').select('id, role, session_id').eq('business_id', businessId);
+            const { data: logs } = await supabase.from('chat_logs').select('id, role, session_id, created_at').eq('business_id', businessId);
             
-            const aiMessages = logs ? logs.filter(l => l.role === 'bot').length : 0;
-            const totalSessions = new Set((logs || []).map(l => l.session_id)).size;
-            const timeSaved = Math.round((aiMessages * 2) / 60); // 2 mins per AI message
+            // Helper to get local date string YYYY-MM-DD
+            const getLocalDateString = (d) => new Date(d).toLocaleDateString('en-CA');
+            const todayStr = getLocalDateString(new Date());
+
+            // 1. Calculate Today's Stats
+            const todayLogs = (logs || []).filter(l => getLocalDateString(l.created_at) === todayStr);
+            const todayBookings = (bookings || []).filter(b => getLocalDateString(b.booking_time || b.created_at) === todayStr);
+
+            const aiMessagesToday = todayLogs.filter(l => l.role === 'bot').length;
+            const totalSessionsToday = new Set(todayLogs.map(l => l.session_id)).size;
+            const timeSavedToday = Math.round((aiMessagesToday * 2) / 60); // 2 mins per AI message
             
-            // Desktop
-            if(document.getElementById('stat-bookings')) document.getElementById('stat-bookings').innerText = bookings.length;
-            if(document.getElementById('stat-sessions')) document.getElementById('stat-sessions').innerText = totalSessions;
-            if(document.getElementById('stat-messages')) document.getElementById('stat-messages').innerText = aiMessages;
-            if(document.getElementById('stat-time-saved')) document.getElementById('stat-time-saved').innerText = `${timeSaved} hrs`;
+            // Render Today's Stats
+            if(document.getElementById('stat-bookings')) document.getElementById('stat-bookings').innerText = todayBookings.length;
+            if(document.getElementById('stat-sessions')) document.getElementById('stat-sessions').innerText = totalSessionsToday;
+            if(document.getElementById('stat-messages')) document.getElementById('stat-messages').innerText = aiMessagesToday;
+            if(document.getElementById('stat-time-saved')) document.getElementById('stat-time-saved').innerText = `${timeSavedToday} hrs`;
             
-            // Mobile
-            if(document.getElementById('stat-messages-mobile')) document.getElementById('stat-messages-mobile').innerText = aiMessages;
-            if(document.getElementById('stat-time-saved-mobile')) document.getElementById('stat-time-saved-mobile').innerText = `${timeSaved} hrs`;
+            // Mobile (if they exist)
+            if(document.getElementById('stat-messages-mobile')) document.getElementById('stat-messages-mobile').innerText = aiMessagesToday;
+            if(document.getElementById('stat-time-saved-mobile')) document.getElementById('stat-time-saved-mobile').innerText = `${timeSavedToday} hrs`;
+
+            // 2. Prepare 7-Day Chart Data
+            const labels = [];
+            const dataLeads = [];
+            const dataSessions = [];
+            const dataMessages = [];
+            const dataTimeSaved = [];
+
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                const dateStr = getLocalDateString(d);
+                const shortLabel = d.toLocaleDateString('en-US', { weekday: 'short' });
+                labels.push(shortLabel);
+
+                const dayLogs = (logs || []).filter(l => getLocalDateString(l.created_at) === dateStr);
+                const dayBookings = (bookings || []).filter(b => getLocalDateString(b.booking_time || b.created_at) === dateStr);
+
+                const dayAiMessages = dayLogs.filter(l => l.role === 'bot').length;
+                dataLeads.push(dayBookings.length);
+                dataSessions.push(new Set(dayLogs.map(l => l.session_id)).size);
+                dataMessages.push(dayAiMessages);
+                dataTimeSaved.push(Math.round((dayAiMessages * 2) / 60));
+            }
+
+            // 3. Render Chart.js Charts
+            const renderChart = (id, color, data) => {
+                const canvas = document.getElementById(id);
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
+                if (window[`chart_${id}`]) window[`chart_${id}`].destroy();
+                
+                window[`chart_${id}`] = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: data,
+                            borderColor: color,
+                            backgroundColor: color + '20',
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false }, tooltip: { enabled: false } },
+                        scales: {
+                            x: { display: false },
+                            y: { display: false, min: 0 }
+                        },
+                        layout: { padding: 0 }
+                    }
+                });
+            };
+
+            renderChart('chart-leads', '#526bf5', dataLeads);
+            renderChart('chart-sessions', '#22c55e', dataSessions);
+            renderChart('chart-messages', '#f59e0b', dataMessages);
+            renderChart('chart-time-saved', '#ec4899', dataTimeSaved);
+
         } catch(e) { console.error("Error loading analytics:", e); }
     },
 
@@ -421,6 +543,145 @@ window.app = {
         }
     },
 
+    // --- Paystack Integration ---
+    initiatePaystackCheckout: async function() {
+        if (!currentUser) return;
+        
+        let userCountry = localStorage.getItem('owl_assist_country') || 'US';
+        let currency = userCountry === 'NG' ? 'NGN' : 'USD';
+        let amountValue = userCountry === 'NG' ? 15999 * 100 : 19.99 * 100; // in lowest denomination
+        
+        const handler = PaystackPop.setup({
+            key: 'pk_test_96ed56610d64b80ed020559feae1f8d5957890bd', // Paystack Publishable Test Key
+            email: currentUser.primaryEmailAddress?.emailAddress || 'support@owlassist.app',
+            amount: amountValue,
+            currency: currency,
+            ref: 'OWL_' + Math.floor((Math.random() * 1000000000) + 1),
+            metadata: {
+                custom_fields: [
+                    {
+                        display_name: "Business ID",
+                        variable_name: "business_id",
+                        value: currentUser.id
+                    }
+                ]
+            },
+            callback: function(response){
+                const btn = document.getElementById('btn-upgrade-pro');
+                if(btn) {
+                   btn.innerText = 'Verifying...';
+                   btn.disabled = true;
+                }
+                
+                fetch('https://fensjqscutikgccajwkh.supabase.co/functions/v1/paystack-verify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ reference: response.reference, business_id: currentUser.id })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if(data.success) {
+                        if (window.OwlModal) OwlModal.alert('Success', 'Upgrade successful! You are now a Pro user.');
+                        else alert('Upgrade successful! You are now a Pro user.');
+                        setTimeout(() => window.location.reload(), 2000);
+                    } else {
+                        if (window.OwlModal) OwlModal.alert('Error', 'Verification failed: ' + data.error);
+                        else alert('Verification failed: ' + data.error);
+                        if(btn) { btn.innerText = 'Upgrade Now'; btn.disabled = false; }
+                    }
+                })
+                .catch(err => {
+                    if (window.OwlModal) OwlModal.alert('Error', 'Verification error: ' + err.message);
+                    else alert('Verification error: ' + err.message);
+                    if(btn) { btn.innerText = 'Upgrade Now'; btn.disabled = false; }
+                });
+            },
+            onClose: function(){
+                console.log('Payment modal closed');
+            }
+        });
+        handler.openIframe();
+    }
+
+};
+
+// --- Centralized Feature Registry ---
+window.OwlFeatures = {
+    features: {
+        // type:'widget_section' handles both hiding the overlay AND unlocking the content div
+        'widget_setup': { tier: 'pro', type: 'widget_section', overlaySelector: '#widget-pro-overlay', contentSelector: '#widget-content' },
+        'document_upload_desktop': { tier: 'pro', type: 'disable_input', selector: '#settings-document-upload' },
+        'document_upload_mobile': { tier: 'pro', type: 'disable_input', selector: '#settings-document-upload-mobile' },
+        'remove_branding': { tier: 'pro', type: 'disable_input', selector: '#settings-remove-branding' },
+        'verified_badge_toggle': { tier: 'pro', type: 'disable_input', selector: '#settings-verified-badge' }
+    },
+    
+    applyAccessControl: function(userTier, expiryDate) {
+        // Enforce expiry logic
+        let effectiveTier = userTier;
+        if (userTier === 'pro' && expiryDate) {
+            const expiry = new Date(expiryDate);
+            if (new Date() > expiry) {
+                effectiveTier = 'free'; // Sub expired — revert to free
+            }
+        }
+        
+        const isPro = effectiveTier === 'pro';
+
+        // Update Billing UI Text (all elements with id current-plan-name, covers desktop + mobile)
+        document.querySelectorAll('#current-plan-name').forEach(el => {
+            el.innerText = isPro ? 'Pro Plan' : 'Free Trial';
+        });
+        
+        // If Pro, update Billing upgrade buttons on both desktop + mobile
+        document.querySelectorAll('#btn-upgrade-pro-billing').forEach(btn => {
+            if (isPro) {
+                btn.innerText = '✓ Active (Pro)';
+                btn.disabled = true;
+                btn.classList.add('outline');
+                btn.classList.remove('primary');
+                btn.onclick = null;
+            }
+        });
+
+        // Apply visual locks based on registry
+        Object.entries(this.features).forEach(([key, config]) => {
+            const isAllowed = isPro || config.tier === 'free';
+
+            if (config.type === 'widget_section') {
+                // Hide/show the lock overlay
+                const overlay = document.querySelector(config.overlaySelector);
+                if (overlay) overlay.style.display = isAllowed ? 'none' : 'flex';
+                // Unlock/lock the content below
+                const content = document.querySelector(config.contentSelector);
+                if (content) {
+                    if (isAllowed) {
+                        content.classList.remove('locked');
+                    } else {
+                        content.classList.add('locked');
+                    }
+                }
+            } else if (config.type === 'ui_overlay') {
+                const elements = document.querySelectorAll(config.selector);
+                elements.forEach(el => { el.style.display = isAllowed ? 'none' : 'flex'; });
+            } else if (config.type === 'disable_input') {
+                const elements = document.querySelectorAll(config.selector);
+                elements.forEach(el => {
+                    el.disabled = !isAllowed;
+                    el.style.cursor = isAllowed ? 'pointer' : 'not-allowed';
+                    if (!isAllowed && el.type === 'checkbox') {
+                        el.checked = false;
+                    }
+                    const labelParent = el.closest('.btn') || el.closest('label');
+                    if (labelParent) {
+                        labelParent.style.opacity = isAllowed ? '1' : '0.6';
+                        labelParent.style.cursor = isAllowed ? 'pointer' : 'not-allowed';
+                        labelParent.title = isAllowed ? '' : 'Requires Pro Plan';
+                    }
+                });
+            }
+        });
+    }
 };
 
 // --- Data Fetching Logic ---
@@ -446,6 +707,15 @@ async function fetchDataFromCloud() {
             const calEl = document.getElementById('settings-booking-url');
             if (calEl) calEl.value = settings.booking_url || '';
 
+            const creditsEl = document.getElementById('ui-credits');
+            if (creditsEl) creditsEl.innerText = settings.credits !== undefined ? settings.credits : '0';
+
+            const verifiedBadgeEl = document.getElementById('settings-verified-badge');
+            if (verifiedBadgeEl) verifiedBadgeEl.checked = settings.verified_badge_enabled !== false;
+
+            const removeBrandingEl = document.getElementById('settings-remove-branding');
+            if (removeBrandingEl) removeBrandingEl.checked = settings.remove_branding === true;
+
             const snippetCode = document.getElementById('snippet-code');
             const snippetCodeMobile = document.getElementById('snippet-code-mobile');
             if (snippetCode || snippetCodeMobile) {
@@ -458,17 +728,28 @@ async function fetchDataFromCloud() {
             const shareInput = document.getElementById('share-link-input');
             if (shareInput) {
                 const origin = window.location.origin;
-                const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+                // Clean URL: /chat/username — falls back to /chat?id= if no username set
+                const actualUsername = settings.username || currentUser.username;
+                const isLocalEnv = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
                 
-                const shareUrl = settings.username 
-                    ? `${origin}/${settings.username}`
-                    : `${origin}/business?id=${businessId}`;
-                    
+                let shareUrl;
+                if (actualUsername) {
+                    shareUrl = isLocalEnv 
+                        ? `${origin}/chat/?u=${actualUsername}` 
+                        : `${origin}/chat/${actualUsername}`;
+                } else {
+                    shareUrl = `${origin}/chat/?id=${businessId}`;
+                }
                 shareInput.value = shareUrl;
             }
             
             const usernameInput = document.getElementById('settings-username');
             if (usernameInput) usernameInput.value = settings.username || '';
+            
+            // Apply Centralized Access Control
+            if (window.OwlFeatures && typeof window.OwlFeatures.applyAccessControl === 'function') {
+                window.OwlFeatures.applyAccessControl(settings.subscription_tier, settings.subscription_expires_at);
+            }
         }
 
         const bookings = await window.owlDb.fetchBookings(businessId);
@@ -489,12 +770,7 @@ async function fetchDataFromCloud() {
 }
 
 function renderStats(bookings, sessions = []) {
-    const statBookings = document.getElementById('stat-bookings');
-    if (statBookings) statBookings.innerText = bookings.length;
-    
-    const statSessions = document.getElementById('stat-sessions');
-    if (statSessions) statSessions.innerText = sessions.length;
-    
+    // statBookings and statSessions are now handled daily in loadAnalytics
     const statStatus = document.getElementById('stat-status');
     if (statStatus) statStatus.innerText = 'Active';
 }
@@ -569,6 +845,10 @@ function renderBookings(bookings) {
                       <span class="material-symbols-outlined">mail</span>
                       Email Lead
                     </div>
+                    <div class="action-item" onclick="app.updateLeadStatusPrompt('${booking.id}', '${booking.status}')">
+                      <span class="material-symbols-outlined">edit</span>
+                      Update Status
+                    </div>
                     <div class="action-item" style="color: var(--error);" onclick="app.deleteLead('${booking.id}')">
                       <span class="material-symbols-outlined">delete</span>
                       Delete Lead
@@ -614,6 +894,9 @@ function renderBookings(bookings) {
                     </button>
                     <button onclick="window.location.href='mailto:${booking.email || booking.customer_email}'" class="btn-small">
                         <span class="material-symbols-outlined">mail</span> Email
+                    </button>
+                    <button onclick="app.updateLeadStatusPrompt('${booking.id}', '${booking.status}')" class="btn-small">
+                        <span class="material-symbols-outlined">edit</span> Status
                     </button>
                 </div>
             `;
@@ -725,7 +1008,7 @@ async function loadTranscript(sessionId, name, summary, timeStr, sessionStatus =
     
     chatMessages.innerHTML = '<div style="text-align: center; color: var(--text-dim); padding: 2rem;">Loading...</div>';
 
-    const logs = await window.owlDb.fetchChatLogs(sessionId);
+    const logs = await window.owlDb.fetchChatLogs(currentUser?.id, sessionId);
     chatMessages.innerHTML = '';
 
     logs.forEach(log => {
@@ -757,8 +1040,7 @@ async function initDashboard() {
 
         const clerk = await window.owlAuth.getSession();
         if (!clerk.session) {
-            const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-            window.location.href = isLocal ? 'auth/login.html' : 'auth/login';
+            window.location.href = '/auth/login';
             return;
         }
 
@@ -782,7 +1064,7 @@ async function initDashboard() {
         // Update avatar elements — class-based + single ID (#ui-avatar) for mobile header
         const updateAvatar = (el) => {
             if (!el) return;
-            if (user.hasImage) {
+            if (user.hasImage && user.imageUrl) {
                 el.innerHTML = `<img src="${user.imageUrl}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
             } else {
                 el.innerText = displayName[0]?.toUpperCase() || 'B';
@@ -790,6 +1072,16 @@ async function initDashboard() {
         };
         document.querySelectorAll('.ui-avatar').forEach(updateAvatar);
         updateAvatar(document.getElementById('ui-avatar'));
+
+        // Also update the settings page avatar preview
+        const settingsPreview = document.getElementById('settings-avatar-preview');
+        if (settingsPreview) {
+            if (user.hasImage && user.imageUrl) {
+                settingsPreview.innerHTML = `<img src="${user.imageUrl}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+            } else {
+                settingsPreview.innerText = displayName[0]?.toUpperCase() || 'B';
+            }
+        }
 
         // Prepopulate Settings
         const fn = document.getElementById('settings-first-name');
@@ -804,7 +1096,11 @@ async function initDashboard() {
         // --- Avatar Upload Logic ---
         const avatarUpload = document.getElementById('settings-avatar-upload');
         if (avatarUpload) {
-            avatarUpload.addEventListener('change', async (e) => {
+            // Remove any previously-bound listeners to prevent duplicates on re-init
+            const newUpload = avatarUpload.cloneNode(true);
+            avatarUpload.parentNode.replaceChild(newUpload, avatarUpload);
+
+            newUpload.addEventListener('change', async (e) => {
                 const file = e.target.files[0];
                 if (!file) return;
 
@@ -814,14 +1110,23 @@ async function initDashboard() {
                 try {
                     preview.innerHTML = '<span class="material-symbols-outlined rotating" style="font-size: 2rem;">sync</span>';
                     
-                    // Upload to Clerk
+                    // 1. Upload to Clerk
                     await user.setProfileImage({ file });
+
+                    // 2. Reload the Clerk user to get the brand new imageUrl
+                    await user.reload();
+                    const freshImageUrl = user.imageUrl || '';
+
+                    // 3. Sync the new image URL to Supabase via the secure edge function
+                    if (freshImageUrl && currentUser?.id) {
+                        await window.owlDb.syncImageUrl(currentUser.id, freshImageUrl);
+                    }
                     
-                    // Refresh UI
+                    // 4. Refresh whole dashboard UI with fresh user data
                     await initDashboard();
                     if (window.OwlModal) OwlModal.alert('Success', 'Profile picture updated!');
                 } catch (err) {
-                    console.error("Avatar upload failed:", err);
+                    console.error('Avatar upload failed:', err);
                     preview.innerHTML = originalContent;
                     if (window.OwlModal) OwlModal.alert('Error', 'Failed to upload image: ' + err.message);
                 }
@@ -833,10 +1138,13 @@ async function initDashboard() {
         // Realtime Subscriptions
         const supabase = await window.owlDb.getSupabase();
         if (supabase) {
-            supabase.channel('db-changes')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings', filter: `business_id=eq.${user.id}` }, () => fetchDataFromCloud())
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_logs', filter: `business_id=eq.${user.id}` }, () => app.fetchRecentConversations())
-                .subscribe();
+            if (!window.dbSubscription) {
+                window.dbSubscription = supabase.channel('db-changes');
+                window.dbSubscription
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings', filter: `business_id=eq.${user.id}` }, () => fetchDataFromCloud())
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_logs', filter: `business_id=eq.${user.id}` }, () => app.fetchRecentConversations())
+                    .subscribe();
+            }
         }
 
     } catch (err) {
@@ -856,3 +1164,5 @@ window.addEventListener('click', (e) => {
 });
 
 initDashboard();
+
+

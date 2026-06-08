@@ -26,8 +26,17 @@ Deno.serve(async (req) => {
     );
 
     const payload = await req.json();
-    const { operation, business_id, settings, date, time, slot_id, image_url, slots, booking_id, session_id } = payload;
+    let { operation, business_id, settings, date, time, slot_id, image_url, slots, booking_id, session_id } = payload;
     
+    // --- SESSION COOKIE PARSING ---
+    const cookieHeader = req.headers.get('cookie');
+    if (cookieHeader && business_id) {
+      const match = cookieHeader.match(new RegExp(`owl_session_${business_id}=([^;]+)`));
+      if (match) {
+        session_id = match[1];
+      }
+    }
+
     console.log(`🚀 Operation: ${operation} | Business: ${business_id}`);
 
     // Security Check: Only public operations are allowed without an Auth header
@@ -268,6 +277,17 @@ Deno.serve(async (req) => {
         .eq('id', booking_id);
       if (error) throw error;
       return new Response('Deleted', { status: 200, headers: corsHeaders });
+    }
+
+    if (operation === 'update_lead_status') {
+      const { booking_id, status } = payload;
+      const { error } = await supabase
+        .from('bookings')
+        .update({ status: status })
+        .eq('id', booking_id)
+        .eq('business_id', business_id);
+      if (error) throw error;
+      return new Response('Status Updated', { status: 200, headers: corsHeaders });
     }
 
     if (operation === 'delete_session') {

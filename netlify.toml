@@ -1,0 +1,106 @@
+[build]
+  publish = "."
+
+# ============================================================
+# API Proxies — forward /api/* to Supabase Edge Functions
+# ============================================================
+[[redirects]]
+  from = "/api/chat-ai"
+  to = "https://fensjqscutikgccajwkh.supabase.co/functions/v1/chat-ai"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/manage-slots"
+  to = "https://fensjqscutikgccajwkh.supabase.co/functions/v1/manage-slots"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/get-business"
+  to = "https://fensjqscutikgccajwkh.supabase.co/functions/v1/get-business"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/paystack-verify"
+  to = "https://fensjqscutikgccajwkh.supabase.co/functions/v1/paystack-verify"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/api/paystack-webhook"
+  to = "https://fensjqscutikgccajwkh.supabase.co/functions/v1/paystack-webhook"
+  status = 200
+  force = true
+
+# ============================================================
+# Root → /home (visible redirect so URL shows /home)
+# ============================================================
+[[redirects]]
+  from = "/"
+  to = "/home"
+  status = 302
+
+# ============================================================
+# Clean vanity URLs: /chat/username → chat/index.html?u=username
+# Must come BEFORE the generic /*  rule below
+# ============================================================
+[[redirects]]
+  from = "/chat/:username"
+  to = "/chat/index.html?u=:username"
+  status = 200
+
+# ============================================================
+# Strip trailing slashes  (e.g. /home/ → /home)
+# ============================================================
+[[redirects]]
+  from = "/:page/"
+  to = "/:page"
+  status = 301
+
+# ============================================================
+# Clean URLs for root files (serve silently)
+# ============================================================
+[[redirects]]
+  from = "/home"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/faq"
+  to = "/faq.html"
+  status = 200
+
+[[redirects]]
+  from = "/pricing"
+  to = "/pricing.html"
+  status = 200
+
+# ============================================================
+# Clean URLs for folder structures
+# ============================================================
+[[redirects]]
+  from = "/dashboard"
+  to = "/dashboard/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/chat"
+  to = "/chat/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/auth/login"
+  to = "/auth/login/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/auth/signup"
+  to = "/auth/signup/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/auth/sso-callback"
+  to = "/auth/sso-callback/index.html"
+  status = 200
