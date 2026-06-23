@@ -725,3 +725,93 @@ body.mobile-ui {
 .mob-chat-messages::-webkit-scrollbar { display: none; }
 .mob-session-list,
 .mob-chat-messages { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ============================================================
+   PREMIUM CREDITS WIDGET (Mobile Header)
+============================================================ */
+.mob-credits-widget {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0.65rem 0.3rem 0.4rem;
+  background: linear-gradient(135deg, rgba(192,193,255,0.09) 0%, rgba(128,131,255,0.03) 100%);
+  border: 1px solid rgba(192,193,255,0.2);
+  border-radius: 0.65rem;
+  overflow: hidden;
+  cursor: default;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  /* Prevent it from growing too wide on small screens */
+  max-width: 130px;
+}
+
+.mob-credits-widget:active {
+  border-color: rgba(192,193,255,0.38);
+  box-shadow: 0 0 16px rgba(192,193,255,0.14);
+}
+
+/* Ambient glow orb — top-right corner */
+.mob-cw-orb {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 36px;
+  height: 36px;
+  background: radial-gradient(circle, rgba(192,193,255,0.4) 0%, transparent 70%);
+  pointer-events: none;
+  animation: mobCwPulse 3s ease-in-out infinite;
+}
+
+@keyframes mobCwPulse {
+  0%, 100% { opacity: 0.55; transform: scale(1); }
+  50%       { opacity: 1;    transform: scale(1.25); }
+}
+
+/* Bolt icon pill */
+.mob-cw-icon {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
+  background: linear-gradient(135deg, rgba(192,193,255,0.22), rgba(128,131,255,0.1));
+  border: 1px solid rgba(192,193,255,0.15);
+}
+
+.mob-cw-icon .material-symbols-outlined {
+  font-size: 0.95rem;
+  color: var(--primary);
+  font-variation-settings: 'FILL' 1;
+}
+
+/* Label + value stacked */
+.mob-cw-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+
+.mob-cw-label {
+  font-size: 0.55rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.mob-cw-value {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

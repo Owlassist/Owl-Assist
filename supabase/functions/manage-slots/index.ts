@@ -239,19 +239,36 @@ Deno.serve(async (req) => {
       const bizEmail = settings?.email || null;
       const bizUsername = settings?.username || null;
 
-      const { data: result, error } = await supabase
+      // Try to INSERT — if the row already exists, ignore the conflict.
+      // This guarantees new users get correct defaults but existing users
+      // NEVER have their credits / subscription data overwritten.
+      const { error: insertErr } = await supabase
         .from('businesses')
-        .upsert({
+        .insert({
           id: business_id,
           name: bizName,
           email: bizEmail,
           username: bizUsername,
-          role: 'business'
-        }, { onConflict: 'id' })
-        .select()
+          role: 'business',
+          credits: 20,
+          plan_credit_limit: 500,
+          credits_reset_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+        });
+      
+      // Code 23505 = duplicate key — row already exists, that's fine.
+      // Any other error (e.g. missing column before migration) must be thrown.
+      if (insertErr && insertErr.code !== '23505') {
+        throw insertErr;
+      }
+
+      // Always return the full, current row (including credits/subscription fields)
+      const { data: result, error: fetchErr } = await supabase
+        .from('businesses')
+        .select('*')
+        .eq('id', business_id)
         .single();
 
-      if (error) throw error;
+      if (fetchErr) throw fetchErr;
       return new Response(JSON.stringify(result), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
@@ -297,6 +314,36 @@ Deno.serve(async (req) => {
         .eq('session_id', session_id);
       if (error) throw error;
       return new Response('Session Deleted', { status: 200, headers: corsHeaders });
+    }
+
+    if (operation === 'send_owner_message') {
+      const { session_id, message, owner_name } = payload;
+      const { error } = await supabase
+        .from('chat_logs')
+        .insert([{
+          business_id: business_id,
+          session_id: session_id,
+          role: 'owner',
+          content: message
+          // we could store owner_name in a metadata column if we had one, 
+          // but for now, we'll format the content or the client will handle it.
+        }]);
+      if (error) throw error;
+      return new Response('Owner message sent', { status: 200, headers: corsHeaders });
+    }
+
+    if (operation === 'toggle_handoff') {
+      const { session_id, is_active } = payload;
+      const { error } = await supabase
+        .from('chat_logs')
+        .insert([{
+          business_id: business_id,
+          session_id: session_id,
+          role: 'system',
+          content: is_active ? 'HANDOFF_ACTIVE' : 'HANDOFF_INACTIVE'
+        }]);
+      if (error) throw error;
+      return new Response('Handoff toggled', { status: 200, headers: corsHeaders });
     }
 
     return new Response('Invalid operation', { status: 400, headers: corsHeaders });

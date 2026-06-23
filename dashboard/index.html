@@ -5,22 +5,34 @@
   <script>
     (function () {
       var MOBILE_BP = 768;
-      var isMobile = window.innerWidth <= MOBILE_BP;
 
-      if (isMobile) {
-        // Initial load on mobile: fetch mobile.html invisibly
+      // Detect real mobile devices by user-agent AND screen width.
+      // This fixes the bug where phones were not loading the mobile UI
+      // because document.write() doesn't trigger on a real device's first load.
+      function isMobileDevice() {
+        var ua = (navigator.userAgent || navigator.vendor || '').toLowerCase();
+        var isMobileUA = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini|mobile|silk|kindle|bb\d+|meego|fennec|tablet|touch/i.test(ua);
+        var isSmallScreen = window.innerWidth <= MOBILE_BP || window.screen.width <= MOBILE_BP;
+        return isMobileUA || isSmallScreen;
+      }
+
+      if (isMobileDevice()) {
         document.documentElement.style.display = 'none';
-        fetch('/dashboard/mobile.html').then(function (res) { return res.text(); }).then(function (html) {
-          document.open();
-          document.write(html);
-          document.close();
-        });
+        fetch('/dashboard/mobile.html')
+          .then(function (res) { return res.text(); })
+          .then(function (html) {
+            document.open();
+            document.write(html);
+            document.close();
+          })
+          .catch(function () {
+            // Fallback: show page as-is if fetch fails
+            document.documentElement.style.display = '';
+          });
       } else {
         // Desktop: watch for resize crossing into mobile territory
         window.addEventListener('resize', function () {
-          if (window.innerWidth <= MOBILE_BP) {
-            window.location.reload();
-          }
+          if (isMobileDevice()) window.location.reload();
         });
       }
     })();
@@ -361,6 +373,80 @@
         flex-direction: column;
       }
     }
+
+    /* ── Premium Credits Widget (Desktop Header) ─────────────────── */
+    .credits-widget-desktop {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.45rem 1rem 0.45rem 0.6rem;
+      background: linear-gradient(135deg, rgba(192,193,255,0.08) 0%, rgba(128,131,255,0.03) 100%);
+      border: 1px solid rgba(192,193,255,0.18);
+      border-radius: 0.75rem;
+      overflow: hidden;
+      cursor: default;
+      transition: border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+    .credits-widget-desktop:hover {
+      border-color: rgba(192,193,255,0.38);
+      box-shadow: 0 0 22px rgba(192,193,255,0.12), inset 0 0 12px rgba(192,193,255,0.04);
+    }
+    /* Subtle ambient glow orb */
+    .cw-orb {
+      position: absolute;
+      top: -12px;
+      right: -12px;
+      width: 48px;
+      height: 48px;
+      background: radial-gradient(circle, rgba(192,193,255,0.35) 0%, transparent 70%);
+      pointer-events: none;
+      animation: cwPulse 3s ease-in-out infinite;
+    }
+    @keyframes cwPulse {
+      0%,100% { opacity: 0.6; transform: scale(1); }
+      50%      { opacity: 1;   transform: scale(1.2); }
+    }
+    /* Icon pill */
+    .cw-icon-wrap {
+      flex-shrink: 0;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      background: linear-gradient(135deg, rgba(192,193,255,0.22), rgba(128,131,255,0.1));
+      border: 1px solid rgba(192,193,255,0.15);
+    }
+    .cw-icon-wrap .material-symbols-outlined {
+      font-size: 1rem;
+      color: var(--primary);
+      font-variation-settings: 'FILL' 1;
+    }
+    /* Label + value stack */
+    .cw-body {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      min-width: 0;
+    }
+    .cw-label {
+      font-size: 0.6rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-dim);
+      line-height: 1;
+    }
+    .cw-value {
+      font-size: 1rem;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.25;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.01em;
+    }
   </style>
 </head>
 
@@ -474,10 +560,20 @@
       <section id="view-overview" class="app-view active-view">
         <header class="db-header db-view-header">
           <h1>Dashboard Overview</h1>
-          <div
-            style="background: rgba(82, 107, 245, 0.1); border: 1px solid var(--primary); padding: 0.5rem 1rem; border-radius: var(--radius-md); display: flex; align-items: center; gap: 0.5rem;">
-            <span class="material-symbols-outlined" style="color: var(--primary);">confirmation_number</span>
-            <span style="font-weight: 600;">Conversations Remaining: <span id="ui-credits">Loading...</span></span>
+          <div class="credits-widget-desktop">
+            <div class="cw-orb"></div>
+            <div class="cw-icon-wrap">
+              <span class="material-symbols-outlined">bolt</span>
+            </div>
+            <div class="cw-body">
+              <span class="cw-label">Credits</span>
+              <div style="display: flex; align-items: center; gap: 0.3rem;">
+                <strong class="cw-value" id="ui-credits">—</strong>
+                <button onclick="app.navigate('settings'); setTimeout(() => app.setSettingsTab('billing'), 100);" title="Buy Credits" style="background: transparent; border: none; color: var(--primary); cursor: pointer; display: flex; align-items: center; padding: 0;">
+                  <span class="material-symbols-outlined" style="font-size: 1.15rem; font-weight: 800;">add_circle</span>
+                </button>
+              </div>
+            </div>
           </div>
         </header>
 
@@ -619,6 +715,31 @@
                 <p>Choose a session from the left to read the transcript.</p>
               </div>
             </div>
+            
+            <!-- Chat Input Area (Hidden by default) -->
+            <div id="chat-input-area" style="display: none; padding: 1rem; border-top: 1px solid var(--border); background: rgba(0,0,0,0.2);">
+              <div style="display: flex; gap: 0.5rem; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
+                <span style="font-size: 0.8rem; color: var(--text-dim);" id="handoff-status-text">AI is replying to this customer.</span>
+                <label class="toggle-switch" style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                  <input type="checkbox" id="toggle-handoff-btn" onchange="app.handleToggleHandoff(this)">
+                  <span class="slider" style="position: relative; display: inline-block; width: 40px; height: 20px; background-color: var(--border); border-radius: 20px; transition: .4s;">
+                    <span class="knob" style="position: absolute; height: 16px; width: 16px; left: 2px; bottom: 2px; background-color: white; border-radius: 50%; transition: .4s;"></span>
+                  </span>
+                  <span style="font-size: 0.8rem;" id="handoff-toggle-label">Take Over Chat</span>
+                </label>
+              </div>
+              <style>
+                #toggle-handoff-btn { display: none; }
+                #toggle-handoff-btn:checked + .slider { background-color: var(--primary); }
+                #toggle-handoff-btn:checked + .slider .knob { transform: translateX(20px); }
+              </style>
+              <div style="display: flex; gap: 0.5rem; opacity: 0.5; pointer-events: none; transition: all 0.3s;" id="chat-input-wrapper">
+                <input type="text" id="owner-chat-input" placeholder="Type a message as the business owner..." style="flex-grow: 1; padding: 0.75rem 1rem; border-radius: 20px; border: 1px solid var(--border); background: rgba(255,255,255,0.05); color: white; outline: none;">
+                <button class="btn btn-primary" id="btn-send-owner-msg" onclick="app.handleSendOwnerMessage()" style="border-radius: 20px; padding: 0.75rem 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                  Send <span class="material-symbols-outlined" style="font-size: 1rem;">send</span>
+                </button>
+              </div>
+            </div>
 
           </div>
         </div>
@@ -730,23 +851,7 @@
                   </label>
                 </div>
 
-                <!-- Verified Badge Toggle -->
-                <div class="form-group"
-                  style="margin-top: 1.5rem; border-top: 1px solid var(--border); padding-top: 1.5rem;">
-                  <label
-                    style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem; color:var(--text-sub); font-size:0.85rem;">
-                    Show Premium Verified Badge
-                    <span class="pro-badge"
-                      style="background: var(--primary); color: var(--on-primary); padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.65rem; font-weight: bold; text-transform: uppercase;">Pro
-                      Only</span>
-                  </label>
-                  <label style="display: flex; align-items: center; gap: 0.75rem; cursor: not-allowed; opacity: 0.6;">
-                    <input type="checkbox" id="settings-verified-badge" disabled
-                      style="accent-color: var(--primary); width: 18px; height: 18px; cursor: not-allowed;">
-                    <span style="font-size: 0.85rem; color: var(--text-dim);">Show your custom badge image next to
-                      your assistant name (upload via /assets/img/verified-badge.png)</span>
-                  </label>
-                </div>
+
 
                 <button class="btn btn-primary" onclick="app.updateProfile()" id="btn-save-profile"
                   style="margin-top: 1.5rem;">Save Profile Settings</button>
@@ -1047,7 +1152,7 @@
                       </li>
                       <li class="pricing-feature">
                         <span class="material-symbols-outlined icon">check_circle</span>
-                        <span class="text"><strong>Unlimited</strong> AI conversations</span>
+                        <span class="text"><strong>500</strong> AI credits per month</span>
                       </li>
                       <li class="pricing-feature">
                         <span class="material-symbols-outlined icon">check_circle</span>
@@ -1062,7 +1167,51 @@
                     <button id="btn-upgrade-pro-billing" onclick="app.initiatePaystackCheckout()"
                       class="pricing-btn primary">Upgrade to Pro</button>
                   </div>
+                </div> <!-- End of Pricing Grid -->
+
+                <!-- Buy Credits Bundles Section -->
+                <div style="margin-top: 3rem;">
+                  <h3 style="color: white; margin-bottom: 1rem; font-size: 1.25rem;">Buy Credit Bundles</h3>
+                  <p style="color: var(--text-dim); font-size: 0.9rem; margin-bottom: 1.5rem;">Need more credits this month? Top up your balance. Purchased credits expire 1 month after purchase.</p>
+                  
+                  <div class="pricing-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
+                    <!-- Bundle 1 -->
+                    <div class="pricing-card" style="border: 1px solid rgba(192, 193, 255, 0.2); background: linear-gradient(135deg, rgba(82, 107, 245, 0.05), rgba(0,0,0,0));">
+                      <div class="pricing-header">
+                        <h3>1,000 Credits</h3>
+                      </div>
+                      <div class="pricing-price">
+                        <span class="price-display amount" data-usd="$10.00" data-ngn="₦15,050">₦15,050</span>
+                      </div>
+                      <ul class="pricing-features" style="margin-bottom: 1.5rem;">
+                        <li class="pricing-feature">
+                          <span class="material-symbols-outlined icon">bolt</span>
+                          <span class="text">1,000 extra AI credits</span>
+                        </li>
+                      </ul>
+                      <button class="pricing-btn primary" onclick="app.initiatePaystackCheckout({ action: 'buy_credits', amount: 15050 * 100, bundleAmount: 1000 })">Buy Now</button>
+                    </div>
+
+                    <!-- Bundle 2 -->
+                    <div class="pricing-card" style="border: 1px solid var(--primary); background: linear-gradient(135deg, rgba(167, 139, 250, 0.1), rgba(0,0,0,0)); box-shadow: 0 4px 20px rgba(124, 58, 237, 0.15);">
+                      <div class="pricing-badge" style="background: var(--primary);">Best Value</div>
+                      <div class="pricing-header">
+                        <h3>5,000 Credits</h3>
+                      </div>
+                      <div class="pricing-price">
+                        <span class="price-display amount" data-usd="$40.00" data-ngn="₦57,200">₦57,200</span>
+                      </div>
+                      <ul class="pricing-features" style="margin-bottom: 1.5rem;">
+                        <li class="pricing-feature">
+                          <span class="material-symbols-outlined icon">bolt</span>
+                          <span class="text">5,000 extra AI credits</span>
+                        </li>
+                      </ul>
+                      <button class="pricing-btn primary" onclick="app.initiatePaystackCheckout({ action: 'buy_credits', amount: 57200 * 100, bundleAmount: 5000 })">Buy Now</button>
+                    </div>
+                  </div>
                 </div>
+
               </div>
             </div>
 
@@ -1147,7 +1296,6 @@
         <header class="db-header db-view-header">
           <h1 style="display: flex; align-items: center; gap: 0.75rem;">Widget Setup
             <span class="pro-badge">
-              <img src="/assets/img/verified-badge.png" alt="Pro" style="height:0.9rem; vertical-align:middle; margin-right:0.2rem;" onerror="this.style.display='none'">
               Pro Only
             </span>
           </h1>
@@ -1190,7 +1338,6 @@
   </div>
 
   <!-- Auth & App Logic -->
-  <script src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@4/dist/clerk.browser.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>

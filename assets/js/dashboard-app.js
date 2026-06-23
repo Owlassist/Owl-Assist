@@ -544,13 +544,31 @@ window.app = {
     },
 
     // --- Paystack Integration ---
-    initiatePaystackCheckout: async function() {
+    initiatePaystackCheckout: async function(options = {}) {
         if (!currentUser) return;
         
         let userCountry = localStorage.getItem('owl_assist_country') || 'US';
         let currency = userCountry === 'NG' ? 'NGN' : 'USD';
-        let amountValue = userCountry === 'NG' ? 15999 * 100 : 19.99 * 100; // in lowest denomination
         
+        // Fix for amount depending on currency
+        let amountValue;
+        if (options.amount) {
+            // Backward compatibility
+            amountValue = options.amount;
+        } else if (options.ngnAmount && options.usdAmount) {
+            amountValue = userCountry === 'NG' ? options.ngnAmount : options.usdAmount;
+        } else {
+            // Default to Pro Upgrade pricing if not specified
+            amountValue = userCountry === 'NG' ? 15999 * 100 : 19.99 * 100;
+        }
+        
+        let action = options.action || 'upgrade_pro';
+        let bundleAmount = options.bundleAmount || 0;
+        
+        // Force test key to NGN if USD is not allowed by Paystack on this test key
+        // For now, let's keep it dynamic but log it
+        console.log(`Starting Paystack checkout for ${currency} ${amountValue/100}`);
+
         const handler = PaystackPop.setup({
             key: 'pk_test_96ed56610d64b80ed020559feae1f8d5957890bd', // Paystack Publishable Test Key
             email: currentUser.primaryEmailAddress?.emailAddress || 'support@owlassist.app',
@@ -559,18 +577,21 @@ window.app = {
             ref: 'OWL_' + Math.floor((Math.random() * 1000000000) + 1),
             metadata: {
                 custom_fields: [
-                    {
-                        display_name: "Business ID",
-                        variable_name: "business_id",
-                        value: currentUser.id
-                    }
+                    { display_name: "Business ID", variable_name: "business_id", value: currentUser.id },
+                    { display_name: "Action", variable_name: "action", value: action },
+                    { display_name: "Bundle Amount", variable_name: "bundle_amount", value: bundleAmount }
                 ]
             },
             callback: function(response){
-                const btn = document.getElementById('btn-upgrade-pro');
+                const btnId = action === 'upgrade_pro' ? 'btn-upgrade-pro' : null; // Dynamic button if needed
+                const btn = btnId ? document.getElementById(btnId) : null;
+                
                 if(btn) {
                    btn.innerText = 'Verifying...';
                    btn.disabled = true;
+                } else if (window.OwlModal) {
+                   // Show a loader modal if no specific button
+                   OwlModal.alert('Verifying', 'Please wait while we confirm your payment...');
                 }
                 
                 fetch('https://fensjqscutikgccajwkh.supabase.co/functions/v1/paystack-verify', {
@@ -581,8 +602,9 @@ window.app = {
                 .then(res => res.json())
                 .then(data => {
                     if(data.success) {
-                        if (window.OwlModal) OwlModal.alert('Success', 'Upgrade successful! You are now a Pro user.');
-                        else alert('Upgrade successful! You are now a Pro user.');
+                        const successMsg = action === 'buy_credits' ? `Successfully added ${bundleAmount} credits!` : 'Upgrade successful! You are now a Pro user.';
+                        if (window.OwlModal) OwlModal.alert('Success', successMsg);
+                        else alert(successMsg);
                         setTimeout(() => window.location.reload(), 2000);
                     } else {
                         if (window.OwlModal) OwlModal.alert('Error', 'Verification failed: ' + data.error);
@@ -612,8 +634,7 @@ window.OwlFeatures = {
         'widget_setup': { tier: 'pro', type: 'widget_section', overlaySelector: '#widget-pro-overlay', contentSelector: '#widget-content' },
         'document_upload_desktop': { tier: 'pro', type: 'disable_input', selector: '#settings-document-upload' },
         'document_upload_mobile': { tier: 'pro', type: 'disable_input', selector: '#settings-document-upload-mobile' },
-        'remove_branding': { tier: 'pro', type: 'disable_input', selector: '#settings-remove-branding' },
-        'verified_badge_toggle': { tier: 'pro', type: 'disable_input', selector: '#settings-verified-badge' }
+        'remove_branding': { tier: 'pro', type: 'disable_input', selector: '#settings-remove-branding' }
     },
     
     applyAccessControl: function(userTier, expiryDate) {
@@ -707,8 +728,21 @@ async function fetchDataFromCloud() {
             const calEl = document.getElementById('settings-booking-url');
             if (calEl) calEl.value = settings.booking_url || '';
 
-            const creditsEl = document.getElementById('ui-credits');
-            if (creditsEl) creditsEl.innerText = settings.credits !== undefined ? settings.credits : '0';
+            const creditsEls = document.querySelectorAll('#ui-credits, .ui-credits');
+            if (creditsEls.length > 0) {
+                let planCredits = parseFloat(settings.credits || '0');
+                let purchasedCredits = parseFloat(settings.purchased_credits || '0');
+                
+                // Ensure expired purchased credits are not shown in UI before DB updates it
+                if (settings.purchased_credits_expires_at && new Date() > new Date(settings.purchased_credits_expires_at)) {
+                    purchasedCredits = 0;
+                }
+                
+                let totalCredits = planCredits + purchasedCredits;
+                let displayStr = Number.isInteger(totalCredits) ? totalCredits.toString() : totalCredits.toFixed(1);
+                
+                creditsEls.forEach(el => { el.innerText = displayStr; });
+            }
 
             const verifiedBadgeEl = document.getElementById('settings-verified-badge');
             if (verifiedBadgeEl) verifiedBadgeEl.checked = settings.verified_badge_enabled !== false;
@@ -768,6 +802,16 @@ async function fetchDataFromCloud() {
         console.error("Cloud data fetch error:", err);
     }
 }
+
+window.app.fetchRecentConversations = async function() {
+    if (!currentUser) return;
+    try {
+        const sessions = await window.owlDb.fetchChatSessions(currentUser.id);
+        renderConversations(sessions);
+    } catch (err) {
+        console.error("Error fetching recent conversations:", err);
+    }
+};
 
 function renderStats(bookings, sessions = []) {
     // statBookings and statSessions are now handled daily in loadAnalytics
@@ -1011,18 +1055,164 @@ async function loadTranscript(sessionId, name, summary, timeStr, sessionStatus =
     const logs = await window.owlDb.fetchChatLogs(currentUser?.id, sessionId);
     chatMessages.innerHTML = '';
 
+    let hasHandoffActive = false;
+
     logs.forEach(log => {
-        // Skip system messages
-        if (log.role === 'system') return;
+        if (log.role === 'system') {
+            if (log.content === 'HANDOFF_ACTIVE') hasHandoffActive = true;
+            if (log.content === 'HANDOFF_INACTIVE') hasHandoffActive = false;
+            return;
+        }
         
         const isUser = log.role === 'user';
+        const isOwner = log.role === 'owner';
         const msgDiv = document.createElement('div');
         msgDiv.className = `message ${isUser ? 'user' : 'bot'}`;
-        msgDiv.innerHTML = log.content;
+        if (isOwner) {
+            msgDiv.style.borderLeft = '4px solid var(--primary)';
+            msgDiv.style.background = 'rgba(82, 107, 245, 0.05)';
+        }
+        
+        let label = '';
+        if (!isUser) {
+            label = `<div style="font-size: 0.65rem; color: var(--text-dim); margin-bottom: 0.2rem;">${isOwner ? 'You' : 'Noctra'}</div>`;
+        }
+        msgDiv.innerHTML = label + log.content;
         chatMessages.appendChild(msgDiv);
     });
 
     chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    // --- Handoff UI Update ---
+    const inputArea = document.getElementById('chat-input-area');
+    const toggleBtn = document.getElementById('toggle-handoff-btn');
+    const statusText = document.getElementById('handoff-status-text');
+    const inputWrapper = document.getElementById('chat-input-wrapper');
+    const ownerInput = document.getElementById('owner-chat-input');
+
+    if (inputArea) {
+        if (isTerminated) {
+            inputArea.style.display = 'none';
+        } else {
+            inputArea.style.display = 'block';
+            toggleBtn.checked = hasHandoffActive;
+            
+            // Set input disabled state based on toggle
+            inputWrapper.style.opacity = hasHandoffActive ? '1' : '0.5';
+            inputWrapper.style.pointerEvents = hasHandoffActive ? 'auto' : 'none';
+            ownerInput.disabled = !hasHandoffActive;
+
+            statusText.innerText = hasHandoffActive 
+                ? 'You are replying. AI is paused.' 
+                : 'AI is replying. Turn on to take over.';
+        }
+    }
+
+    // Attach current sessionId for handoff functions to use
+    window.app.currentSessionId = sessionId;
+
+    // --- DEDICATED REALTIME CHANNEL FOR OPEN TRANSCRIPT ---
+    const supabase = await window.owlDb.getSupabase();
+    if (supabase) {
+        if (window.app.transcriptChannel) {
+            window.app.transcriptChannel.unsubscribe();
+        }
+        window.app.transcriptChannel = supabase.channel(`dashboard_transcript_${sessionId}`)
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_logs', filter: `session_id=eq.${sessionId}` }, (payload) => {
+                const log = payload.new;
+                
+                // Skip system messages
+                if (log.role === 'system') {
+                    if (log.content === 'HANDOFF_ACTIVE' || log.content === 'HANDOFF_INACTIVE') {
+                        const toggleBtn = document.getElementById('toggle-handoff-btn');
+                        const statusText = document.getElementById('handoff-status-text');
+                        const inputWrapper = document.getElementById('chat-input-wrapper');
+                        const ownerInput = document.getElementById('owner-chat-input');
+                        if (toggleBtn && inputWrapper && ownerInput) {
+                            const isActive = log.content === 'HANDOFF_ACTIVE';
+                            toggleBtn.checked = isActive;
+                            inputWrapper.style.opacity = isActive ? '1' : '0.5';
+                            inputWrapper.style.pointerEvents = isActive ? 'auto' : 'none';
+                            ownerInput.disabled = !isActive;
+                            if (statusText) statusText.innerText = isActive ? 'You are replying. AI is paused.' : 'AI is replying. Turn on to take over.';
+                        }
+                    }
+                    return;
+                }
+
+                // Avoid duplicating our own owner messages (they are optimistically added)
+                if (log.role === 'owner') return;
+
+                const chatMessages = document.getElementById('chat-messages');
+                if (!chatMessages) return;
+
+                const isUser = log.role === 'user';
+                const msgDiv = document.createElement('div');
+                msgDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+                let label = '';
+                if (!isUser) {
+                    label = `<div style="font-size: 0.65rem; color: var(--text-dim); margin-bottom: 0.2rem;">Noctra</div>`;
+                }
+                msgDiv.innerHTML = label + log.content;
+                chatMessages.appendChild(msgDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            })
+            .subscribe();
+    }
+}
+
+window.app.handleToggleHandoff = async function(checkbox) {
+    if (!window.app.currentSessionId || !currentUser) return;
+    const isActive = checkbox.checked;
+    
+    const inputWrapper = document.getElementById('chat-input-wrapper');
+    const ownerInput = document.getElementById('owner-chat-input');
+    const statusText = document.getElementById('handoff-status-text');
+
+    // Optimistic UI update
+    inputWrapper.style.opacity = isActive ? '1' : '0.5';
+    inputWrapper.style.pointerEvents = isActive ? 'auto' : 'none';
+    ownerInput.disabled = !isActive;
+    statusText.innerText = isActive 
+        ? 'You are replying. AI is paused.' 
+        : 'AI is replying. Turn on to take over.';
+
+    try {
+        await window.owlDb.toggleHandoff(window.app.currentSessionId, currentUser.id, isActive);
+        // Refresh transcript to show new system logs properly if needed, but not necessary since UI is updated
+    } catch (err) {
+        console.error("Error toggling handoff:", err);
+        if (window.OwlModal) OwlModal.alert('Error', 'Failed to toggle handoff. Please try again.');
+        checkbox.checked = !isActive; // Revert
+        app.handleToggleHandoff(checkbox); // Re-run to fix UI
+    }
+};
+
+window.app.handleSendOwnerMessage = async function() {
+    if (!window.app.currentSessionId || !currentUser) return;
+    const input = document.getElementById('owner-chat-input');
+    const text = input.value.trim();
+    if (!text) return;
+
+    input.value = ''; // clear input
+
+    // Optimistic UI insert
+    const chatMessages = document.getElementById('chat-messages');
+    const msgDiv = document.createElement('div');
+    msgDiv.className = `message bot`;
+    msgDiv.style.borderLeft = '4px solid var(--primary)';
+    msgDiv.style.background = 'rgba(82, 107, 245, 0.05)';
+    msgDiv.innerHTML = `<div style="font-size: 0.65rem; color: var(--text-dim); margin-bottom: 0.2rem;">You</div>${text}`;
+    chatMessages.appendChild(msgDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    try {
+        const ownerName = currentUser.fullName || currentUser.username || "Business Owner";
+        await window.owlDb.sendOwnerMessage(window.app.currentSessionId, currentUser.id, text, ownerName);
+    } catch (err) {
+        console.error("Error sending message:", err);
+        if (window.OwlModal) OwlModal.alert('Error', 'Failed to send message.');
+    }
 }
 
 async function initDashboard() {
@@ -1092,6 +1282,13 @@ async function initDashboard() {
         if (bn) bn.value = user.unsafeMetadata?.business_name || '';
         const un = document.getElementById('settings-username');
         if (un) un.value = user.unsafeMetadata?.business_username || user.username || '';
+
+        // Silently sync profile picture to Supabase on every login so chat UI shows it too.
+        // We do this fire-and-forget to not block the dashboard load.
+        if (user.imageUrl && window.owlDb && typeof window.owlDb.syncImageUrl === 'function') {
+            window.owlDb.syncImageUrl(user.id, user.imageUrl)
+                .catch(e => console.warn('Background image sync skipped:', e.message));
+        }
         
         // --- Avatar Upload Logic ---
         const avatarUpload = document.getElementById('settings-avatar-upload');
@@ -1142,7 +1339,12 @@ async function initDashboard() {
                 window.dbSubscription = supabase.channel('db-changes');
                 window.dbSubscription
                     .on('postgres_changes', { event: '*', schema: 'public', table: 'bookings', filter: `business_id=eq.${user.id}` }, () => fetchDataFromCloud())
-                    .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_logs', filter: `business_id=eq.${user.id}` }, () => app.fetchRecentConversations())
+                    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chat_logs', filter: `business_id=eq.${user.id}` }, (payload) => {
+                        // Always refresh the session list sidebar
+                        if (window.app && typeof window.app.fetchRecentConversations === 'function') {
+                            window.app.fetchRecentConversations();
+                        }
+                    })
                     .subscribe();
             }
         }

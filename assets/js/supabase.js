@@ -30,7 +30,7 @@ async function fetchBusinessData(identifier) {
   
   try {
     const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    const url = isLocal ? 'https://fensjqscutikgccajwkh.supabase.co/functions/v1/get-business' : '/api/get-business';
+    const url = isLocal ? `https://fensjqscutikgccajwkh.supabase.co/functions/v1/get-business?t=${Date.now()}` : `/api/get-business?t=${Date.now()}`;
 
     const res = await fetch(url, {
       method: 'POST',
@@ -39,7 +39,13 @@ async function fetchBusinessData(identifier) {
     });
     
     if (!res.ok) return null;
-    return await res.json();
+    const data = await res.json();
+    if (data) {
+        const planCred = parseFloat(data.credits) || 0;
+        const purCred = parseFloat(data.purchased_credits) || 0;
+        data.totalCredits = planCred + purCred;
+    }
+    return data;
   } catch (err) {
     console.error('Error fetching business data:', err);
     return null;
@@ -304,9 +310,6 @@ async function createLead(leadData) {
 }
 
 /**
- * Retrieve session ID using email, access code, and business ID
- */
-/**
  * Retrieve session by email + access_code OR email + passcode.
  * @param {string} email - Customer email
  * @param {string|null} accessCode - Backup access code (OWL-XXXXXX)
@@ -365,6 +368,44 @@ async function terminateSession(sessionId, businessId) {
 }
 
 /**
+ * Chat Handoff (Business side)
+ */
+async function toggleHandoff(sessionId, businessId, isActive) {
+  const supabase = await getSupabase();
+  const token = await window.owlAuth.getToken();
+
+  const { error } = await supabase.functions.invoke('manage-slots', {
+    body: {
+      operation: 'toggle_handoff',
+      session_id: sessionId,
+      business_id: businessId,
+      is_active: isActive
+    },
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  if (error) throw error;
+}
+
+async function sendOwnerMessage(sessionId, businessId, message, ownerName) {
+  const supabase = await getSupabase();
+  const token = await window.owlAuth.getToken();
+
+  const { error } = await supabase.functions.invoke('manage-slots', {
+    body: {
+      operation: 'send_owner_message',
+      session_id: sessionId,
+      business_id: businessId,
+      message: message,
+      owner_name: ownerName
+    },
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  if (error) throw error;
+}
+
+/**
  * Public Booking Creation (Used by Customers on business.html)
  */
 async function deleteLead(bookingId) {
@@ -419,8 +460,7 @@ async function createBooking(details) {
  * Chat with Gemini Flash AI using our secure Edge Function
  */
 async function chatWithAI(businessId, message, history = [], getGreeting = false, sessionId = null) {
-  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-  const url = isLocal ? 'https://fensjqscutikgccajwkh.supabase.co/functions/v1/chat-ai' : '/api/chat-ai';
+  const url = '/api/chat-ai';
 
   // Use proxy for HttpOnly cookies instead of supabase.functions.invoke
   const res = await fetch(url, {
@@ -431,7 +471,8 @@ async function chatWithAI(businessId, message, history = [], getGreeting = false
       business_id: businessId,
       message: message,
       history: history,
-      getGreeting: getGreeting
+      is_greeting: getGreeting,
+      session_id: sessionId
     })
   });
   
@@ -483,28 +524,27 @@ async function fetchChatSessions(businessId) {
   });
 }
 
-async function fetchChatLogs(businessId, sessionId) {
-  // Mode 1: Dashboard viewer — sessionId provided, query DB directly
-  if (sessionId) {
+async function fetchChatLogs(businessId, sessionId = null) {
+  // Try querying DB directly if we have a session token (Dashboard mode)
+  const sessionToken = await window.owlAuth.getToken().catch(() => null);
+  if (sessionId && sessionToken) {
     const supabase = await getSupabase();
     const { data: logs, error } = await supabase
       .from('chat_logs')
       .select('*')
       .eq('session_id', sessionId)
       .order('created_at', { ascending: true });
-    if (error) { console.error('fetchChatLogs error:', error); return []; }
-    return logs || [];
+    if (!error) return logs || [];
   }
 
-  // Mode 2: Chat page — no sessionId, use HttpOnly cookie via edge function
-  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-  const url = isLocal ? 'https://fensjqscutikgccajwkh.supabase.co/functions/v1/chat-ai' : '/api/chat-ai';
+  // Chat widget mode — use the Netlify proxy for all environments
+  const url = '/api/chat-ai';
   try {
     const res = await fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
-      body: JSON.stringify({ business_id: businessId, getLogs: true })
+      body: JSON.stringify({ business_id: businessId, getLogs: true, session_id: sessionId })
     });
     if (!res.ok) return [];
     const data = await res.json();
@@ -515,6 +555,27 @@ async function fetchChatLogs(businessId, sessionId) {
   }
 }
 
+/**
+ * Fetch all chat sessions for a customer widget — reads from DB via service role.
+ * Returns sessions with their last message preview (no auth token needed for chat widget).
+ */
+async function fetchPublicChatSessions(businessId) {
+  const url = '/api/list-sessions';
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ business_id: businessId })
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.sessions || [];
+  } catch (err) {
+    console.error('Error fetching public chat sessions:', err);
+    return [];
+  }
+}
 
 // Expose to window
 /**
@@ -558,9 +619,10 @@ window.owlDb = {
   chatWithAI,
   fetchChatSessions,
   fetchChatLogs,
+  fetchPublicChatSessions,
   deleteChatSession,
   fetchSessionByCode,
-  terminateSession
+  terminateSession,
+  toggleHandoff,
+  sendOwnerMessage
 };
-
-

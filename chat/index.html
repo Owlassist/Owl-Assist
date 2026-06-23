@@ -638,6 +638,9 @@
       </div>
     </div>
     <div class="header-actions">
+      <button id="btn-chat-history" class="btn btn-outline" style="padding: 0.35rem 0.65rem; font-size: 0.75rem; border-radius: var(--radius-sm); white-space: nowrap; margin-right: 0.25rem;" onclick="openHistoryModal()">
+        <span class="material-symbols-outlined" style="font-size: 0.9rem; vertical-align: middle;">history</span><span class="reset-label" style="margin-left: 0.25rem;">Conversations</span>
+      </button>
       <button id="btn-reset-chat" class="btn btn-outline" style="padding: 0.35rem 0.65rem; font-size: 0.75rem; display: none; border-radius: var(--radius-sm); white-space: nowrap;" onclick="resetChatSession()">
         <span class="material-symbols-outlined" style="font-size: 0.9rem; vertical-align: middle;">refresh</span><span class="reset-label" style="margin-left: 0.25rem;">New Chat</span>
       </button>
@@ -788,6 +791,53 @@
     </button>
   </div>
 
+  <!-- End Resume Modal -->
+
+  <!-- Chat History Modal -->
+  <div id="history-modal" class="overlay-container" style="display: none; justify-content: flex-end; padding: 0;">
+    <div class="glass-card welcome-card" style="margin: 0; border-radius: 0; height: 100vh; max-width: 400px; animation: slideInRight 0.3s ease; display: flex; flex-direction: column;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h3 style="margin: 0;">Conversations</h3>
+        <button class="btn btn-icon" onclick="closeHistoryModal()" style="padding: 0.5rem; background: rgba(255,255,255,0.1); border-radius: 50%; color: white; border: none; cursor: pointer;">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div id="history-list" style="flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem;">
+         <!-- History items populate here -->
+      </div>
+    </div>
+  </div>
+  <style>
+    @keyframes slideInRight {
+       from { transform: translateX(100%); }
+       to { transform: translateX(0); }
+    }
+    .history-item {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 0.75rem;
+      padding: 1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .history-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .history-item-date {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      margin-bottom: 0.25rem;
+    }
+    .history-item-id {
+      font-size: 0.85rem;
+      color: white;
+      font-family: monospace;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  </style>
+
   <!-- Supabase & Logic -->
   <script src="../assets/js/modals.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -801,6 +851,7 @@
     let businessId = null;
     let sessionId = null;
     let realtimeChannel = null;
+    let globalBusinessName = 'Owner';
 
     const urlParams = new URLSearchParams(window.location.search);
     let identifier = urlParams.get('u') || urlParams.get('id');
@@ -863,6 +914,7 @@
       // Set text node first, then append badge span — ensures badge always appears AFTER the name
       bizNameEl.textContent = bizName;
       bizNameEl.dataset.name = bizName; // Store cleanly for use in greeting
+      globalBusinessName = bizName;
       if (showBadge) {
         const badgeSpan = document.createElement('span');
         badgeSpan.className = 'verified-badge';
@@ -883,16 +935,20 @@
 
       const logoEl = document.getElementById('biz-logo');
       if (businessData.image_url && businessData.image_url !== "") {
+        window.globalBusinessImageUrl = businessData.image_url;
         logoEl.innerHTML = `<img src="${businessData.image_url}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
         logoEl.style.background = 'transparent';
       } else {
+        window.globalBusinessImageUrl = null;
         logoEl.innerText = bizName[0].toUpperCase();
       }
 
       document.title = `${bizName} AI Assistant | Owl Assist`;
 
-      // Check if there is an active session by attempting to fetch logs (cookie handles auth)
-      const logs = await window.owlDb.fetchChatLogs(businessId);
+      // Try restoring the active session from the session cookie via the backend
+      // We do NOT use localStorage — sessions are tracked server-side.
+      // If fetchChatLogs returns data the backend matched a cookie to a session.
+      const logs = await window.owlDb.fetchChatLogs(businessId, null);
       
       if (logs && logs.length > 0) {
         // Active session exists!
@@ -911,12 +967,17 @@
       const typing = showTyping();
       try {
         typing.remove();
+        
+        if (logs && logs.length > 0) {
+           sessionId = logs[0].session_id;
+           connectRealtimeListener(sessionId);
+        }
 
         if (logs.length === 0) {
           // If no logs, fetch fresh greeting
           const greetingTyping = showTyping();
           try {
-            const response = await window.owlDb.chatWithAI(businessId, null, [], true, sessId);
+            const response = await window.owlDb.chatWithAI(businessId, null, [], true, sessionId);
             greetingTyping.remove();
             addMessage('bot', `Hello! Good to have you here. I'm the assistant for **${document.getElementById('biz-name').dataset.name || 'this business'}**. How may i assist you today?`);
           } catch(e) {
@@ -1027,7 +1088,24 @@
         let displayText = text.replace(/\[\[CONFIRM_BOOKING:.*?\]\]/g, '').trim();
 
         // Apply formatting
-        msgDiv.innerHTML = formatMessage(displayText.replace(/\n/g, '<br>'));
+        let formattedText = formatMessage(displayText.replace(/\n/g, '<br>'));
+
+        let label = '';
+        if (sender === 'bot') {
+            // isActionable true means role is 'owner'
+            const displayName = isActionable ? globalBusinessName : 'Noctra';
+            const imageUrl = window.globalBusinessImageUrl || 'https://api.dicebear.com/7.x/bottts/svg?seed=Noctra';
+            const avatarHtml = isActionable && window.globalBusinessImageUrl 
+                ? `<img src="${window.globalBusinessImageUrl}" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; margin-right: 0.5rem; flex-shrink: 0;">`
+                : `<img src="../assets/img/logo/logo.png" style="width: 24px; height: 24px; border-radius: 50%; object-fit: contain; margin-right: 0.5rem; flex-shrink: 0; background: var(--primary); padding: 3px;">`;
+                
+            label = `<div style="display: flex; align-items: center; margin-bottom: 0.4rem;">
+                       ${avatarHtml}
+                       <div style="font-size: 0.7rem; color: var(--text-dim); font-weight: 600;">${displayName}</div>
+                     </div>`;
+        }
+
+        msgDiv.innerHTML = label + formattedText;
 
         if (isActionable) {
           msgDiv.style.borderLeft = '4px solid var(--primary)';
@@ -1138,6 +1216,13 @@
       try {
         const response = await window.owlDb.chatWithAI(businessId, text, chatHistory, false, sessionId);
         typing.remove();
+
+        if (!sessionId && response.session_id) {
+            sessionId = response.session_id;
+            // NOTE: session is tracked server-side via HttpOnly cookie.
+            // We just keep sessionId in memory for in-page realtime channel use.
+            connectRealtimeListener(sessionId);
+        }
 
         if (response.reply === "") {
           // Handoff is active, do nothing
@@ -1428,6 +1513,89 @@
     });
 
     init();
+
+    // ── Conversation History Panel ──────────────────────────────────────
+    async function openHistoryModal() {
+      const historyList = document.getElementById('history-list');
+      historyList.innerHTML = '<p style="color: var(--text-dim); text-align: center; margin-top: 2rem;">Loading conversations...</p>';
+      document.getElementById('history-modal').style.display = 'flex';
+
+      const sessions = await window.owlDb.fetchPublicChatSessions(businessId);
+
+      historyList.innerHTML = '';
+      if (!sessions || sessions.length === 0) {
+        historyList.innerHTML = '<p style="color: var(--text-dim); text-align: center; margin-top: 2rem;">No conversations found.</p>';
+        return;
+      }
+
+      sessions.forEach(sess => {
+        const div = document.createElement('div');
+        div.className = 'history-item';
+        div.onclick = () => loadHistoricalSession(sess.session_id);
+
+        // Format relative time
+        const ts = sess.last_ts ? new Date(sess.last_ts) : null;
+        let timeStr = '';
+        if (ts) {
+          const diffMs = Date.now() - ts.getTime();
+          const diffMins = Math.floor(diffMs / 60000);
+          const diffHours = Math.floor(diffMins / 60);
+          const diffDays = Math.floor(diffHours / 24);
+          if (diffMins < 1) timeStr = 'Just now';
+          else if (diffMins < 60) timeStr = `${diffMins}m ago`;
+          else if (diffHours < 24) timeStr = `${diffHours}h ago`;
+          else timeStr = `${diffDays}d ago`;
+        }
+
+        // Truncate last message preview to 80 chars
+        const preview = sess.last_message
+          ? (sess.last_message.length > 80 ? sess.last_message.substring(0, 77) + '...' : sess.last_message)
+          : 'Conversation';
+
+        const roleIcon = sess.last_role === 'user' ? '👤' : '🤖';
+
+        div.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 0.3rem;">
+            <span style="font-size:0.7rem; font-weight:600; color: var(--primary); text-transform:uppercase; letter-spacing:0.05em;">Conversation</span>
+            <span style="font-size:0.7rem; color: var(--text-dim);">${timeStr}</span>
+          </div>
+          <div style="font-size:0.85rem; color: var(--text-light); line-height:1.4;">${roleIcon} ${preview}</div>
+        `;
+        historyList.appendChild(div);
+      });
+    }
+
+    function closeHistoryModal() {
+      document.getElementById('history-modal').style.display = 'none';
+    }
+
+    async function loadHistoricalSession(sessId) {
+      closeHistoryModal();
+      sessionId = sessId; // update in-memory global
+
+      document.getElementById('pre-chat-overlay').style.display = 'none';
+      document.getElementById('btn-reset-chat').style.display = 'inline-flex';
+      chatMessages.innerHTML = '';
+
+      const typing = showTyping();
+      // Fetch directly from DB using the session ID we already know
+      const supabase = await window.owlDb.getSupabase();
+      const { data: logs, error } = await supabase
+        .from('chat_logs')
+        .select('*')
+        .eq('session_id', sessId)
+        .order('created_at', { ascending: true });
+      typing.remove();
+
+      if (error || !logs || logs.length === 0) {
+        addMessage('bot', 'This conversation could not be loaded.');
+        return;
+      }
+
+      // Render using the existing renderChatHistory function
+      await renderChatHistory(logs);
+    }
+
   </script>
 </body>
 

@@ -50,25 +50,75 @@ Deno.serve(async (req) => {
       console.warn("Business ID mismatch in Paystack verify");
     }
 
+    const actionField = customFields.find((f: any) => f.variable_name === 'action');
+    const bundleField = customFields.find((f: any) => f.variable_name === 'bundle_amount');
+
+    const action = actionField ? actionField.value : 'upgrade_pro';
+    const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
+
+    // Fetch current business state
+    const { data: business } = await supabase.from('businesses').select('*').eq('id', business_id).single();
+    if (!business) {
+       return new Response(JSON.stringify({ success: false, error: 'Business not found' }), { 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 404
+      });
+    }
+
     // Calculate expiry (1 month from now)
     const expiry = new Date();
     expiry.setMonth(expiry.getMonth() + 1);
 
-    // Update Supabase
-    const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
-    const { error } = await supabase
-      .from('businesses')
-      .update({ 
-        subscription_tier: 'pro',
-        subscription_expires_at: expiry.toISOString()
-      })
-      .eq('id', business_id);
+    if (action === 'buy_credits') {
+      const bundleAmount = bundleField ? parseFloat(bundleField.value) : 0;
+      const currentPurchased = parseFloat(String(business.purchased_credits ?? '0'));
+      const newPurchased = currentPurchased + bundleAmount;
 
-    if (error) {
-      console.error("Supabase error:", error);
-      return new Response(JSON.stringify({ success: false, error: 'Database update failed' }), { 
+      const { error } = await supabase
+        .from('businesses')
+        .update({ 
+          purchased_credits: newPurchased,
+          purchased_credits_expires_at: expiry.toISOString()
+        })
+        .eq('id', business_id);
+
+      if (error) {
+        console.error("Supabase error:", error);
+        return new Response(JSON.stringify({ success: false, error: 'Database update failed' }), { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 500
+        });
+      }
+
+      return new Response(JSON.stringify({ success: true, message: `Successfully purchased ${bundleAmount} credits` }), { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500
+        status: 200
+      });
+
+    } else {
+      // Default: upgrade_pro
+      const planLimit = parseFloat(String(business.plan_credit_limit ?? '500'));
+
+      const { error } = await supabase
+        .from('businesses')
+        .update({ 
+          subscription_tier: 'pro',
+          subscription_expires_at: expiry.toISOString(),
+          credits: planLimit
+        })
+        .eq('id', business_id);
+
+      if (error) {
+        console.error("Supabase error:", error);
+        return new Response(JSON.stringify({ success: false, error: 'Database update failed' }), { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 500
+        });
+      }
+
+      return new Response(JSON.stringify({ success: true, message: 'Upgraded to Pro successfully' }), { 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200
       });
     }
 

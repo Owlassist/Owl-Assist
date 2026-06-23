@@ -34,6 +34,12 @@
   status = 200
   force = true
 
+[[redirects]]
+  from = "/api/list-sessions"
+  to = "https://fensjqscutikgccajwkh.supabase.co/functions/v1/list-sessions"
+  status = 200
+  force = true
+
 # ============================================================
 # Root → /home (visible redirect so URL shows /home)
 # ============================================================

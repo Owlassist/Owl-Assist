@@ -57,11 +57,12 @@ Deno.serve(async (req) => {
     );
 
     // 3. Handle Events
-    if (type === 'user.created' || type === 'user.updated') {
+    if (type === 'user.created') {
+      // New user — insert a fresh record with credit defaults.
+      // Use insert + ignoreDuplicates so we NEVER overwrite an existing row's credits
+      // (handles edge case where the record was pre-provisioned by the frontend fallback).
       const { id, username, first_name, last_name, email_addresses, unsafe_metadata, image_url } = data;
       const email = email_addresses[0]?.email_address;
-
-      // Sync metadata: business_name, country, website_url
       const name = unsafe_metadata?.business_name || `${first_name || ''} ${last_name || ''}`.trim() || 'New Business';
       const country = unsafe_metadata?.country || 'N/A';
       const website_url = unsafe_metadata?.website_url || null;
@@ -69,18 +70,67 @@ Deno.serve(async (req) => {
 
       const { error } = await supabase
         .from('businesses')
-        .upsert({
+        .insert({
           id,
           username: finalUsername,
           name,
           email,
           country,
           website_url,
+          image_url,
+          credits: 20,
+          plan_credit_limit: 500,
+          credits_reset_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+        });
+
+      // PGRST116 / 23505 = duplicate key — row already exists.
+      // This happens if the frontend auto-provisioned the user before the webhook arrived.
+      // In this case, we MUST update the row with the user's actual profile data from Clerk.
+      if (error && (error.code === '23505' || error.message?.includes('duplicate'))) {
+        console.log(`Row exists for ${id}, falling back to update for profile data.`);
+        const { error: updateErr } = await supabase
+          .from('businesses')
+          .update({
+             username: finalUsername,
+             name,
+             email,
+             image_url
+          })
+          .eq('id', id);
+          
+        if (updateErr) {
+            console.error("DB Update Fallback Error:", updateErr);
+        }
+      } else if (error) {
+        console.error("DB Insert Error:", error);
+        return new Response(JSON.stringify({ error: error.message }), { status: 400 });
+      }
+    }
+
+    if (type === 'user.updated') {
+      // Existing user profile update — only patch profile/identity fields.
+      // NEVER touch credits, subscription, or billing columns here.
+      const { id, username, first_name, last_name, email_addresses, unsafe_metadata, image_url } = data;
+      const email = email_addresses[0]?.email_address;
+      const name = unsafe_metadata?.business_name || `${first_name || ''} ${last_name || ''}`.trim() || 'New Business';
+      const country = unsafe_metadata?.country || 'N/A';
+      const website_url = unsafe_metadata?.website_url || null;
+      const finalUsername = username || unsafe_metadata?.business_username || null;
+
+      const { error } = await supabase
+        .from('businesses')
+        .update({
+          username: finalUsername,
+          name,
+          email,
+          country,
+          website_url,
           image_url
-        }, { onConflict: 'id' });
+        })
+        .eq('id', id);
 
       if (error) {
-        console.error("DB Error:", error);
+        console.error("DB Update Error:", error);
         return new Response(JSON.stringify({ error: error.message }), { status: 400 });
       }
     }

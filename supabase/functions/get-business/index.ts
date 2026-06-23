@@ -34,12 +34,12 @@ Deno.serve(async (req) => {
 
     if (error) throw error;
 
-    // Return with Cache-Control for Netlify CDN (cache for 5 minutes)
+    // Return with private Cache-Control — never cache billing/credit data in a CDN
     return new Response(JSON.stringify(data), { 
       headers: { 
         ...corsHeaders, 
         'Content-Type': 'application/json',
-        'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=60'
+        'Cache-Control': 'private, no-cache, no-store, max-age=0'
       } 
     });
 

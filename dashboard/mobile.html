@@ -29,8 +29,12 @@
 
   <!-- Device Detection — reloads to desktop layout if screen expands past mobile breakpoint -->
   <script>
+    // On mobile.html we only switch back to desktop if the screen is wide
+    // AND we're definitely not on a real mobile device (e.g. desktop browser resized).
     window.addEventListener('resize', function() {
-      if (window.innerWidth > 768) {
+      var ua = (navigator.userAgent || navigator.vendor || '').toLowerCase();
+      var isMobileUA = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini|mobile|silk|kindle|bb\d+|meego|fennec|tablet|touch/i.test(ua);
+      if (window.innerWidth > 768 && !isMobileUA) {
         window.location.reload();
       }
     });
@@ -49,8 +53,21 @@
       </div>
     </div>
     <div style="display: flex; align-items: center; gap: 0.75rem;">
-      <div style="background: rgba(82, 107, 245, 0.1); border: 1px solid var(--primary); padding: 0.25rem 0.75rem; border-radius: var(--radius-sm); font-size: 0.85rem; font-weight: 600;">
-        Conversations Remaining: <span id="ui-credits">Loading...</span>
+      <!-- Premium Credits Widget -->
+      <div class="mob-credits-widget">
+        <div class="mob-cw-orb"></div>
+        <div class="mob-cw-icon">
+          <span class="material-symbols-outlined">bolt</span>
+        </div>
+        <div class="mob-cw-body">
+          <span class="mob-cw-label">Credits</span>
+          <div style="display: flex; align-items: center; gap: 0.3rem;">
+            <strong class="mob-cw-value" id="ui-credits">—</strong>
+            <button onclick="app.navigate('settings'); setTimeout(() => app.setSettingsTab('billing'), 100);" title="Buy Credits" style="background: transparent; border: none; color: var(--primary); cursor: pointer; display: flex; align-items: center; padding: 0;">
+              <span class="material-symbols-outlined" style="font-size: 1.05rem; font-weight: 800;">add_circle</span>
+            </button>
+          </div>
+        </div>
       </div>
       <button class="mob-notif-btn" aria-label="Notifications">
         <span class="material-symbols-outlined">notifications</span>
@@ -503,7 +520,7 @@
               </li>
               <li class="pricing-feature">
                 <span class="material-symbols-outlined icon">check_circle</span>
-                <span class="text"><strong>Unlimited</strong> AI conversations</span>
+                <span class="text"><strong>500</strong> AI credits per month</span>
               </li>
               <li class="pricing-feature">
                 <span class="material-symbols-outlined icon">check_circle</span>
@@ -516,6 +533,32 @@
             </ul>
 
             <button id="btn-upgrade-pro-billing" onclick="app.initiatePaystackCheckout()" class="pricing-btn primary">Upgrade to Pro</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Buy Credits Bundles Section (Mobile) -->
+      <div style="margin-top: 2rem; margin-bottom: 2rem;">
+        <h3 style="color: white; margin-bottom: 0.75rem; font-size: 1.15rem;">Buy Credit Bundles</h3>
+        <p style="color: var(--text-dim); font-size: 0.85rem; margin-bottom: 1.25rem;">Need more credits? Purchased credits expire 1 month after purchase.</p>
+        
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+          <!-- Bundle 1 -->
+          <div class="mob-settings-card" style="margin-bottom: 0; background: linear-gradient(135deg, rgba(82, 107, 245, 0.05), rgba(0,0,0,0)); border: 1px solid rgba(192, 193, 255, 0.2);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+              <h3 style="font-size: 1rem; color: white;">1,000 Credits</h3>
+              <span class="price-display" data-usd="$10.00" data-ngn="₦15,050" style="font-weight: 800; color: white;">₦15,050</span>
+            </div>
+            <button class="pricing-btn primary" style="width: 100%; padding: 0.75rem; border-radius: 0.5rem; background: var(--primary); color: var(--on-primary); border: none; font-weight: bold;" onclick="app.initiatePaystackCheckout({ action: 'buy_credits', ngnAmount: 15050 * 100, usdAmount: 10 * 100, bundleAmount: 1000 })">Buy Now</button>
+          </div>
+
+          <!-- Bundle 2 -->
+          <div class="mob-settings-card" style="margin-bottom: 0; background: linear-gradient(135deg, rgba(167, 139, 250, 0.1), rgba(0,0,0,0)); border: 1px solid var(--primary);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+              <h3 style="font-size: 1rem; color: white;">5,000 Credits</h3>
+              <span class="price-display" data-usd="$40.00" data-ngn="₦57,200" style="font-weight: 800; color: white;">₦57,200</span>
+            </div>
+            <button class="pricing-btn primary" style="width: 100%; padding: 0.75rem; border-radius: 0.5rem; background: var(--primary); color: var(--on-primary); border: none; font-weight: bold;" onclick="app.initiatePaystackCheckout({ action: 'buy_credits', ngnAmount: 57200 * 100, usdAmount: 40 * 100, bundleAmount: 5000 })">Buy Now</button>
           </div>
         </div>
       </div>
@@ -577,6 +620,7 @@
   <script>
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
   </script>
+  <script src="https://js.paystack.co/v1/inline.js"></script>
   <script src="../assets/js/clerk-auth.js"></script>
   <script src="../assets/js/supabase.js"></script>
   <script src="../assets/js/modals.js"></script>
