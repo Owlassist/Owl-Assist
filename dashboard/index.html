@@ -764,6 +764,11 @@
               <span class="material-symbols-outlined">smart_toy</span>
               <span>AI Knowledge Base</span>
             </a>
+            <a href="javascript:void(0)" onclick="app.setSettingsTab('customization')" id="tab-nav-customization"
+              class="db-nav-item" style="padding: 0.75rem 1rem; width: 100%;">
+              <span class="material-symbols-outlined">palette</span>
+              <span>Customization</span>
+            </a>
             <a href="javascript:void(0)" onclick="app.setSettingsTab('billing')" id="tab-nav-billing"
               class="db-nav-item" style="padding: 0.75rem 1rem; width: 100%;">
               <span class="material-symbols-outlined">credit_card</span>
@@ -860,30 +865,26 @@
 
             <!-- 2. AI Knowledge Base Tab -->
             <div id="settings-tab-ai" style="display: none;">
-              <div class="glass-card">
+              <div class="glass-card" style="margin-bottom: 1.5rem;">
                 <h3 style="margin-bottom: 1.5rem;">AI Knowledge Base</h3>
                 <div class="form-group" style="margin-bottom: 1.5rem;">
                   <label
                     style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem; color:var(--text-sub); font-size:0.85rem;">
                     Website URL (For Auto-Scraping)
                     <span class="pro-badge"
-                      style="background: var(--primary); color: var(--on-primary); padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.65rem; font-weight: bold; text-transform: uppercase;">Pro
-                      Only</span>
+                      style="background: var(--primary); color: var(--on-primary); padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.65rem; font-weight: bold; text-transform: uppercase;">Pro Only</span>
                   </label>
                   <input type="url" id="settings-url" placeholder="https://www.yourdomain.com"
                     style="width:100%; padding:0.75rem; border-radius:var(--radius-sm); border:1px solid var(--border); background:rgba(0,0,0,0.2); color:white; opacity:0.6; cursor:not-allowed;"
                     disabled>
-                  <p style="font-size: 0.8rem; color: var(--text-dim); margin-top: 0.5rem;">The AI will read this
-                    website to answer customer questions automatically.</p>
+                  <p style="font-size: 0.8rem; color: var(--text-dim); margin-top: 0.5rem;">The AI will automatically read this website to answer customer questions.</p>
                 </div>
 
                 <div class="form-group" style="margin-bottom: 1.5rem;">
-                  <label style="display:block; margin-bottom:0.5rem; color:var(--text-sub); font-size:0.85rem;">External
-                    Booking Link</label>
+                  <label style="display:block; margin-bottom:0.5rem; color:var(--text-sub); font-size:0.85rem;">External Booking Link</label>
                   <input type="url" id="settings-booking-url" placeholder="https://your-booking-link.com/..."
                     style="width:100%; padding:0.75rem; border-radius:var(--radius-sm); border:1px solid var(--border); background:rgba(0,0,0,0.2); color:white;">
-                  <p style="font-size: 0.8rem; color: var(--text-dim); margin-top: 0.5rem;">Share your booking link
-                    (Calendly, Google Calendar, etc.) for AI-assisted appointment booking.</p>
+                  <p style="font-size: 0.8rem; color: var(--text-dim); margin-top: 0.5rem;">Share your booking link (Calendly, Google Calendar, etc.)</p>
                 </div>
 
                 <div class="form-group" style="margin-bottom: 1.5rem;">
@@ -891,36 +892,114 @@
                     style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem; color:var(--text-sub); font-size:0.85rem;">
                     Upload Document Knowledge (PDF)
                     <span class="pro-badge"
-                      style="background: var(--primary); color: var(--on-primary); padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.65rem; font-weight: bold; text-transform: uppercase;">Pro
-                      Only</span>
+                      style="background: var(--primary); color: var(--on-primary); padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.65rem; font-weight: bold; text-transform: uppercase;">Pro Only</span>
                   </label>
                   <div style="display: flex; gap: 1rem; align-items: center; opacity:0.6;">
                     <label class="btn btn-outline"
                       style="cursor: not-allowed; padding: 0.75rem 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
                       <span class="material-symbols-outlined">upload_file</span> Choose PDF
-                      <input type="file" id="settings-document-upload" accept="application/pdf" style="display: none;"
-                        disabled>
+                      <input type="file" id="settings-document-upload" accept="application/pdf" style="display: none;" disabled>
                     </label>
-                    <span id="document-upload-status" style="font-size: 0.85rem; color: var(--text-dim);">No document
-                      uploaded</span>
+                    <span id="document-upload-status" style="font-size: 0.85rem; color: var(--text-dim);">No document uploaded</span>
                   </div>
-                  <p style="font-size: 0.8rem; color: var(--text-dim); margin-top: 0.5rem;">Upload menus, price lists,
-                    or FAQs. The AI will read this to answer questions.</p>
                 </div>
 
                 <div class="form-group">
-                  <label style="display:block; margin-bottom:0.5rem; color:var(--text-sub); font-size:0.85rem;">Custom
-                    Instructions & Company Information</label>
+                  <label style="display:block; margin-bottom:0.5rem; color:var(--text-sub); font-size:0.85rem;">Custom Instructions &amp; Company Information</label>
                   <textarea id="settings-instructions" rows="6"
-                    placeholder="Example: We are open Monday to Friday from 9am to 5pm. Please behave professionally but warmly. If a customer asks about a refund, tell them we process refunds within 3-5 business days. Never offer discounts unless explicitly asked."
+                    placeholder="Example: We are open Monday to Friday from 9am to 5pm. Please behave professionally but warmly. If a customer asks about a refund, tell them we process refunds within 3-5 business days."
                     style="width:100%; padding:0.75rem; border-radius:var(--radius-sm); border:1px solid var(--border); background:rgba(0,0,0,0.2); color:white; font-family:var(--font-family); resize:vertical;"></textarea>
-                  <p style="font-size: 0.8rem; color: var(--text-dim); margin-top: 0.5rem;">Explicitly tell the AI how
-                    it should behave, respond, and what specific facts it must memorize.</p>
+                  <p style="font-size: 0.8rem; color: var(--text-dim); margin-top: 0.5rem;">Tell the AI how to behave, what to say, and key business facts to remember.</p>
                 </div>
 
-                <button class="btn btn-primary" onclick="app.saveSettings(this)" style="margin-top: 1rem;">Save
-                  Knowledge
-                  Base</button>
+                <button class="btn btn-primary" onclick="app.saveSettings(this)" style="margin-top: 1rem;">Save Knowledge Base</button>
+              </div>
+
+              <!-- FAQ Manager -->
+              <div class="glass-card">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; flex-wrap:wrap; gap:0.75rem;">
+                  <div>
+                    <h3 style="margin:0;">Frequently Asked Questions</h3>
+                    <p style="font-size:0.8rem; color:var(--text-dim); margin:0.3rem 0 0;">FAQs are shown in the customer chat menu and also trained into the AI.</p>
+                  </div>
+                  <div style="display:flex; align-items:center; gap:0.75rem;">
+                    <span id="faq-count-badge" style="font-size:0.75rem; padding:0.2rem 0.6rem; background:rgba(82,107,245,0.15); border:1px solid rgba(82,107,245,0.3); border-radius:99px; color:var(--primary); font-weight:600;">0 / 3</span>
+                    <button id="add-faq-btn" onclick="app.openFaqModal()" class="btn btn-primary" style="padding:0.5rem 1rem; font-size:0.85rem; display:flex; align-items:center; gap:0.4rem;">
+                      <span class="material-symbols-outlined" style="font-size:1rem;">add</span> Add FAQ
+                    </button>
+                  </div>
+                </div>
+                <div id="faq-list" style="display:flex; flex-direction:column; gap:0.75rem;">
+                  <div style="text-align:center; color:var(--text-dim); padding:2rem 0; font-size:0.9rem;">No FAQs yet. Click &ldquo;Add FAQ&rdquo; to get started.</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. Customization Tab (Pro Only) -->
+            <div id="settings-tab-customization" style="display: none;">
+              <div class="glass-card" style="position:relative;">
+                <!-- Pro Lock Overlay -->
+                <div id="customization-pro-lock" style="display:none; position:absolute; inset:0; z-index:10; border-radius:var(--radius); background:rgba(10,10,20,0.85); backdrop-filter:blur(6px); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1rem; text-align:center; padding:2rem;">
+                  <span class="material-symbols-outlined" style="font-size:3rem; color:var(--primary);">lock</span>
+                  <h3 style="margin:0;">Pro Feature</h3>
+                  <p style="color:var(--text-dim); max-width:340px;">Custom branding &amp; theming is available on the <strong style="color:white;">Pro Plan</strong>. Upgrade to unlock your brand colors on the dashboard and customer chat widget.</p>
+                  <button class="btn btn-primary" onclick="app.navigate('settings'); app.setSettingsTab('billing');">Upgrade to Pro</button>
+                </div>
+
+                <h3 style="margin-bottom:0.5rem;">Brand &amp; Theme</h3>
+                <p style="font-size:0.85rem; color:var(--text-dim); margin-bottom:2rem;">Customize the colors of your Noctra chat widget to match your brand. Changes apply instantly to your customer-facing chat.</p>
+
+                <!-- Live Preview -->
+                <div style="margin-bottom:2rem;">
+                  <label style="display:block; margin-bottom:0.75rem; color:var(--text-sub); font-size:0.85rem; font-weight:600;">Live Preview</label>
+                  <div id="theme-preview" style="border-radius:0.75rem; overflow:hidden; border:1px solid var(--border); max-width:320px;">
+                    <div id="preview-header" style="padding:0.75rem 1rem; display:flex; align-items:center; gap:0.6rem; background:#1e1e32;">
+                      <div style="width:28px; height:28px; border-radius:50%; background:var(--primary); display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:700; color:white;">N</div>
+                      <span style="font-size:0.85rem; font-weight:600; color:white;">Noctra</span>
+                    </div>
+                    <div id="preview-body" style="padding:1rem; background:#0e0e1a; display:flex; flex-direction:column; gap:0.5rem;">
+                      <div id="preview-bot-bubble" style="align-self:flex-start; background:#1e1e32; color:white; padding:0.5rem 0.75rem; border-radius:0 0.75rem 0.75rem 0.75rem; font-size:0.8rem; max-width:80%;">Hi! How can I help you today?</div>
+                      <div id="preview-user-bubble" style="align-self:flex-end; background:var(--primary); color:white; padding:0.5rem 0.75rem; border-radius:0.75rem 0.75rem 0 0.75rem; font-size:0.8rem; max-width:80%;">I have a question!</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Color Pickers -->
+                <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(200px,1fr)); gap:1.5rem; margin-bottom:2rem;">
+
+                  <div>
+                    <label style="display:block; margin-bottom:0.4rem; font-weight:600; font-size:0.9rem;">Primary Accent Color</label>
+                    <p style="font-size:0.75rem; color:var(--text-dim); margin:0 0 0.75rem;">Buttons, links, and highlights throughout the chat widget.</p>
+                    <div style="display:flex; align-items:center; gap:0.75rem;">
+                      <input type="color" id="theme-primary-picker" value="#526BF5" oninput="app.previewTheme()" style="width:48px; height:48px; border:none; border-radius:0.5rem; cursor:pointer; padding:2px; background:rgba(255,255,255,0.05); border:2px solid var(--border);">
+                      <input type="text" id="theme-primary-hex" value="#526BF5" oninput="app.syncHexInput('theme-primary', this.value)" maxlength="7" style="width:90px; padding:0.5rem; border-radius:0.4rem; border:1px solid var(--border); background:rgba(0,0,0,0.2); color:white; font-family:monospace; font-size:0.85rem;">
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style="display:block; margin-bottom:0.4rem; font-weight:600; font-size:0.9rem;">Chat Background Color</label>
+                    <p style="font-size:0.75rem; color:var(--text-dim); margin:0 0 0.75rem;">The background of the chat window that customers see.</p>
+                    <div style="display:flex; align-items:center; gap:0.75rem;">
+                      <input type="color" id="theme-bg-picker" value="#0e0e1a" oninput="app.previewTheme()" style="width:48px; height:48px; border:none; border-radius:0.5rem; cursor:pointer; padding:2px; background:rgba(255,255,255,0.05); border:2px solid var(--border);">
+                      <input type="text" id="theme-bg-hex" value="#0e0e1a" oninput="app.syncHexInput('theme-bg', this.value)" maxlength="7" style="width:90px; padding:0.5rem; border-radius:0.4rem; border:1px solid var(--border); background:rgba(0,0,0,0.2); color:white; font-family:monospace; font-size:0.85rem;">
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style="display:block; margin-bottom:0.4rem; font-weight:600; font-size:0.9rem;">AI Chat Bubble Color</label>
+                    <p style="font-size:0.75rem; color:var(--text-dim); margin:0 0 0.75rem;">Background color of Noctra's reply bubbles.</p>
+                    <div style="display:flex; align-items:center; gap:0.75rem;">
+                      <input type="color" id="theme-bubble-picker" value="#1e1e32" oninput="app.previewTheme()" style="width:48px; height:48px; border:none; border-radius:0.5rem; cursor:pointer; padding:2px; background:rgba(255,255,255,0.05); border:2px solid var(--border);">
+                      <input type="text" id="theme-bubble-hex" value="#1e1e32" oninput="app.syncHexInput('theme-bubble', this.value)" maxlength="7" style="width:90px; padding:0.5rem; border-radius:0.4rem; border:1px solid var(--border); background:rgba(0,0,0,0.2); color:white; font-family:monospace; font-size:0.85rem;">
+                    </div>
+                  </div>
+
+                </div>
+
+                <div style="display:flex; gap:1rem; align-items:center; flex-wrap:wrap;">
+                  <button class="btn btn-primary" onclick="app.saveTheme(this)">Save Theme</button>
+                  <button class="btn btn-outline" onclick="app.resetTheme()" style="font-size:0.85rem;">Reset to Defaults</button>
+                </div>
               </div>
             </div>
 
@@ -1122,13 +1201,17 @@
                         <span class="material-symbols-outlined icon">check_circle</span>
                         <span class="text">Manual knowledge base entry</span>
                       </li>
+                      <li class="pricing-feature">
+                        <span class="material-symbols-outlined icon">check_circle</span>
+                        <span class="text">Up to <strong>3 FAQs</strong> on the chat widget</span>
+                      </li>
                       <li class="pricing-feature disabled">
                         <span class="material-symbols-outlined icon">cancel</span>
                         <span class="text">No website scraping or document uploads</span>
                       </li>
                     </ul>
 
-                    <button class="pricing-btn outline" disabled>Current Plan</button>
+                    <button id="btn-free-current-plan" class="pricing-btn outline" disabled>Current Plan</button>
                   </div>
 
                   <!-- Pro Tier -->
@@ -1161,6 +1244,18 @@
                       <li class="pricing-feature">
                         <span class="material-symbols-outlined icon">check_circle</span>
                         <span class="text">Removable branding</span>
+                      </li>
+                      <li class="pricing-feature">
+                        <span class="material-symbols-outlined icon">check_circle</span>
+                        <span class="text"><strong>Custom Brand Colors</strong> — personalize chat widget UI</span>
+                      </li>
+                      <li class="pricing-feature">
+                        <span class="material-symbols-outlined icon">check_circle</span>
+                        <span class="text"><strong>Unlimited FAQs</strong> on the chat widget</span>
+                      </li>
+                      <li class="pricing-feature">
+                        <span class="material-symbols-outlined icon">check_circle</span>
+                        <span class="text"><strong>Human Takeover</strong> — live chat with customers</span>
                       </li>
                     </ul>
 
@@ -1376,6 +1471,27 @@
   <script src="https://js.paystack.co/v1/inline.js"></script>
   <script src="../assets/js/modals.js"></script>
   <script src="../assets/js/dashboard-app.js"></script>
+
+  <!-- FAQ Modal -->
+  <div id="faq-modal" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.7); backdrop-filter:blur(4px); align-items:center; justify-content:center; padding:1rem;">
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:2rem; width:100%; max-width:500px; position:relative;">
+      <button onclick="app.closeFaqModal()" style="position:absolute; top:1rem; right:1rem; background:none; border:none; color:var(--text-dim); cursor:pointer; font-size:1.5rem; line-height:1;">&#x2715;</button>
+      <h3 id="faq-modal-title" style="margin:0 0 1.5rem;">Add FAQ</h3>
+      <input type="hidden" id="faq-edit-index" value="-1">
+      <div class="form-group" style="margin-bottom:1rem;">
+        <label style="display:block; margin-bottom:0.4rem; font-size:0.85rem; color:var(--text-sub);">Question</label>
+        <input type="text" id="faq-question-input" placeholder="e.g. What are your business hours?" style="width:100%; padding:0.75rem; border-radius:var(--radius-sm); border:1px solid var(--border); background:rgba(0,0,0,0.2); color:white;">
+      </div>
+      <div class="form-group" style="margin-bottom:1.5rem;">
+        <label style="display:block; margin-bottom:0.4rem; font-size:0.85rem; color:var(--text-sub);">Answer</label>
+        <textarea id="faq-answer-input" rows="4" placeholder="e.g. We are open Monday to Friday, 9am–5pm." style="width:100%; padding:0.75rem; border-radius:var(--radius-sm); border:1px solid var(--border); background:rgba(0,0,0,0.2); color:white; font-family:var(--font-family); resize:vertical;"></textarea>
+      </div>
+      <div style="display:flex; gap:1rem; justify-content:flex-end;">
+        <button onclick="app.closeFaqModal()" class="btn btn-outline">Cancel</button>
+        <button onclick="app.saveFaqFromModal()" class="btn btn-primary">Save FAQ</button>
+      </div>
+    </div>
+  </div>
 
 </body>
 

@@ -599,6 +599,42 @@ async function deleteChatSession(sessionId) {
   return data;
 }
 
+/**
+ * Save FAQs for a business — routed through manage-slots for RLS bypass
+ */
+async function saveFaqs(businessId, faqs) {
+  const supabase = await getSupabase();
+  const token = await window.owlAuth.getToken();
+  const { error } = await supabase.functions.invoke('manage-slots', {
+    body: {
+      operation: 'save_faqs',
+      business_id: businessId,
+      faqs: faqs
+    },
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (error) throw error;
+}
+
+/**
+ * Save custom theme colors — routed through manage-slots for RLS bypass
+ */
+async function saveTheme(businessId, colors) {
+  const supabase = await getSupabase();
+  const token = await window.owlAuth.getToken();
+  const { error } = await supabase.functions.invoke('manage-slots', {
+    body: {
+      operation: 'save_theme',
+      business_id: businessId,
+      theme_primary: colors.theme_primary,
+      theme_bg: colors.theme_bg,
+      theme_chat_bubble: colors.theme_chat_bubble
+    },
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (error) throw error;
+}
+
 window.owlDb = {
   getSupabase,
   fetchBusinessData,
@@ -624,5 +660,7 @@ window.owlDb = {
   fetchSessionByCode,
   terminateSession,
   toggleHandoff,
-  sendOwnerMessage
+  sendOwnerMessage,
+  saveFaqs,
+  saveTheme
 };

@@ -1,0 +1,27 @@
+User-agent: *
+Allow: /
+Allow: /pricing/
+Allow: /faq/
+Allow: /auth/login
+Allow: /auth/signup
+
+# Block private/app areas from crawlers
+Disallow: /dashboard/
+Disallow: /auth/callback
+Disallow: /setup/
+Disallow: /widget/
+Disallow: /assets/js/
+Disallow: /api/
+Disallow: /supabase/
+
+# Block utility files
+Disallow: /fix_links.js
+Disallow: /update_nav_footer.js
+Disallow: /test_chat_ai.js
+Disallow: /*.env
+
+# Sitemap location
+Sitemap: https://owlassist.app/sitemap.xml
+
+# Crawl-delay for good citizenship
+Crawl-delay: 10

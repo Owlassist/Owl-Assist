@@ -381,7 +381,63 @@
         </div>
       </div>
 
+      <!-- Customization Card (Brand Colors + FAQs) -->
+      <div class="mob-settings-card" id="mobile-customization-card">
+        <div class="mob-settings-card-header">
+          <span class="material-symbols-outlined mob-settings-icon">palette</span>
+          <span class="mob-settings-label">Customization</span>
+        </div>
+        <p class="mob-settings-desc">Personalize your chat widget to match your brand colors.</p>
+
+        <!-- Brand Colors -->
+        <div id="mobile-theme-section">
+          <div class="mob-input-group" style="margin-bottom: 1rem;">
+            <label style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; color:var(--text-sub); font-size:0.85rem;">
+              Primary Accent Color
+            </label>
+            <div style="display:flex; gap:0.75rem; align-items:center;">
+              <input type="color" id="theme-primary-picker" value="#c0c1ff" oninput="app.previewTheme(); document.getElementById('theme-primary-hex').value=this.value" style="width:44px; height:44px; border:none; cursor:pointer; border-radius:8px; background:none;">
+              <input type="text" id="theme-primary-hex" value="#c0c1ff" maxlength="7" placeholder="#c0c1ff" oninput="app.syncHexInput('theme-primary', this.value)" style="flex:1; font-family:monospace;">
+            </div>
+          </div>
+          <div class="mob-input-group" style="margin-bottom: 1rem;">
+            <label style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; color:var(--text-sub); font-size:0.85rem;">
+              Chat Background Color
+            </label>
+            <div style="display:flex; gap:0.75rem; align-items:center;">
+              <input type="color" id="theme-bg-picker" value="#0e0e1a" oninput="app.previewTheme(); document.getElementById('theme-bg-hex').value=this.value" style="width:44px; height:44px; border:none; cursor:pointer; border-radius:8px; background:none;">
+              <input type="text" id="theme-bg-hex" value="#0e0e1a" maxlength="7" placeholder="#0e0e1a" oninput="app.syncHexInput('theme-bg', this.value)" style="flex:1; font-family:monospace;">
+            </div>
+          </div>
+          <div class="mob-input-group" style="margin-bottom: 1.5rem;">
+            <label style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; color:var(--text-sub); font-size:0.85rem;">
+              AI Chat Bubble Color
+            </label>
+            <div style="display:flex; gap:0.75rem; align-items:center;">
+              <input type="color" id="theme-bubble-picker" value="#1e1e32" oninput="app.previewTheme(); document.getElementById('theme-bubble-hex').value=this.value" style="width:44px; height:44px; border:none; cursor:pointer; border-radius:8px; background:none;">
+              <input type="text" id="theme-bubble-hex" value="#1e1e32" maxlength="7" placeholder="#1e1e32" oninput="app.syncHexInput('theme-bubble', this.value)" style="flex:1; font-family:monospace;">
+            </div>
+          </div>
+          <div style="display:flex; gap:0.75rem;">
+            <button class="btn btn-primary mob-full-btn" style="flex:2;" onclick="app.saveTheme(this)">Save Theme</button>
+            <button class="btn btn-outline" style="flex:1;" onclick="app.resetTheme()">Reset</button>
+          </div>
+        </div>
+
+        <!-- FAQs -->
+        <div style="margin-top: 2rem; border-top: 1px solid var(--border); padding-top: 1.5rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+            <h4 style="color:white; font-size:0.95rem; margin:0;">Frequently Asked Questions</h4>
+            <button class="btn btn-primary" style="padding:0.4rem 0.85rem; font-size:0.8rem;" onclick="app.openFaqModal()">+ Add FAQ</button>
+          </div>
+          <div id="faq-list-mobile" style="display:flex; flex-direction:column; gap:0.75rem;">
+            <p style="color:var(--text-dim); font-size:0.85rem;">No FAQs yet. Add your first one!</p>
+          </div>
+        </div>
+      </div>
+
       <!-- Billing Card -->
+
       <div class="mob-settings-card">
         <div class="mob-settings-card-header">
           <span class="material-symbols-outlined mob-settings-icon">credit_card</span>
@@ -490,13 +546,17 @@
                 <span class="material-symbols-outlined icon">check_circle</span>
                 <span class="text">Manual knowledge base entry</span>
               </li>
+              <li class="pricing-feature">
+                <span class="material-symbols-outlined icon">check_circle</span>
+                <span class="text">Up to <strong>3 FAQs</strong> on the chat widget</span>
+              </li>
               <li class="pricing-feature disabled">
                 <span class="material-symbols-outlined icon">cancel</span>
                 <span class="text">No website scraping or document uploads</span>
               </li>
             </ul>
 
-            <button class="pricing-btn outline" disabled>Current Plan</button>
+            <button id="btn-free-current-plan" class="pricing-btn outline" disabled>Current Plan</button>
           </div>
 
           <!-- Pro Tier -->
@@ -524,11 +584,23 @@
               </li>
               <li class="pricing-feature">
                 <span class="material-symbols-outlined icon">check_circle</span>
-                <span class="text"><strong>Website Scraping</strong> & Document Uploads</span>
+                <span class="text"><strong>Website Scraping</strong> &amp; Document Uploads</span>
               </li>
               <li class="pricing-feature">
                 <span class="material-symbols-outlined icon">check_circle</span>
                 <span class="text">Removable branding</span>
+              </li>
+              <li class="pricing-feature">
+                <span class="material-symbols-outlined icon">check_circle</span>
+                <span class="text"><strong>Custom Brand Colors</strong> — personalize chat widget UI</span>
+              </li>
+              <li class="pricing-feature">
+                <span class="material-symbols-outlined icon">check_circle</span>
+                <span class="text"><strong>Unlimited FAQs</strong> on the chat widget</span>
+              </li>
+              <li class="pricing-feature">
+                <span class="material-symbols-outlined icon">check_circle</span>
+                <span class="text"><strong>Human Takeover</strong> — live chat with customers</span>
               </li>
             </ul>
 

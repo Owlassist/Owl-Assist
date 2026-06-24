@@ -1,0 +1,20 @@
+[functions.chat-ai]
+verify_jwt = false
+
+[functions.clerk-webhook]
+verify_jwt = false
+
+[functions.get-business]
+verify_jwt = false
+
+[functions.paystack-webhook]
+verify_jwt = false
+
+[functions.paystack-verify]
+verify_jwt = false
+
+[functions.manage-slots]
+verify_jwt = false
+
+[functions.manage-business]
+verify_jwt = false

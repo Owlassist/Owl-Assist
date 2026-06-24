@@ -346,6 +346,37 @@ Deno.serve(async (req) => {
       return new Response('Handoff toggled', { status: 200, headers: corsHeaders });
     }
 
+    // ─────────────────────────────────────────────────────────
+    // SAVE THEME COLORS
+    // ─────────────────────────────────────────────────────────
+    if (operation === 'save_theme') {
+      const { theme_primary, theme_bg, theme_chat_bubble } = payload;
+      const updateObj: Record<string, string> = {};
+      if (theme_primary !== undefined) updateObj.theme_primary = theme_primary;
+      if (theme_bg !== undefined) updateObj.theme_bg = theme_bg;
+      if (theme_chat_bubble !== undefined) updateObj.theme_chat_bubble = theme_chat_bubble;
+
+      const { error } = await supabase
+        .from('businesses')
+        .update(updateObj)
+        .eq('id', business_id);
+      if (error) throw error;
+      return new Response('Theme Saved', { status: 200, headers: corsHeaders });
+    }
+
+    // ─────────────────────────────────────────────────────────
+    // SAVE FAQs
+    // ─────────────────────────────────────────────────────────
+    if (operation === 'save_faqs') {
+      const { faqs } = payload;
+      const { error } = await supabase
+        .from('businesses')
+        .update({ faqs: faqs })
+        .eq('id', business_id);
+      if (error) throw error;
+      return new Response('FAQs Saved', { status: 200, headers: corsHeaders });
+    }
+
     return new Response('Invalid operation', { status: 400, headers: corsHeaders });
 
   } catch (err) {

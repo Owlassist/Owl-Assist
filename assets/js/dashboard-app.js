@@ -96,7 +96,7 @@ window.app = {
     },
 
     setSettingsTab: function (tabId) {
-        const tabs = ['account', 'ai', 'billing'];
+        const tabs = ['account', 'ai', 'customization', 'billing'];
         tabs.forEach(t => {
             const el = document.getElementById(`settings-tab-${t}`);
             if (el) el.style.display = 'none';
@@ -108,6 +108,203 @@ window.app = {
         if (activeTab) activeTab.style.display = 'block';
         const activeNav = document.getElementById(`tab-nav-${tabId}`);
         if (activeNav) activeNav.classList.add('active');
+
+        // Show/hide pro lock on customization tab
+        if (tabId === 'customization') {
+            app.applyCustomizationLock();
+            app.loadThemePickers();
+        }
+        // Load FAQs when switching to AI tab
+        if (tabId === 'ai' || tabId === 'customization') {
+            app.renderFaqs();
+        }
+    },
+
+    // --- FAQ MANAGEMENT ---
+    _faqs: [],
+    _isPro: false,
+    FAQ_FREE_LIMIT: 3,
+
+    renderFaqs: function() {
+        const renderToContainer = (list) => {
+            if (!list) return;
+            if (app._faqs.length === 0) {
+                list.innerHTML = '<div style="text-align:center; color:var(--text-dim); padding:2rem 0; font-size:0.9rem;">No FAQs yet. Click "Add FAQ" to get started.</div>';
+                return;
+            }
+            list.innerHTML = '';
+            app._faqs.forEach((faq, idx) => {
+                const card = document.createElement('div');
+                card.style.cssText = 'padding:1rem; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:var(--radius-sm); margin-bottom:0.5rem;';
+                card.innerHTML = `
+                  <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:1rem;">
+                    <div style="flex:1;">
+                      <div style="font-weight:600; margin-bottom:0.35rem; color:white;">${faq.question}</div>
+                      <div style="font-size:0.85rem; color:var(--text-dim); white-space:pre-wrap;">${faq.answer}</div>
+                    </div>
+                    <div style="display:flex; gap:0.5rem; flex-shrink:0;">
+                      <button onclick="app.openFaqModal(${idx})" style="background:rgba(82,107,245,0.1); border:1px solid rgba(82,107,245,0.3); color:var(--primary); border-radius:0.4rem; padding:0.3rem 0.6rem; cursor:pointer; font-size:0.8rem;">Edit</button>
+                      <button onclick="app.deleteFaq(${idx})" style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); color:#ef4444; border-radius:0.4rem; padding:0.3rem 0.6rem; cursor:pointer; font-size:0.8rem;">Delete</button>
+                    </div>
+                  </div>
+                `;
+                list.appendChild(card);
+            });
+        };
+
+        // Render to desktop faq-list
+        const desktopList = document.getElementById('faq-list');
+        renderToContainer(desktopList);
+
+        // Render to mobile faq-list-mobile
+        const mobileList = document.getElementById('faq-list-mobile');
+        renderToContainer(mobileList);
+
+        // Update badge and disable Add button at free limit
+        const badge = document.getElementById('faq-count-badge');
+        const addBtn = document.getElementById('add-faq-btn');
+        const max = app._isPro ? '∞' : app.FAQ_FREE_LIMIT;
+        if (badge) badge.textContent = `${app._faqs.length} / ${max}`;
+        if (addBtn) addBtn.disabled = !app._isPro && app._faqs.length >= app.FAQ_FREE_LIMIT;
+    },
+
+    openFaqModal: function(editIndex = -1) {
+        if (!app._isPro && editIndex === -1 && app._faqs.length >= app.FAQ_FREE_LIMIT) {
+            if (window.OwlModal) OwlModal.alert('Free Plan Limit', `You can add up to ${app.FAQ_FREE_LIMIT} FAQs on the Free plan. Upgrade to Pro for unlimited FAQs.`);
+            return;
+        }
+        const modal = document.getElementById('faq-modal');
+        const title = document.getElementById('faq-modal-title');
+        const qInput = document.getElementById('faq-question-input');
+        const aInput = document.getElementById('faq-answer-input');
+        const editIdx = document.getElementById('faq-edit-index');
+        if (!modal) return;
+        if (editIndex >= 0 && app._faqs[editIndex]) {
+            title.textContent = 'Edit FAQ';
+            qInput.value = app._faqs[editIndex].question;
+            aInput.value = app._faqs[editIndex].answer;
+            editIdx.value = editIndex;
+        } else {
+            title.textContent = 'Add FAQ';
+            qInput.value = '';
+            aInput.value = '';
+            editIdx.value = -1;
+        }
+        modal.style.display = 'flex';
+        setTimeout(() => qInput.focus(), 100);
+    },
+
+    closeFaqModal: function() {
+        const modal = document.getElementById('faq-modal');
+        if (modal) modal.style.display = 'none';
+    },
+
+    saveFaqFromModal: async function() {
+        const q = (document.getElementById('faq-question-input')?.value || '').trim();
+        const a = (document.getElementById('faq-answer-input')?.value || '').trim();
+        const editIdx = parseInt(document.getElementById('faq-edit-index')?.value ?? '-1');
+        if (!q || !a) { if (window.OwlModal) OwlModal.alert('Incomplete', 'Please fill in both the question and answer.'); return; }
+
+        if (editIdx >= 0) {
+            app._faqs[editIdx] = { question: q, answer: a };
+        } else {
+            app._faqs.push({ question: q, answer: a });
+        }
+        app.closeFaqModal();
+        app.renderFaqs();
+        try {
+            await window.owlDb.saveFaqs(currentUser.id, app._faqs);
+        } catch(e) { console.error('Save FAQs error:', e); }
+    },
+
+    deleteFaq: async function(idx) {
+        app._faqs.splice(idx, 1);
+        app.renderFaqs();
+        try {
+            await window.owlDb.saveFaqs(currentUser.id, app._faqs);
+        } catch(e) { console.error('Delete FAQ error:', e); }
+    },
+
+    // --- THEME MANAGEMENT ---
+    loadThemePickers: function() {
+        const settings = window._currentBusinessSettings;
+        if (!settings) return;
+        const primary = settings.theme_primary || '#c0c1ff';
+        const bg = settings.theme_bg || '#0e0e1a';
+        const bubble = settings.theme_chat_bubble || '#1e1e32';
+        const pp = document.getElementById('theme-primary-picker');
+        const ph = document.getElementById('theme-primary-hex');
+        const bp = document.getElementById('theme-bg-picker');
+        const bh = document.getElementById('theme-bg-hex');
+        const bup = document.getElementById('theme-bubble-picker');
+        const buh = document.getElementById('theme-bubble-hex');
+        if (pp) pp.value = primary; if (ph) ph.value = primary;
+        if (bp) bp.value = bg; if (bh) bh.value = bg;
+        if (bup) bup.value = bubble; if (buh) buh.value = bubble;
+        app.previewTheme();
+    },
+
+    previewTheme: function() {
+        const primary = document.getElementById('theme-primary-picker')?.value || '#c0c1ff';
+        const bg = document.getElementById('theme-bg-picker')?.value || '#0e0e1a';
+        const bubble = document.getElementById('theme-bubble-picker')?.value || '#1e1e32';
+        const hex1 = document.getElementById('theme-primary-hex'); if (hex1) hex1.value = primary;
+        const hex2 = document.getElementById('theme-bg-hex'); if (hex2) hex2.value = bg;
+        const hex3 = document.getElementById('theme-bubble-hex'); if (hex3) hex3.value = bubble;
+        // Update preview
+        const pBody = document.getElementById('preview-body'); if (pBody) pBody.style.background = bg;
+        const pBot = document.getElementById('preview-bot-bubble'); if (pBot) pBot.style.background = bubble;
+        const pUser = document.getElementById('preview-user-bubble'); if (pUser) pUser.style.background = primary;
+        const pHeader = document.getElementById('preview-header'); if (pHeader) pHeader.style.background = bubble;
+    },
+
+    syncHexInput: function(key, val) {
+        if (!/^#[0-9A-Fa-f]{0,6}$/.test(val)) return;
+        const picker = document.getElementById(`${key}-picker`);
+        if (picker && val.length === 7) { picker.value = val; app.previewTheme(); }
+    },
+
+    saveTheme: async function(btn) {
+        if (!currentUser) return;
+        const original = btn.textContent;
+        btn.textContent = 'Saving...';
+        btn.disabled = true;
+        const primary = document.getElementById('theme-primary-picker')?.value || '#c0c1ff';
+        const bg = document.getElementById('theme-bg-picker')?.value || '#0e0e1a';
+        const bubble = document.getElementById('theme-bubble-picker')?.value || '#1e1e32';
+        try {
+            await window.owlDb.saveTheme(currentUser.id, { theme_primary: primary, theme_bg: bg, theme_chat_bubble: bubble });
+            // Apply primary to current dashboard
+            document.documentElement.style.setProperty('--primary', primary);
+            if (window.OwlModal) OwlModal.alert('Theme Saved', 'Your brand colors have been saved and will appear in your customer chat widget.');
+        } catch(e) {
+            if (window.OwlModal) OwlModal.alert('Error', 'Could not save theme. Please try again.');
+        }
+        btn.textContent = original;
+        btn.disabled = false;
+    },
+
+    resetTheme: async function() {
+        if (!currentUser) return;
+        const defaults = { theme_primary: '#c0c1ff', theme_bg: '#0e0e1a', theme_chat_bubble: '#1e1e32' };
+        const pp = document.getElementById('theme-primary-picker'); if (pp) pp.value = defaults.theme_primary;
+        const bp = document.getElementById('theme-bg-picker'); if (bp) bp.value = defaults.theme_bg;
+        const bup = document.getElementById('theme-bubble-picker'); if (bup) bup.value = defaults.theme_chat_bubble;
+        const ph = document.getElementById('theme-primary-hex'); if (ph) ph.value = defaults.theme_primary;
+        const bh = document.getElementById('theme-bg-hex'); if (bh) bh.value = defaults.theme_bg;
+        const buh = document.getElementById('theme-bubble-hex'); if (buh) buh.value = defaults.theme_chat_bubble;
+        app.previewTheme();
+        try {
+            await window.owlDb.saveTheme(currentUser.id, defaults);
+            document.documentElement.style.setProperty('--primary', defaults.theme_primary);
+            if (window.OwlModal) OwlModal.alert('Reset', 'Theme reset to defaults.');
+        } catch(e) { console.error('Reset theme error:', e); }
+    },
+
+    applyCustomizationLock: function() {
+        const lock = document.getElementById('customization-pro-lock');
+        if (!lock) return;
+        lock.style.display = app._isPro ? 'none' : 'flex';
     },
 
     terminateSessionPrompt: async function (sessionId) {
@@ -654,14 +851,31 @@ window.OwlFeatures = {
             el.innerText = isPro ? 'Pro Plan' : 'Free Trial';
         });
         
-        // If Pro, update Billing upgrade buttons on both desktop + mobile
+        // Update billing card buttons — show correct "Current Plan" on the right card
+        document.querySelectorAll('#btn-free-current-plan').forEach(btn => {
+            if (isPro) {
+                btn.style.display = 'none'; // Hide "Current Plan" on Free card for Pro users
+            } else {
+                btn.style.display = '';
+                btn.innerText = 'Current Plan';
+                btn.disabled = true;
+            }
+        });
+
         document.querySelectorAll('#btn-upgrade-pro-billing').forEach(btn => {
             if (isPro) {
-                btn.innerText = '✓ Active (Pro)';
+                btn.innerText = '✓ Current Plan';
                 btn.disabled = true;
                 btn.classList.add('outline');
                 btn.classList.remove('primary');
                 btn.onclick = null;
+                btn.style.display = '';
+            } else {
+                btn.innerText = 'Upgrade to Pro';
+                btn.disabled = false;
+                btn.classList.remove('outline');
+                btn.classList.add('primary');
+                btn.onclick = () => app.initiatePaystackCheckout();
             }
         });
 
@@ -783,6 +997,22 @@ async function fetchDataFromCloud() {
             // Apply Centralized Access Control
             if (window.OwlFeatures && typeof window.OwlFeatures.applyAccessControl === 'function') {
                 window.OwlFeatures.applyAccessControl(settings.subscription_tier, settings.subscription_expires_at);
+            }
+
+            // Store settings globally for theme picker access
+            window._currentBusinessSettings = settings;
+
+            // Track pro status for FAQ limits and customization lock
+            const now = new Date();
+            app._isPro = settings.subscription_tier === 'pro' &&
+                (!settings.subscription_expires_at || new Date(settings.subscription_expires_at) > now);
+
+            // Load FAQs into state
+            app._faqs = Array.isArray(settings.faqs) ? settings.faqs : [];
+
+            // Apply saved custom theme colors if Pro
+            if (app._isPro && settings.theme_primary) {
+                document.documentElement.style.setProperty('--primary', settings.theme_primary);
             }
         }
 
