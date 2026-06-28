@@ -132,6 +132,21 @@ Deno.serve(async (req) => {
         result = inserted;
       }
 
+      // ─────────────────────────────────────────────────────────
+      // Mark Lead Form as Submitted in Chat Logs (for UI state)
+      // ─────────────────────────────────────────────────────────
+      if (session_id && targetStatus !== 'chat') {
+        const { error: logErr } = await supabase
+          .from('chat_logs')
+          .insert([{
+            session_id: session_id,
+            business_id: business_id,
+            role: 'system',
+            content: `[SYSTEM: User submitted lead form. Name: ${customer_name}]`
+          }]);
+        if (logErr) console.error("❌ Error inserting lead chat log:", logErr);
+      }
+
       return new Response(JSON.stringify(result), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 

@@ -996,6 +996,8 @@
     async function renderChatHistory(logs) {
       chatMessages.innerHTML = '';
       chatHistory = [];
+      leadFormShown = false;
+      leadFormSubmitted = false;
       const typing = showTyping();
       try {
         typing.remove();
@@ -1022,7 +1024,7 @@
         const isTerminated = logs.some(l => l.role === 'system' && l.content === 'SESSION_TERMINATED');
         
         // Check if lead was already submitted
-        leadFormSubmitted = logs.some(l => l.role === 'user' && l.content && l.content.startsWith('[SYSTEM: User submitted lead form'));
+        leadFormSubmitted = logs.some(l => l.content && l.content.includes('[SYSTEM: User submitted lead form'));
 
         logs.forEach(log => {
           if (log.role === 'system') return;
