@@ -671,108 +671,7 @@
     </style>
   </header>
 
-  <!-- Pre-Chat Options Overlay -->
-  <div id="pre-chat-overlay" class="overlay-container" style="display: none;">
-    <div class="glass-card welcome-card">
-      <div class="welcome-header">
-        <div class="logo-animation">
-          <img src="../assets/img/logo/logo.png" alt="Owl Assist" style="height: 50px; animation: float 3s ease-in-out infinite;">
-        </div>
-        <h2 id="welcome-biz-name">Welcome!</h2>
-        <p>Choose how you would like to interact with our assistant today.</p>
-      </div>
 
-      <!-- Main Options -->
-      <div id="welcome-options" class="options-grid">
-        <button id="opt-guest" class="option-button">
-          <span class="material-symbols-outlined icon">flash_on</span>
-          <span class="title">Quick Chat (Guest)</span>
-          <span class="desc">Start chatting immediately. Chat history is temporary and will be cleared when you close this tab.</span>
-        </button>
-
-        <button id="opt-track" class="option-button highlight">
-          <span class="material-symbols-outlined icon">track_changes</span>
-          <span class="title">Tracked Chat (Save Progress)</span>
-          <span class="desc">Save progress, get responses from the business owner, and resume your chat anytime on any device.</span>
-        </button>
-      </div>
-
-      <!-- Tracked Details Form (Hidden initially) -->
-      <div id="tracked-form" class="hidden-panel booking-form">
-        <h3 style="margin-top: 0; display: flex; align-items: center; gap: 0.5rem;">
-          <span class="material-symbols-outlined">person_add</span> Create Tracked Session
-        </h3>
-        <p style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 1rem;">Enter your contact information so the business can follow up with you directly.</p>
-        <input type="text" id="cust-name" placeholder="Your Name" required>
-        <input type="email" id="cust-email" placeholder="Email Address" required>
-        <input type="tel" id="cust-phone" placeholder="Phone Number (Optional)">
-
-        <!-- Optional Passcode Toggle -->
-        <div class="passcode-toggle-row">
-          <label class="toggle-label" for="use-passcode-check">
-            <input type="checkbox" id="use-passcode-check">
-            <span>Set a personal passcode <span style="font-size: 0.7rem; color: var(--primary); font-weight: 600;">(optional)</span></span>
-          </label>
-          <span class="toggle-hint">Easier to remember than a code. You'll still get a backup access code.</span>
-        </div>
-        <div id="passcode-fields" class="hidden-panel" style="width: 100%; flex-direction: column;">
-          <input type="password" id="cust-passcode" placeholder="Create a Passcode" style="margin-bottom: 0.75rem;">
-          <input type="password" id="cust-passcode-confirm" placeholder="Confirm Passcode">
-        </div>
-
-        <div style="display: flex; gap: 1rem; margin-top: 0.5rem; width: 100%;">
-          <button class="btn btn-outline" id="btn-tracked-back" style="flex: 1;">Back</button>
-          <button class="btn btn-primary" id="btn-tracked-start" style="flex: 2;">Start Session</button>
-        </div>
-      </div>
-
-      <!-- Access Code Confirmation Panel (Hidden initially) -->
-      <div id="code-confirm-panel" class="hidden-panel" style="text-align: center; padding: 1rem 0;">
-        <span class="material-symbols-outlined" style="font-size: 3rem; color: #6366f1; margin-bottom: 1rem;">verified_user</span>
-        <h3>Session Created!</h3>
-        <p style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 1.5rem;" id="code-confirm-desc">
-          Your <strong>Backup Access Code</strong> is below. Save it so you can always resume your chat, even if you forget your passcode.
-        </p>
-        <div class="code-box">
-          <span id="display-access-code" style="font-size: 1.5rem; font-weight: 800; letter-spacing: 2px; color: #6366f1;">OWL-XXXXXX</span>
-          <button class="btn-icon" id="btn-copy-code" style="margin-left: 0.75rem;" title="Copy Code">
-            <span class="material-symbols-outlined" style="font-size: 1.25rem;">content_copy</span>
-          </button>
-        </div>
-        <button class="btn btn-primary" id="btn-code-continue" style="width: 100%; margin-top: 1.5rem;">Continue to Chat</button>
-      </div>
-
-      <!-- Resume Session Panel (Hidden initially) -->
-      <div id="resume-panel" class="hidden-panel booking-form">
-        <h3 style="margin-top: 0; display: flex; align-items: center; gap: 0.5rem;">
-          <span class="material-symbols-outlined">history</span> Resume Your Chat
-        </h3>
-        <p style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 1rem;">Enter your email and use either your passcode or backup access code.</p>
-        <input type="email" id="resume-email" placeholder="Your Email Address" required>
-
-        <!-- Passcode field -->
-        <input type="password" id="resume-passcode" placeholder="Your Passcode (if you set one)" autocomplete="current-password">
-
-        <!-- OR Divider -->
-        <div class="or-divider"><span>or use backup access code</span></div>
-
-        <!-- Backup access code field -->
-        <input type="text" id="resume-code" placeholder="Backup Code (e.g. OWL-XXXXXX)" style="text-transform: uppercase;">
-
-        <div id="resume-error" style="color: #ff9966; font-size: 0.8rem; display: none; background: rgba(255,153,102,0.1); padding: 0.5rem; border-radius: 0.5rem; text-align: center; margin-bottom: 0.5rem; width: 100%;"></div>
-
-        <div style="display: flex; gap: 1rem; margin-top: 0.5rem; width: 100%;">
-          <button class="btn btn-outline" id="btn-resume-back" style="flex: 1;">Back</button>
-          <button class="btn btn-primary" id="btn-resume-submit" style="flex: 2;">Resume Chat</button>
-        </div>
-      </div>
-
-      <!-- Footer Action -->
-      <div id="welcome-footer" class="welcome-footer">
-        <button id="btn-show-resume" class="link-btn">Already started? Resume your chat</button>
-      </div>
-    </div>
-  </div>
 
 
 
@@ -787,18 +686,7 @@
     </div>
   </div>
 
-  <!-- Customer 'New Chat' Confirmation Modal -->
-  <div id="reset-confirm-modal" class="overlay-container" style="display: none; z-index: 1001;">
-    <div style="background: rgba(15,23,42,0.97); border: 1px solid rgba(255,255,255,0.1); border-radius: 1.5rem; padding: 2.5rem; width: 100%; max-width: 440px; text-align: center; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7); animation: msgPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);">
-      <span class="material-symbols-outlined" style="font-size: 3.5rem; color: #f59e0b; display: block; margin-bottom: 1rem;">warning</span>
-      <h2 style="color: white; font-size: 1.5rem; margin: 0 0 0.75rem;">Start a New Chat?</h2>
-      <p style="color: var(--text-dim); font-size: 0.9rem; line-height: 1.6; margin-bottom: 2rem;">Your current chat progress will be lost. Are you sure you want to start fresh?</p>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-        <button class="btn btn-outline" id="btn-reset-cancel" style="padding: 0.85rem; border-radius: 1rem;">Keep Chat</button>
-        <button class="btn btn-primary" id="btn-reset-confirm" style="background: #ef4444; border-color: #ef4444; padding: 0.85rem; border-radius: 1rem;">Yes, Reset</button>
-      </div>
-    </div>
-  </div>
+
 
   <div class="chat-container" id="chat-messages">
     <!-- Messages appear here -->
@@ -1003,20 +891,10 @@
 
       document.title = `${bizName} AI Assistant | Owl Assist`;
 
-      // Try restoring the active session from the session cookie via the backend
-      // We do NOT use localStorage — sessions are tracked server-side.
-      // If fetchChatLogs returns data the backend matched a cookie to a session.
       const logs = await window.owlDb.fetchChatLogs(businessId, null);
       
-      if (logs && logs.length > 0) {
-        // Active session exists!
-        document.getElementById('pre-chat-overlay').style.display = 'none';
-        document.getElementById('btn-reset-chat').style.display = 'inline-flex';
-        await renderChatHistory(logs);
-      } else {
-        // Show Welcome Screen
-        document.getElementById('pre-chat-overlay').style.display = 'flex';
-      }
+      document.getElementById('btn-reset-chat').style.display = 'inline-flex';
+      await renderChatHistory(logs || []);
     }
 
     async function renderChatHistory(logs) {
@@ -1132,7 +1010,6 @@
           if (inputEl) { inputEl.disabled = false; inputEl.placeholder = 'Ask about services or book an appointment...'; }
           if (btnEl)   btnEl.disabled = false;
           doResetSession(/* skipOverlayReshow */ true);
-          document.getElementById('pre-chat-overlay').style.display = 'flex';
         };
       }
     }
@@ -1309,217 +1186,9 @@
       }
     }
 
-    document.getElementById('opt-guest').onclick = async () => {
-      document.getElementById('pre-chat-overlay').style.display = 'none';
-      document.getElementById('btn-reset-chat').style.display = 'inline-flex';
-      
-      // The server will automatically create a session and set the cookie when we first chat
-      const logs = await window.owlDb.fetchChatLogs(businessId);
-      await renderChatHistory(logs);
-    };
-
-    document.getElementById('opt-track').onclick = () => {
-      document.getElementById('welcome-options').style.display = 'none';
-      document.getElementById('welcome-footer').style.display = 'none';
-      document.getElementById('tracked-form').style.display = 'flex';
-      document.getElementById('tracked-form').classList.remove('hidden-panel');
-    };
-
-    // Toggle optional passcode fields visibility
-    document.getElementById('use-passcode-check').onchange = (e) => {
-      const fields = document.getElementById('passcode-fields');
-      if (e.target.checked) {
-        fields.classList.remove('hidden-panel');
-        fields.style.display = 'flex';
-      } else {
-        fields.classList.add('hidden-panel');
-        fields.style.display = 'none';
-        document.getElementById('cust-passcode').value = '';
-        document.getElementById('cust-passcode-confirm').value = '';
-      }
-    };
-
-    document.getElementById('btn-tracked-back').onclick = (e) => {
-      e.preventDefault();
-      document.getElementById('tracked-form').style.display = 'none';
-      document.getElementById('tracked-form').classList.add('hidden-panel');
-      document.getElementById('welcome-options').style.display = 'grid';
-      document.getElementById('welcome-footer').style.display = 'block';
-    };
-
-    document.getElementById('btn-tracked-start').onclick = async (e) => {
-      e.preventDefault();
-      const name  = document.getElementById('cust-name').value.trim();
-      const email = document.getElementById('cust-email').value.trim();
-      const phone = document.getElementById('cust-phone').value.trim();
-
-      if (!name || !email) {
-        alert('Please fill in both Name and Email to start a tracked session.');
-        return;
-      }
-
-      // Validate optional passcode
-      const usePasscode = document.getElementById('use-passcode-check').checked;
-      let passcode = null;
-      if (usePasscode) {
-        passcode = document.getElementById('cust-passcode').value.trim();
-        const passConfirm = document.getElementById('cust-passcode-confirm').value.trim();
-        if (!passcode) { alert('Please enter a passcode or uncheck the passcode option.'); return; }
-        if (passcode !== passConfirm) { alert('Passcodes do not match. Please try again.'); return; }
-      }
-
-      const btn = document.getElementById('btn-tracked-start');
-      const origText = btn.innerText;
-      btn.innerText = 'Creating...';
-      btn.disabled = true;
-
-      try {
-        sessionId = crypto.randomUUID?.() || Math.random().toString(36).substring(2, 15);
-        const accessCode = generateAccessCode();
-
-        await window.owlDb.createLead({
-          business_id: businessId,
-          customer_name: name,
-          customer_email: email,
-          phone: phone,
-          service_name: 'Persistent Chat Started',
-          access_code: accessCode,
-          customer_passcode: passcode
-        });
-
-        localStorage.setItem('owl_code_' + businessId, accessCode);
-
-        // Hide form and show code confirmation
-        document.getElementById('tracked-form').style.display = 'none';
-        document.getElementById('code-confirm-panel').style.display = 'block';
-        document.getElementById('code-confirm-panel').classList.remove('hidden-panel');
-        document.getElementById('display-access-code').innerText = accessCode;
-
-        // Update description text based on whether a passcode was set
-        const descEl = document.getElementById('code-confirm-desc');
-        if (descEl) {
-          descEl.innerHTML = passcode
-            ? 'Your <strong>Backup Access Code</strong> is below. Save it as a fallback in case you ever forget your passcode.'
-            : 'Your <strong>Access Code</strong> is below. Save this to resume your chat from any device at any time.';
-        }
-
-        // Copy button action
-        document.getElementById('btn-copy-code').onclick = () => {
-          navigator.clipboard.writeText(accessCode);
-          const icon = document.getElementById('btn-copy-code').querySelector('.material-symbols-outlined');
-          icon.innerText = 'check';
-          setTimeout(() => icon.innerText = 'content_copy', 2000);
-        };
-
-        document.getElementById('btn-code-continue').onclick = async () => {
-          document.getElementById('pre-chat-overlay').style.display = 'none';
-          document.getElementById('btn-reset-chat').style.display = 'inline-flex';
-          const logs = await window.owlDb.fetchChatLogs(businessId);
-          await renderChatHistory(logs);
-        };
-
-      } catch (err) {
-        console.error("Failed to create tracked session:", err);
-        alert("Failed to initialize session. Please check your connection and try again.");
-      } finally {
-        btn.innerText = origText;
-        btn.disabled = false;
-      }
-    };
-
-    // Show Resume Panel
-    document.getElementById('btn-show-resume').onclick = () => {
-      document.getElementById('welcome-options').style.display = 'none';
-      document.getElementById('welcome-footer').style.display = 'none';
-      document.getElementById('resume-panel').style.display = 'flex';
-      document.getElementById('resume-panel').classList.remove('hidden-panel');
-    };
-
-    document.getElementById('btn-resume-back').onclick = (e) => {
-      e.preventDefault();
-      document.getElementById('resume-panel').style.display = 'none';
-      document.getElementById('resume-panel').classList.add('hidden-panel');
-      document.getElementById('welcome-options').style.display = 'grid';
-      document.getElementById('welcome-footer').style.display = 'block';
-    };
-
-    document.getElementById('btn-resume-submit').onclick = async (e) => {
-      e.preventDefault();
-      const email    = document.getElementById('resume-email').value.trim();
-      const passcode = document.getElementById('resume-passcode').value.trim();
-      const code     = document.getElementById('resume-code').value.trim().toUpperCase();
-      const errEl    = document.getElementById('resume-error');
-      errEl.style.display = 'none';
-
-      if (!email) {
-        errEl.innerText = "Please enter your email address.";
-        errEl.style.display = 'block';
-        return;
-      }
-      if (!passcode && !code) {
-        errEl.innerText = "Please enter your passcode or backup access code.";
-        errEl.style.display = 'block';
-        return;
-      }
-
-      const btn = document.getElementById('btn-resume-submit');
-      const origText = btn.innerText;
-      btn.innerText = 'Resuming...';
-      btn.disabled = true;
-
-      try {
-        // Backend supports either passcode or access code for verification
-        const result = await window.owlDb.fetchSessionByCode(
-          email,
-          code || null,
-          businessId,
-          passcode || null
-        );
-
-        // Handle terminated sessions gracefully
-        if (result && result.session_status === 'terminated') {
-          errEl.innerText = "This session has been ended by the business and can no longer be resumed.";
-          errEl.style.display = 'block';
-          return;
-        }
-
-        if (result && result.session_id) {
-          sessionId = result.session_id;
-          localStorage.setItem('owl_session_' + businessId, sessionId);
-          if (code) localStorage.setItem('owl_code_' + businessId, code);
-
-          document.getElementById('pre-chat-overlay').style.display = 'none';
-          document.getElementById('btn-reset-chat').style.display = 'inline-flex';
-
-          await loadChatHistory(sessionId);
-          connectRealtimeListener(sessionId);
-        } else {
-          errEl.innerText = "No matching session found. Check your details and try again.";
-          errEl.style.display = 'block';
-        }
-      } catch (err) {
-        console.error("Resume error:", err);
-        errEl.innerText = "No matching session found for this business. Check your details.";
-        errEl.style.display = 'block';
-      } finally {
-        btn.innerText = origText;
-        btn.disabled = false;
-      }
-    };
-
     // Open the styled confirmation modal before resetting
     function resetChatSession() {
-      const modal = document.getElementById('reset-confirm-modal');
-      if (!modal) { doResetSession(); return; }
-      modal.style.display = 'flex';
-
-      document.getElementById('btn-reset-cancel').onclick = () => {
-        modal.style.display = 'none';
-      };
-      document.getElementById('btn-reset-confirm').onclick = () => {
-        modal.style.display = 'none';
-        doResetSession();
-      };
+      doResetSession();
     }
 
     // Actually perform the session reset (split out so terminated overlay can call it too)
@@ -1536,39 +1205,11 @@
 
       document.getElementById('btn-reset-chat').style.display = 'none';
 
-      // Reset all welcome overlay inputs
-      document.getElementById('cust-name').value = '';
-      document.getElementById('cust-email').value = '';
-      document.getElementById('cust-phone').value = '';
-      const pc = document.getElementById('cust-passcode');
-      const pcc = document.getElementById('cust-passcode-confirm');
-      const useCheck = document.getElementById('use-passcode-check');
-      const rp = document.getElementById('resume-passcode');
-      if (pc) pc.value = '';
-      if (pcc) pcc.value = '';
-      if (useCheck) useCheck.checked = false;
-      if (rp) rp.value = '';
-      document.getElementById('resume-email').value = '';
-      document.getElementById('resume-code').value = '';
-
-      // Hide passcode fields
-      const pFields = document.getElementById('passcode-fields');
-      if (pFields) { pFields.style.display = 'none'; pFields.classList.add('hidden-panel'); }
+      document.getElementById('btn-reset-chat').style.display = 'none';
 
       // Go back to first welcome view
-      document.getElementById('tracked-form').style.display = 'none';
-      document.getElementById('tracked-form').classList.add('hidden-panel');
-      document.getElementById('resume-panel').style.display = 'none';
-      document.getElementById('resume-panel').classList.add('hidden-panel');
-      document.getElementById('code-confirm-panel').style.display = 'none';
-      document.getElementById('code-confirm-panel').classList.add('hidden-panel');
-
-      document.getElementById('welcome-options').style.display = 'grid';
-      document.getElementById('welcome-footer').style.display = 'block';
-
-      if (!skipOverlayReshow) {
-        document.getElementById('pre-chat-overlay').style.display = 'flex';
-      }
+      document.getElementById('btn-reset-chat').style.display = 'inline-flex';
+      renderChatHistory([]);
     }
 
     sendBtn.addEventListener('click', handleSend);
