@@ -671,10 +671,41 @@
     </style>
   </header>
 
+  <!-- Customer Register Overlay -->
+  <div id="customer-register-overlay" class="overlay-container" style="display: none; z-index: 950;">
+    <div class="glass-card welcome-card" style="max-width: 400px; padding: 2rem; text-align: center;">
+      <div class="welcome-header">
+        <div class="logo-animation">
+          <img src="../assets/img/logo/logo.png" alt="Owl Assist" style="height: 50px; animation: float 3s ease-in-out infinite;">
+        </div>
+        <h2 id="register-title">Start Conversation</h2>
+        <p id="register-desc">Enter your email address to begin chatting with our assistant.</p>
+      </div>
 
+      <!-- Step 1: Email Input -->
+      <div id="register-step-email" class="booking-form" style="display: flex; flex-direction: column; gap: 0.75rem;">
+        <input type="email" id="cust-reg-email" placeholder="Your Email Address" required autocomplete="email" style="width: 100%; padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border); background: rgba(255,255,255,0.05); color: white;">
+        <div id="email-error" style="color: #ff9966; font-size: 0.8rem; display: none; background: rgba(255,153,102,0.1); padding: 0.5rem; border-radius: 0.5rem; text-align: center;"></div>
+        <button class="btn btn-primary" id="btn-submit-email" style="width: 100%; margin-top: 0.5rem;">Continue</button>
+      </div>
 
+      <!-- Step 2: Name Input (If new customer) -->
+      <div id="register-step-name" class="booking-form" style="display: none; flex-direction: column; gap: 0.75rem;">
+        <input type="text" id="cust-reg-name" placeholder="Your Full Name" required autocomplete="name" style="width: 100%; padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border); background: rgba(255,255,255,0.05); color: white;">
+        <button class="btn btn-primary" id="btn-submit-name" style="width: 100%; margin-top: 0.5rem;">Start Chatting</button>
+        <button class="btn btn-outline" id="btn-back-to-email" style="width: 100%; font-size: 0.8rem;">Change Email</button>
+      </div>
 
-
+      <!-- Step 3: Welcome Back (If existing customer) -->
+      <div id="register-step-welcome" class="booking-form" style="display: none; flex-direction: column; gap: 1rem;">
+        <h3 id="welcome-back-msg" style="margin: 0; color: white;">Welcome Back!</h3>
+        <p style="font-size: 0.85rem; color: var(--text-dim); margin: 0;">You can start a new conversation or view your previous conversation history.</p>
+        <button class="btn btn-primary" id="btn-start-new-chat" style="width: 100%;">Start New Chat</button>
+        <button class="btn btn-outline" id="btn-view-prev-history" style="width: 100%;">View History</button>
+        <button class="btn btn-outline" id="btn-change-email-welcome" style="width: 100%; font-size: 0.8rem;">Change Email</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Session Terminated Overlay — shown via Realtime when business ends the session -->
   <div id="session-terminated-overlay" class="overlay-container" style="display: none; z-index: 1000;">
@@ -891,10 +922,175 @@
 
       document.title = `${bizName} AI Assistant | Owl Assist`;
 
+      // Set up customer registration overlay event listeners
+      document.getElementById('btn-submit-email').onclick = async () => {
+        const email = document.getElementById('cust-reg-email').value.trim();
+        const errEl = document.getElementById('email-error');
+        errEl.style.display = 'none';
+
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          errEl.innerText = "Please enter a valid email address.";
+          errEl.style.display = 'block';
+          return;
+        }
+
+        const btn = document.getElementById('btn-submit-email');
+        const origText = btn.innerText;
+        btn.innerText = "Checking...";
+        btn.disabled = true;
+
+        try {
+          const res = await window.owlDb.checkCustomer(businessId, email);
+          if (res.registered) {
+            showWelcomeBackStep(email, res.name);
+          } else {
+            showNameStep(email);
+          }
+        } catch(e) {
+          console.error(e);
+          errEl.innerText = "An error occurred. Please try again.";
+          errEl.style.display = 'block';
+        } finally {
+          btn.innerText = origText;
+          btn.disabled = false;
+        }
+      };
+
+      document.getElementById('btn-submit-name').onclick = async () => {
+        const name = document.getElementById('cust-reg-name').value.trim();
+        const email = document.getElementById('cust-reg-email').value.trim();
+        if (!name) {
+          alert("Please enter your name.");
+          return;
+        }
+
+        const btn = document.getElementById('btn-submit-name');
+        const origText = btn.innerText;
+        btn.innerText = "Starting...";
+        btn.disabled = true;
+
+        try {
+          await startNewChatForCustomer(email, name);
+          document.getElementById('customer-register-overlay').style.display = 'none';
+        } catch(e) {
+          console.error(e);
+          alert("Could not start chat. Please try again.");
+        } finally {
+          btn.innerText = origText;
+          btn.disabled = false;
+        }
+      };
+
+      document.getElementById('btn-back-to-email').onclick = () => {
+        showEmailStep();
+      };
+
+      document.getElementById('btn-change-email-welcome').onclick = () => {
+        showEmailStep();
+      };
+
+      document.getElementById('btn-start-new-chat').onclick = async () => {
+        const email = localStorage.getItem('owl_customer_email_' + businessId);
+        const name = localStorage.getItem('owl_customer_name_' + businessId);
+        const btn = document.getElementById('btn-start-new-chat');
+        const origText = btn.innerText;
+        btn.innerText = "Starting...";
+        btn.disabled = true;
+
+        try {
+          await startNewChatForCustomer(email, name);
+          document.getElementById('customer-register-overlay').style.display = 'none';
+        } catch(e) {
+          console.error(e);
+          alert("Could not start chat. Please try again.");
+        } finally {
+          btn.innerText = origText;
+          btn.disabled = false;
+        }
+      };
+
+      document.getElementById('btn-view-prev-history').onclick = () => {
+        document.getElementById('customer-register-overlay').style.display = 'none';
+        openHistoryModal();
+      };
+
+      // Restoring active session
       const logs = await window.owlDb.fetchChatLogs(businessId, null);
       
+      if (logs && logs.length > 0) {
+        document.getElementById('btn-reset-chat').style.display = 'inline-flex';
+        await renderChatHistory(logs);
+      } else {
+        const savedEmail = localStorage.getItem('owl_customer_email_' + businessId);
+        if (savedEmail) {
+          try {
+            const res = await window.owlDb.checkCustomer(businessId, savedEmail);
+            if (res.registered) {
+              showWelcomeBackStep(savedEmail, res.name);
+              return;
+            }
+          } catch(e) {
+            console.error(e);
+          }
+        }
+        showEmailStep();
+      }
+    }
+
+    let currentCustomerEmail = null;
+    let currentCustomerName = null;
+
+    function showEmailStep() {
+      document.getElementById('customer-register-overlay').style.display = 'flex';
+      document.getElementById('register-step-email').style.display = 'flex';
+      document.getElementById('register-step-name').style.display = 'none';
+      document.getElementById('register-step-welcome').style.display = 'none';
+      document.getElementById('register-title').innerText = "Start Conversation";
+      document.getElementById('register-desc').innerText = "Enter your email address to begin chatting with our assistant.";
+      document.getElementById('cust-reg-email').value = localStorage.getItem('owl_customer_email_' + businessId) || '';
+      document.getElementById('email-error').style.display = 'none';
+    }
+
+    function showNameStep(email) {
+      document.getElementById('customer-register-overlay').style.display = 'flex';
+      document.getElementById('register-step-email').style.display = 'none';
+      document.getElementById('register-step-name').style.display = 'flex';
+      document.getElementById('register-step-welcome').style.display = 'none';
+      document.getElementById('register-title').innerText = "Tell us your name";
+      document.getElementById('register-desc').innerText = `We couldn't find a profile for ${email}. Please enter your name to register.`;
+      document.getElementById('cust-reg-name').value = '';
+    }
+
+    function showWelcomeBackStep(email, name) {
+      currentCustomerEmail = email;
+      currentCustomerName = name;
+      localStorage.setItem('owl_customer_email_' + businessId, email);
+      localStorage.setItem('owl_customer_name_' + businessId, name);
+
+      document.getElementById('customer-register-overlay').style.display = 'flex';
+      document.getElementById('register-step-email').style.display = 'none';
+      document.getElementById('register-step-name').style.display = 'none';
+      document.getElementById('register-step-welcome').style.display = 'flex';
+      document.getElementById('welcome-back-msg').innerText = `Welcome back, ${name}!`;
+      document.getElementById('register-title').innerText = "Account Found";
+      document.getElementById('register-desc').innerText = "Would you like to start a new chat or review your previous conversations?";
+    }
+
+    async function startNewChatForCustomer(email, name) {
+      sessionId = crypto.randomUUID?.() || Math.random().toString(36).substring(2, 15);
+      await window.owlDb.createLead({
+        business_id: businessId,
+        customer_name: name,
+        customer_email: email,
+        access_code: null,
+        session_id: sessionId,
+        status: 'chat'
+      });
+      localStorage.setItem('owl_session_' + businessId, sessionId);
+      localStorage.setItem('owl_customer_email_' + businessId, email);
+      localStorage.setItem('owl_customer_name_' + businessId, name);
       document.getElementById('btn-reset-chat').style.display = 'inline-flex';
-      await renderChatHistory(logs || []);
+      await renderChatHistory([]);
     }
 
     async function renderChatHistory(logs) {
@@ -903,17 +1099,13 @@
       const typing = showTyping();
       try {
         typing.remove();
-        
-        if (logs && logs.length > 0) {
-           sessionId = logs[0].session_id;
-           connectRealtimeListener(sessionId);
-        }
 
         if (logs.length === 0) {
-          // If no logs, fetch fresh greeting
+          // Brand new session — connect realtime then fetch greeting
+          connectRealtimeListener(sessionId);
           const greetingTyping = showTyping();
           try {
-            const response = await window.owlDb.chatWithAI(businessId, null, [], true, sessionId);
+            await window.owlDb.chatWithAI(businessId, null, [], true, sessionId);
             greetingTyping.remove();
             addMessage('bot', `Hello! Good to have you here. I'm the assistant for **${document.getElementById('biz-name').dataset.name || 'this business'}**. How may i assist you today?`);
           } catch(e) {
@@ -922,6 +1114,9 @@
           }
           return;
         }
+
+        // Existing session with logs
+        sessionId = logs[0].session_id;
 
         // Check if this session was already terminated by the business
         const isTerminated = logs.some(l => l.role === 'system' && l.content === 'SESSION_TERMINATED');
@@ -942,10 +1137,9 @@
           return;
         }
 
-        // We can't connect to Realtime easily without the session ID, 
-        // but the Edge function now handles state. For a full production app, 
-        // the Edge function should return the public session ID for realtime subscriptions,
-        // or we rely purely on polling/HTTP.
+        // Connect realtime for live session
+        connectRealtimeListener(sessionId);
+
       } catch (err) {
         typing.remove();
         console.error("Error loading chat history:", err);
@@ -1092,9 +1286,6 @@
         btn.disabled = true;
 
         try {
-          // If they already submitted tracked session details on this device, reuse the code
-          const activeCode = localStorage.getItem('owl_code_' + businessId) || null;
-
           await window.owlDb.createLead({
             business_id: businessId,
             customer_name: name,
@@ -1102,7 +1293,7 @@
             phone: phone,
             service_name: intent || 'Inquiry',
             session_id: sessionId,
-            access_code: activeCode
+            access_code: null
           });
 
           formDiv.innerHTML = `
@@ -1192,7 +1383,7 @@
     }
 
     // Actually perform the session reset (split out so terminated overlay can call it too)
-    function doResetSession(skipOverlayReshow = false) {
+    async function doResetSession(skipOverlayReshow = false) {
       sessionStorage.removeItem('owl_chat_session_id');
       if (businessId) {
         localStorage.removeItem('owl_session_' + businessId);
@@ -1205,11 +1396,18 @@
 
       document.getElementById('btn-reset-chat').style.display = 'none';
 
-      document.getElementById('btn-reset-chat').style.display = 'none';
-
-      // Go back to first welcome view
-      document.getElementById('btn-reset-chat').style.display = 'inline-flex';
-      renderChatHistory([]);
+      const savedEmail = localStorage.getItem('owl_customer_email_' + businessId);
+      const savedName = localStorage.getItem('owl_customer_name_' + businessId);
+      if (savedEmail && savedName) {
+        try {
+          await startNewChatForCustomer(savedEmail, savedName);
+        } catch(e) {
+          console.error(e);
+          showEmailStep();
+        }
+      } else {
+        showEmailStep();
+      }
     }
 
     sendBtn.addEventListener('click', handleSend);
@@ -1226,7 +1424,8 @@
       historyList.innerHTML = '<p style="color: var(--text-dim); text-align: center; margin-top: 2rem;">Loading conversations...</p>';
       document.getElementById('history-modal').style.display = 'flex';
 
-      const sessions = await window.owlDb.fetchPublicChatSessions(businessId);
+      const email = localStorage.getItem('owl_customer_email_' + businessId);
+      const sessions = await window.owlDb.fetchPublicChatSessions(businessId, email);
 
       historyList.innerHTML = '';
       if (!sessions || sessions.length === 0) {
@@ -1279,7 +1478,8 @@
       closeHistoryModal();
       sessionId = sessId; // update in-memory global
 
-      document.getElementById('pre-chat-overlay').style.display = 'none';
+      const regOverlay = document.getElementById('customer-register-overlay');
+      if (regOverlay) regOverlay.style.display = 'none';
       document.getElementById('btn-reset-chat').style.display = 'inline-flex';
       chatMessages.innerHTML = '';
 

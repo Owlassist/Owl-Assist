@@ -279,11 +279,14 @@ async function deleteSlot(slotId) {
  * Public Lead Creation (Used by Customers on business.html)
  */
 async function createLead(leadData) {
-  const supabase = await getSupabase();
-  console.log("📝 Creating lead via Edge Function:", leadData);
+  console.log("📝 Creating lead via Netlify proxy:", leadData);
   
-  const { data, error } = await supabase.functions.invoke('manage-slots', {
-    body: {
+  const url = '/api/manage-slots';
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({
       operation: 'create_lead',
       business_id: leadData.business_id,
       customer_name: leadData.customer_name,
@@ -292,13 +295,15 @@ async function createLead(leadData) {
       service_name: leadData.service_name || 'Inquiry',
       session_id: leadData.session_id,
       access_code: leadData.access_code,
-      customer_passcode: leadData.customer_passcode || null
-    }
+      customer_passcode: leadData.customer_passcode || null,
+      status: leadData.status || 'pending'
+    })
   });
 
-  if (error) {
-    console.error("❌ Edge Function Lead Error:", error);
-    throw error;
+  const data = await res.json();
+  if (!res.ok) {
+    console.error("❌ Edge Function Lead Error details:", data);
+    throw new Error(data.details || data.error || "Failed to create lead");
   }
   return data;
 }
@@ -471,16 +476,52 @@ async function fetchChatSessions(businessId) {
     .select('session_id, customer_name, summary, session_status')
     .eq('business_id', businessId);
 
-  // Map lead data to sessions
+  // 3. Get unread customer counts for this business
+  const { data: unreadLogs } = await supabase
+    .from('chat_logs')
+    .select('session_id')
+    .eq('business_id', businessId)
+    .eq('is_read', false)
+    .eq('role', 'user');
+
+  const unreadCounts = {};
+  if (unreadLogs) {
+    unreadLogs.forEach(ul => {
+      unreadCounts[ul.session_id] = (unreadCounts[ul.session_id] || 0) + 1;
+    });
+  }
+
+  // Map lead data and unread counts to sessions
   return uniqueSessions.map(sess => {
     const lead = (leads || []).find(l => l.session_id === sess.session_id);
     return {
       ...sess,
       customer_name: lead ? lead.customer_name : 'Visitor Session',
       summary: lead ? lead.summary : 'General Inquiry',
-      session_status: lead ? lead.session_status : 'active'
+      session_status: lead ? lead.session_status : 'active',
+      unread_count: unreadCounts[sess.session_id] || 0
     };
   });
+}
+
+/**
+ * Mark all messages in a session as read
+ */
+async function markSessionAsRead(sessionId, businessId) {
+  const supabase = await getSupabase();
+  const token = await window.owlAuth.getToken();
+
+  const { error } = await supabase.functions.invoke('manage-slots', {
+    body: {
+      operation: 'mark_session_as_read',
+      session_id: sessionId,
+      business_id: businessId
+    },
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  if (error) throw error;
+  return true;
 }
 
 async function fetchChatLogs(businessId) {
@@ -503,6 +544,62 @@ async function fetchChatLogs(businessId) {
     console.error('Error fetching chat logs:', err);
     return [];
   }
+}
+
+async function fetchPublicChatSessions(businessId, customerEmail) {
+  if (!customerEmail) return [];
+  const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  const url = isLocal ? 'https://fensjqscutikgccajwkh.supabase.co/functions/v1/list-sessions' : '/api/list-sessions';
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ business_id: businessId, customer_email: customerEmail })
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.sessions || [];
+  } catch (err) {
+    console.error('Error fetching public chat sessions:', err);
+    return [];
+  }
+}
+
+async function checkCustomer(businessId, customerEmail) {
+  const url = '/api/manage-slots';
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({
+      operation: 'check_customer',
+      business_id: businessId,
+      customer_email: customerEmail
+    })
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.details || data.error || "Failed to check customer");
+  return data;
+}
+
+async function getCustomerSessions(businessId, customerEmail) {
+  const url = '/api/manage-slots';
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({
+      operation: 'get_customer_sessions',
+      business_id: businessId,
+      customer_email: customerEmail
+    })
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.details || data.error || "Failed to get customer sessions");
+  return data.sessions || [];
 }
 
 // Expose to window
@@ -549,7 +646,11 @@ window.owlDb = {
   fetchChatLogs,
   deleteChatSession,
   fetchSessionByCode,
-  terminateSession
+  terminateSession,
+  fetchPublicChatSessions,
+  checkCustomer,
+  getCustomerSessions,
+  markSessionAsRead
 };
 
 

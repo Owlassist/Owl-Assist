@@ -548,6 +548,9 @@ function renderStats(bookings, sessions = []) {
 }
 
 function renderBookings(bookings) {
+    // Filter out chat sessions (only show real leads/bookings)
+    bookings = bookings.filter(b => b.status !== 'chat');
+
     const recentList    = document.getElementById('recent-bookings-list');
     const allList       = document.getElementById('all-bookings-list');
     const mobileList    = document.getElementById('mobile-leads-list');  // Overview recent (mobile)
@@ -683,6 +686,8 @@ function renderBookings(bookings) {
     });
 }
 
+let expandedCustomerName = null;
+
 async function renderConversations(sessions) {
     const sessionList = document.getElementById('session-list');
     if (!sessionList) return;
@@ -693,54 +698,128 @@ async function renderConversations(sessions) {
         return;
     }
 
+    // Group by customer_name
+    const groups = {};
     sessions.forEach(session => {
-        const date = new Date(session.created_at);
-        const timeStr = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const name = session.customer_name || 'Anonymous Visitor';
+        if (!groups[name]) groups[name] = [];
+        groups[name].push(session);
+    });
 
-        const isTerminated = session.session_status === 'terminated';
-        const statusBadge = isTerminated 
-          ? `<span style="font-size: 0.65rem; padding: 0.1rem 0.4rem; background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 0.5rem; margin-left: 0.5rem;">Ended</span>` 
-          : '';
+    Object.keys(groups).forEach(customerName => {
+        const customerSessions = groups[customerName];
+        
+        // Sum unread messages for this customer
+        const customerUnreadTotal = customerSessions.reduce((sum, s) => sum + (s.unread_count || 0), 0);
 
-        const item = document.createElement('div');
-        item.className = 'session-item';
-        if (isTerminated) {
-            item.className += ' terminated';
+        // Create a customer header/group container
+        const groupContainer = document.createElement('div');
+        groupContainer.style = 'margin-bottom: 0.5rem; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; background: rgba(255,255,255,0.01);';
+        
+        const header = document.createElement('div');
+        header.style = 'padding: 0.75rem 1rem; background: rgba(255,255,255,0.03); display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: background 0.2s;';
+        
+        const leftSide = document.createElement('div');
+        leftSide.style = 'display: flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 0.85rem; color: white;';
+        leftSide.innerHTML = `<span class="material-symbols-outlined" style="font-size: 1.1rem; color: var(--primary);">person</span><span>${customerName}</span>`;
+        header.appendChild(leftSide);
+
+        const rightSide = document.createElement('div');
+        rightSide.style = 'display: flex; align-items: center; gap: 0.5rem;';
+
+        if (customerUnreadTotal > 0) {
+            const unreadBadge = document.createElement('span');
+            unreadBadge.style = 'background: #f43f5e; color: white; font-size: 0.7rem; font-weight: 700; padding: 0.15rem 0.4rem; border-radius: 9999px; line-height: 1;';
+            unreadBadge.innerText = customerUnreadTotal;
+            rightSide.appendChild(unreadBadge);
         }
-        item.style = `padding: 1rem; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; transition: all 0.2s; margin-bottom: 0.5rem;${isTerminated ? ' opacity: 0.6;' : ''}`;
 
-        item.setAttribute('data-session-id', session.session_id);
-        item.innerHTML = `
-          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-            <div style="flex-grow: 1; overflow: hidden; padding-right: 0.5rem;">
-              <div style="font-weight: 700; font-size: 0.85rem; color: ${isTerminated ? 'var(--text-dim)' : 'var(--primary)'}; margin-bottom: 0.25rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: flex; align-items: center; justify-content: space-between;">
-                <span>${session.summary || 'Active Chat'}</span>
+        const arrow = document.createElement('span');
+        arrow.className = 'material-symbols-outlined';
+        arrow.style = 'font-size: 1.1rem; color: var(--text-dim); transition: transform 0.2s;';
+        arrow.innerText = expandedCustomerName === customerName ? 'expand_less' : 'expand_more';
+        rightSide.appendChild(arrow);
+
+        header.appendChild(rightSide);
+        groupContainer.appendChild(header);
+
+        const subList = document.createElement('div');
+        subList.style = `padding: 0.5rem; flex-direction: column; gap: 0.35rem; display: ${expandedCustomerName === customerName ? 'flex' : 'none'};`;
+
+        customerSessions.forEach(session => {
+            const date = new Date(session.created_at);
+            const timeStr = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            const isTerminated = session.session_status === 'terminated';
+            const statusBadge = isTerminated 
+              ? `<span style="font-size: 0.6rem; padding: 0.05rem 0.3rem; background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 0.4rem;">Ended</span>` 
+              : `<span style="font-size: 0.6rem; padding: 0.05rem 0.3rem; background: rgba(34, 197, 94, 0.15); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.2); border-radius: 0.4rem;">Active</span>`;
+
+            const isSelected = window.app.currentSessionId === session.session_id;
+            item.style = `padding: 0.65rem; background: rgba(255,255,255,0.02); border: 1px solid ${isSelected ? 'var(--primary)' : 'transparent'}; border-radius: var(--radius-sm); cursor: pointer; transition: all 0.2s; display: flex; flex-direction: column; justify-content: center;${isTerminated ? ' opacity: 0.75;' : ''}`;
+
+            item.setAttribute('data-session-id', session.session_id);
+            
+            const sessionUnreadBadge = session.unread_count > 0 
+              ? `<span style="background: #f43f5e; color: white; font-size: 0.6rem; font-weight: 700; padding: 0.05rem 0.3rem; border-radius: 9999px; margin-left: 0.25rem;">${session.unread_count}</span>`
+              : '';
+
+            item.innerHTML = `
+              <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <div style="font-weight: 600; font-size: 0.8rem; color: ${isTerminated ? 'var(--text-dim)' : 'white'}; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 135px; display: flex; align-items: center;">
+                  ${session.summary || 'Chat Session'} ${sessionUnreadBadge}
+                </div>
                 ${statusBadge}
               </div>
-              <div style="display: flex; gap: 0.5rem; align-items: center; justify-content: space-between;">
-                <span style="font-size: 0.75rem; color: ${isTerminated ? 'var(--text-dim)' : 'white'};">${session.customer_name}</span>
-                <span style="font-size: 0.65rem; color: var(--text-dim);">${timeStr}</span>
+              <div style="font-size: 0.65rem; color: var(--text-dim); margin-top: 0.15rem; text-align: right; width: 100%;">
+                ${timeStr}
               </div>
-            </div>
-          </div>
-        `;
+            `;
 
-        item.onclick = async () => {
-            document.querySelectorAll('.session-item').forEach(el => el.classList.remove('active'));
-            item.classList.add('active');
-            
-            // Handle Mobile Layout Switch
-            if (window.innerWidth <= 768) {
-                const sPanel = document.getElementById('session-panel');
-                const cPanel = document.getElementById('chat-panel');
-                if (sPanel) sPanel.classList.remove('panel-active');
-                if (cPanel) cPanel.classList.add('panel-active');
-            }
+            item.onclick = async (e) => {
+                e.stopPropagation();
 
-            await loadTranscript(session.session_id, session.customer_name, session.summary, timeStr, session.session_status);
+                // Optimistic UI update: hide unread badges immediately
+                const sBadge = item.querySelector('span[style*="background: #f43f5e"]');
+                if (sBadge) sBadge.style.display = 'none';
+
+                const hBadge = groupContainer.querySelector('span[style*="background: #f43f5e"]');
+                if (hBadge) {
+                    const currentCount = parseInt(hBadge.innerText) || 0;
+                    const sessionCount = session.unread_count || 0;
+                    const newCount = Math.max(0, currentCount - sessionCount);
+                    if (newCount === 0) {
+                        hBadge.style.display = 'none';
+                    } else {
+                        hBadge.innerText = newCount;
+                    }
+                }
+
+                document.querySelectorAll('.session-item').forEach(el => el.style.borderColor = 'transparent');
+                item.style.borderColor = 'var(--primary)';
+                window.app.currentSessionId = session.session_id;
+                
+                // Handle Mobile Layout Switch
+                if (window.innerWidth <= 768) {
+                    const sPanel = document.getElementById('session-panel');
+                    const cPanel = document.getElementById('chat-panel');
+                    if (sPanel) sPanel.classList.remove('panel-active');
+                    if (cPanel) cPanel.classList.add('panel-active');
+                }
+
+                await loadTranscript(session.session_id, customerName, session.summary, timeStr, session.session_status);
+            };
+
+            subList.appendChild(item);
+        });
+
+        header.onclick = () => {
+            expandedCustomerName = expandedCustomerName === customerName ? null : customerName;
+            renderConversations(sessions);
         };
 
-        sessionList.appendChild(item);
+        groupContainer.appendChild(subList);
+        sessionList.appendChild(groupContainer);
     });
 }
 
@@ -778,9 +857,20 @@ async function loadTranscript(sessionId, name, summary, timeStr, sessionStatus =
         `;
     }
     
-    chatMessages.innerHTML = '<div style="text-align: center; color: var(--text-dim); padding: 2rem;">Loading...</div>';
+    chatMessages.innerHTML = '<div style="text-align: center; color: var(--text-dim); padding: 2rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem;"><span class="material-symbols-outlined rotating" style="font-size: 1.2rem;">sync</span> Loading...</div>';
 
-    const logs = await window.owlDb.fetchChatLogs(sessionId);
+    let logs;
+    try {
+        logs = await window.owlDb.fetchChatLogs(sessionId);
+        await window.owlDb.markSessionAsRead(sessionId, currentUser.id);
+        const updated = await window.owlDb.fetchChatSessions(currentUser.id);
+        renderConversations(updated);
+    } catch (err) {
+        console.error("Failed to load transcript:", err);
+        chatMessages.innerHTML = '<div style="text-align: center; color: #ef4444; padding: 2rem;">Failed to load conversation history.</div>';
+        return;
+    }
+
     chatMessages.innerHTML = '';
 
     logs.forEach(log => {
@@ -788,9 +878,22 @@ async function loadTranscript(sessionId, name, summary, timeStr, sessionStatus =
         if (log.role === 'system') return;
         
         const isUser = log.role === 'user';
+        const isOwner = log.role === 'owner';
+        const isUnread = isUser && !log.is_read;
         const msgDiv = document.createElement('div');
         msgDiv.className = `message ${isUser ? 'user' : 'bot'}`;
-        msgDiv.innerHTML = log.content;
+        if (isOwner) {
+            msgDiv.style.borderLeft = '4px solid var(--primary)';
+            msgDiv.style.background = 'rgba(82, 107, 245, 0.05)';
+        } else if (isUnread) {
+            msgDiv.style.borderRight = '4px solid #f43f5e';
+            msgDiv.style.background = 'rgba(244, 63, 94, 0.05)';
+        }
+
+        const unreadLabel = isUnread 
+          ? `<div style="font-size: 0.6rem; color: #f43f5e; font-weight: 700; text-align: right; margin-top: 0.25rem;">● Unread</div>`
+          : '';
+        msgDiv.innerHTML = log.content + unreadLabel;
         chatMessages.appendChild(msgDiv);
     });
 

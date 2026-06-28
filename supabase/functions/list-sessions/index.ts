@@ -27,18 +27,40 @@ Deno.serve(async (req) => {
     const SUPABASE_SRK = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     const supabase = createClient(SUPABASE_URL!, SUPABASE_SRK!);
 
-    const { business_id } = await req.json();
-    if (!business_id) {
-      return new Response(JSON.stringify({ error: 'Missing business_id' }), {
+    const { business_id, customer_email } = await req.json();
+    if (!business_id || !customer_email) {
+      return new Response(JSON.stringify({ error: 'Missing business_id or customer_email' }), {
         status: 400, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' }
       });
     }
 
-    // Fetch ALL chat_logs for this business, ordered newest first
+    // 1. Fetch only session IDs belonging to this customer
+    const { data: customerSessions, error: sessionErr } = await supabase
+      .from('bookings')
+      .select('session_id')
+      .eq('business_id', business_id)
+      .eq('customer_email', customer_email.trim().toLowerCase());
+
+    if (sessionErr) {
+      console.error('Error fetching customer sessions:', sessionErr);
+      return new Response(JSON.stringify({ sessions: [] }), {
+        headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' }
+      });
+    }
+
+    const sessionIds = (customerSessions || []).map(s => s.session_id).filter(Boolean);
+    if (sessionIds.length === 0) {
+      return new Response(JSON.stringify({ sessions: [] }), {
+        headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' }
+      });
+    }
+
+    // 2. Fetch chat logs for these sessions
     const { data: logs, error } = await supabase
       .from('chat_logs')
       .select('session_id, role, content, created_at')
       .eq('business_id', business_id)
+      .in('session_id', sessionIds)
       .not('role', 'eq', 'system') // exclude system messages like SESSION_TERMINATED
       .order('created_at', { ascending: false });
 

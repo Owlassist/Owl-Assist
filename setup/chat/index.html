@@ -576,16 +576,54 @@
         <span id="biz-status" style="font-size: 0.75rem; color: #22c55e;">● Online</span>
       </div>
     </div>
-    <div style="display: flex; align-items: center; gap: 1rem;">
+    <div style="display: flex; align-items: center; gap: 0.5rem;">
       <button id="btn-reset-chat" class="btn btn-outline" style="padding: 0.35rem 0.75rem; font-size: 0.75rem; display: none; border-radius: var(--radius-sm);" onclick="resetChatSession()">
         <span class="material-symbols-outlined" style="font-size: 0.95rem; vertical-align: middle; margin-right: 0.25rem;">refresh</span>New Chat
       </button>
+      <button id="btn-history-chat" class="btn btn-outline" style="padding: 0.35rem 0.75rem; font-size: 0.75rem; display: none; border-radius: var(--radius-sm);" onclick="openHistoryModal()">
+        <span class="material-symbols-outlined" style="font-size: 0.95rem; vertical-align: middle; margin-right: 0.25rem;">history</span>History
+      </button>
       <div id="owl-branding" style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: var(--text-dim);">
-        Powered by <img src="../assets/img/logo/logo.png" style="height: 14px; opacity: 0.6;"> Owl Assist
+        Powered by <img src="../../assets/img/logo/logo.png" style="height: 14px; opacity: 0.6;"> Owl Assist
       </div>
     </div>
   </header>
-v>
+
+  <!-- Customer Register Overlay -->
+  <div id="customer-register-overlay" class="overlay-container" style="display: none; z-index: 950;">
+    <div class="glass-card welcome-card" style="max-width: 400px; padding: 2rem; text-align: center;">
+      <div class="welcome-header">
+        <div class="logo-animation">
+          <img src="../../assets/img/logo/logo.png" alt="Owl Assist" style="height: 50px; animation: float 3s ease-in-out infinite;">
+        </div>
+        <h2 id="register-title">Start Conversation</h2>
+        <p id="register-desc">Enter your email address to begin chatting with our assistant.</p>
+      </div>
+
+      <!-- Step 1: Email Input -->
+      <div id="register-step-email" class="booking-form" style="display: flex; flex-direction: column; gap: 0.75rem;">
+        <input type="email" id="cust-reg-email" placeholder="Your Email Address" required autocomplete="email" style="width: 100%; padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border); background: rgba(255,255,255,0.05); color: white;">
+        <div id="email-error" style="color: #ff9966; font-size: 0.8rem; display: none; background: rgba(255,153,102,0.1); padding: 0.5rem; border-radius: 0.5rem; text-align: center;"></div>
+        <button class="btn btn-primary" id="btn-submit-email" style="width: 100%; margin-top: 0.5rem;">Continue</button>
+      </div>
+
+      <!-- Step 2: Name Input (If new customer) -->
+      <div id="register-step-name" class="booking-form" style="display: none; flex-direction: column; gap: 0.75rem;">
+        <input type="text" id="cust-reg-name" placeholder="Your Full Name" required autocomplete="name" style="width: 100%; padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border); background: rgba(255,255,255,0.05); color: white;">
+        <button class="btn btn-primary" id="btn-submit-name" style="width: 100%; margin-top: 0.5rem;">Start Chatting</button>
+        <button class="btn btn-outline" id="btn-back-to-email" style="width: 100%; font-size: 0.8rem;">Change Email</button>
+      </div>
+
+      <!-- Step 3: Welcome Back (If existing customer) -->
+      <div id="register-step-welcome" class="booking-form" style="display: none; flex-direction: column; gap: 1rem;">
+        <h3 id="welcome-back-msg" style="margin: 0; color: white;">Welcome Back!</h3>
+        <p style="font-size: 0.85rem; color: var(--text-dim); margin: 0;">You can start a new conversation or view your previous conversation history.</p>
+        <button class="btn btn-primary" id="btn-start-new-chat" style="width: 100%;">Start New Chat</button>
+        <button class="btn btn-outline" id="btn-view-prev-history" style="width: 100%;">View History</button>
+        <button class="btn btn-outline" id="btn-change-email-welcome" style="width: 100%; font-size: 0.8rem;">Change Email</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Session Terminated Overlay — shown via Realtime when business ends the session -->
   <div id="session-terminated-overlay" class="overlay-container" style="display: none; z-index: 1000;">
@@ -611,6 +649,52 @@ v>
       <span class="material-symbols-outlined">send</span>
     </button>
   </div>
+
+  <!-- Chat History Modal -->
+  <div id="history-modal" class="overlay-container" style="display: none; justify-content: flex-end; padding: 0;">
+    <div class="glass-card welcome-card" style="margin: 0; border-radius: 0; height: 100vh; max-width: 400px; animation: slideInRight 0.3s ease; display: flex; flex-direction: column;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h3 style="margin: 0;">Conversations</h3>
+        <button class="btn btn-icon" onclick="closeHistoryModal()" style="padding: 0.5rem; background: rgba(255,255,255,0.1); border-radius: 50%; color: white; border: none; cursor: pointer;">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div id="history-list" style="flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem;">
+         <!-- History items populate here -->
+      </div>
+    </div>
+  </div>
+
+  <style>
+    @keyframes slideInRight {
+       from { transform: translateX(100%); }
+       to { transform: translateX(0); }
+    }
+    .history-item {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 0.75rem;
+      padding: 1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .history-item:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .history-item-date {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      margin-bottom: 0.25rem;
+    }
+    .history-item-id {
+      font-size: 0.85rem;
+      color: white;
+      font-family: monospace;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  </style>
 
   <!-- Supabase & Logic -->
   <script src="../assets/js/modals.js"></script>
@@ -709,10 +793,177 @@ v>
 
       document.title = `${bizName} AI Assistant | Owl Assist`;
 
+      // Set up customer registration overlay event listeners
+      document.getElementById('btn-submit-email').onclick = async () => {
+        const email = document.getElementById('cust-reg-email').value.trim();
+        const errEl = document.getElementById('email-error');
+        errEl.style.display = 'none';
+
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+          errEl.innerText = "Please enter a valid email address.";
+          errEl.style.display = 'block';
+          return;
+        }
+
+        const btn = document.getElementById('btn-submit-email');
+        const origText = btn.innerText;
+        btn.innerText = "Checking...";
+        btn.disabled = true;
+
+        try {
+          const res = await window.owlDb.checkCustomer(businessId, email);
+          if (res.registered) {
+            showWelcomeBackStep(email, res.name);
+          } else {
+            showNameStep(email);
+          }
+        } catch(e) {
+          console.error(e);
+          errEl.innerText = "An error occurred. Please try again.";
+          errEl.style.display = 'block';
+        } finally {
+          btn.innerText = origText;
+          btn.disabled = false;
+        }
+      };
+
+      document.getElementById('btn-submit-name').onclick = async () => {
+        const name = document.getElementById('cust-reg-name').value.trim();
+        const email = document.getElementById('cust-reg-email').value.trim();
+        if (!name) {
+          alert("Please enter your name.");
+          return;
+        }
+
+        const btn = document.getElementById('btn-submit-name');
+        const origText = btn.innerText;
+        btn.innerText = "Starting...";
+        btn.disabled = true;
+
+        try {
+          await startNewChatForCustomer(email, name);
+          document.getElementById('customer-register-overlay').style.display = 'none';
+        } catch(e) {
+          console.error(e);
+          alert("Could not start chat. Please try again.");
+        } finally {
+          btn.innerText = origText;
+          btn.disabled = false;
+        }
+      };
+
+      document.getElementById('btn-back-to-email').onclick = () => {
+        showEmailStep();
+      };
+
+      document.getElementById('btn-change-email-welcome').onclick = () => {
+        showEmailStep();
+      };
+
+      document.getElementById('btn-start-new-chat').onclick = async () => {
+        const email = localStorage.getItem('owl_customer_email_' + businessId);
+        const name = localStorage.getItem('owl_customer_name_' + businessId);
+        const btn = document.getElementById('btn-start-new-chat');
+        const origText = btn.innerText;
+        btn.innerText = "Starting...";
+        btn.disabled = true;
+
+        try {
+          await startNewChatForCustomer(email, name);
+          document.getElementById('customer-register-overlay').style.display = 'none';
+        } catch(e) {
+          console.error(e);
+          alert("Could not start chat. Please try again.");
+        } finally {
+          btn.innerText = origText;
+          btn.disabled = false;
+        }
+      };
+
+      document.getElementById('btn-view-prev-history').onclick = () => {
+        document.getElementById('customer-register-overlay').style.display = 'none';
+        openHistoryModal();
+      };
+
+      // Restoring active session
       const logs = await window.owlDb.fetchChatLogs(businessId, null);
       
+      if (logs && logs.length > 0) {
+        document.getElementById('btn-reset-chat').style.display = 'inline-flex';
+        document.getElementById('btn-history-chat').style.display = 'inline-flex';
+        await renderChatHistory(logs);
+      } else {
+        const savedEmail = localStorage.getItem('owl_customer_email_' + businessId);
+        if (savedEmail) {
+          try {
+            const res = await window.owlDb.checkCustomer(businessId, savedEmail);
+            if (res.registered) {
+              showWelcomeBackStep(savedEmail, res.name);
+              return;
+            }
+          } catch(e) {
+            console.error(e);
+          }
+        }
+        showEmailStep();
+      }
+    }
+
+    let currentCustomerEmail = null;
+    let currentCustomerName = null;
+
+    function showEmailStep() {
+      document.getElementById('customer-register-overlay').style.display = 'flex';
+      document.getElementById('register-step-email').style.display = 'flex';
+      document.getElementById('register-step-name').style.display = 'none';
+      document.getElementById('register-step-welcome').style.display = 'none';
+      document.getElementById('register-title').innerText = "Start Conversation";
+      document.getElementById('register-desc').innerText = "Enter your email address to begin chatting with our assistant.";
+      document.getElementById('cust-reg-email').value = localStorage.getItem('owl_customer_email_' + businessId) || '';
+      document.getElementById('email-error').style.display = 'none';
+    }
+
+    function showNameStep(email) {
+      document.getElementById('customer-register-overlay').style.display = 'flex';
+      document.getElementById('register-step-email').style.display = 'none';
+      document.getElementById('register-step-name').style.display = 'flex';
+      document.getElementById('register-step-welcome').style.display = 'none';
+      document.getElementById('register-title').innerText = "Tell us your name";
+      document.getElementById('register-desc').innerText = `We couldn't find a profile for ${email}. Please enter your name to register.`;
+      document.getElementById('cust-reg-name').value = '';
+    }
+
+    function showWelcomeBackStep(email, name) {
+      currentCustomerEmail = email;
+      currentCustomerName = name;
+      localStorage.setItem('owl_customer_email_' + businessId, email);
+      localStorage.setItem('owl_customer_name_' + businessId, name);
+
+      document.getElementById('customer-register-overlay').style.display = 'flex';
+      document.getElementById('register-step-email').style.display = 'none';
+      document.getElementById('register-step-name').style.display = 'none';
+      document.getElementById('register-step-welcome').style.display = 'flex';
+      document.getElementById('welcome-back-msg').innerText = `Welcome back, ${name}!`;
+      document.getElementById('register-title').innerText = "Account Found";
+      document.getElementById('register-desc').innerText = "Would you like to start a new chat or review your previous conversations?";
+    }
+
+    async function startNewChatForCustomer(email, name) {
+      sessionId = crypto.randomUUID?.() || Math.random().toString(36).substring(2, 15);
+      await window.owlDb.createLead({
+        business_id: businessId,
+        customer_name: name,
+        customer_email: email,
+        access_code: null,
+        session_id: sessionId,
+        status: 'chat'
+      });
+      localStorage.setItem('owl_session_' + businessId, sessionId);
+      localStorage.setItem('owl_customer_email_' + businessId, email);
+      localStorage.setItem('owl_customer_name_' + businessId, name);
       document.getElementById('btn-reset-chat').style.display = 'inline-flex';
-      await renderChatHistory(logs || []);
+      document.getElementById('btn-history-chat').style.display = 'inline-flex';
+      await renderChatHistory([]);
     }
 
     async function renderChatHistory(logs) {
@@ -723,10 +974,11 @@ v>
         typing.remove();
 
         if (logs.length === 0) {
-          // If no logs, fetch fresh greeting
+          // Brand new session — connect realtime then fetch greeting
+          connectRealtimeListener(sessionId);
           const greetingTyping = showTyping();
           try {
-            const response = await window.owlDb.chatWithAI(businessId, null, [], true, sessId);
+            await window.owlDb.chatWithAI(businessId, null, [], true, sessionId);
             greetingTyping.remove();
             addMessage('bot', `Hello! Good to have you here. I'm the assistant for **${document.getElementById('biz-name').innerText.replace('verified', '').trim()}**. How may i assist you today?`);
           } catch(e) {
@@ -735,6 +987,9 @@ v>
           }
           return;
         }
+
+        // Existing session with logs
+        sessionId = logs[0].session_id;
 
         // Check if this session was already terminated by the business
         const isTerminated = logs.some(l => l.role === 'system' && l.content === 'SESSION_TERMINATED');
@@ -755,10 +1010,9 @@ v>
           return;
         }
 
-        // We can't connect to Realtime easily without the session ID, 
-        // but the Edge function now handles state. For a full production app, 
-        // the Edge function should return the public session ID for realtime subscriptions,
-        // or we rely purely on polling/HTTP.
+        // Connect realtime for live session
+        connectRealtimeListener(sessionId);
+
       } catch (err) {
         typing.remove();
         console.error("Error loading chat history:", err);
@@ -888,9 +1142,6 @@ v>
         btn.disabled = true;
 
         try {
-          // If they already submitted tracked session details on this device, reuse the code
-          const activeCode = localStorage.getItem('owl_code_' + businessId) || null;
-
           await window.owlDb.createLead({
             business_id: businessId,
             customer_name: name,
@@ -898,7 +1149,7 @@ v>
             phone: phone,
             service_name: intent || 'Inquiry',
             session_id: sessionId,
-            access_code: activeCode
+            access_code: null
           });
 
           formDiv.innerHTML = `
@@ -981,7 +1232,7 @@ v>
     }
 
     // Actually perform the session reset (split out so terminated overlay can call it too)
-    function doResetSession(skipOverlayReshow = false) {
+    async function doResetSession(skipOverlayReshow = false) {
       sessionStorage.removeItem('owl_chat_session_id');
       if (businessId) {
         localStorage.removeItem('owl_session_' + businessId);
@@ -993,12 +1244,20 @@ v>
       chatMessages.innerHTML = '';
 
       document.getElementById('btn-reset-chat').style.display = 'none';
+      document.getElementById('btn-history-chat').style.display = 'none';
 
-      document.getElementById('btn-reset-chat').style.display = 'none';
-
-      // Go back to first welcome view
-      document.getElementById('btn-reset-chat').style.display = 'inline-flex';
-      renderChatHistory([]);
+      const savedEmail = localStorage.getItem('owl_customer_email_' + businessId);
+      const savedName = localStorage.getItem('owl_customer_name_' + businessId);
+      if (savedEmail && savedName) {
+        try {
+          await startNewChatForCustomer(savedEmail, savedName);
+        } catch(e) {
+          console.error(e);
+          showEmailStep();
+        }
+      } else {
+        showEmailStep();
+      }
     }
 
     sendBtn.addEventListener('click', handleSend);
@@ -1007,6 +1266,87 @@ v>
     });
 
     init();
+
+    // ── Conversation History Panel ──────────────────────────────────────
+    async function openHistoryModal() {
+      const historyList = document.getElementById('history-list');
+      historyList.innerHTML = '<p style="color: var(--text-dim); text-align: center; margin-top: 2rem;">Loading conversations...</p>';
+      document.getElementById('history-modal').style.display = 'flex';
+
+      const email = localStorage.getItem('owl_customer_email_' + businessId);
+      const sessions = await window.owlDb.fetchPublicChatSessions(businessId, email);
+
+      historyList.innerHTML = '';
+      if (!sessions || sessions.length === 0) {
+        historyList.innerHTML = '<p style="color: var(--text-dim); text-align: center; margin-top: 2rem;">No conversations found.</p>';
+        return;
+      }
+
+      sessions.forEach(sess => {
+        const div = document.createElement('div');
+        div.className = 'history-item';
+        div.onclick = () => loadHistoricalSession(sess.session_id);
+
+        const ts = sess.last_ts ? new Date(sess.last_ts) : null;
+        let timeStr = '';
+        if (ts) {
+          const diffMs = Date.now() - ts.getTime();
+          const diffMins = Math.floor(diffMs / 60000);
+          const diffHours = Math.floor(diffMins / 60);
+          const diffDays = Math.floor(diffHours / 24);
+          if (diffMins < 1) timeStr = 'Just now';
+          else if (diffMins < 60) timeStr = `${diffMins}m ago`;
+          else if (diffHours < 24) timeStr = `${diffHours}h ago`;
+          else timeStr = `${diffDays}d ago`;
+        }
+
+        const preview = sess.last_message
+          ? (sess.last_message.length > 80 ? sess.last_message.substring(0, 77) + '...' : sess.last_message)
+          : 'Conversation';
+
+        const roleIcon = sess.last_role === 'user' ? '👤' : '🤖';
+
+        div.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 0.3rem;">
+            <span style="font-size:0.7rem; font-weight:600; color: var(--primary); text-transform:uppercase; letter-spacing:0.05em;">Conversation</span>
+            <span style="font-size:0.7rem; color: var(--text-dim);">${timeStr}</span>
+          </div>
+          <div style="font-size:0.85rem; color: var(--text-light); line-height:1.4;">${roleIcon} ${preview}</div>
+        `;
+        historyList.appendChild(div);
+      });
+    }
+
+    function closeHistoryModal() {
+      document.getElementById('history-modal').style.display = 'none';
+    }
+
+    async function loadHistoricalSession(sessId) {
+      closeHistoryModal();
+      sessionId = sessId;
+
+      const regOverlay = document.getElementById('customer-register-overlay');
+      if (regOverlay) regOverlay.style.display = 'none';
+      document.getElementById('btn-reset-chat').style.display = 'inline-flex';
+      document.getElementById('btn-history-chat').style.display = 'inline-flex';
+      chatMessages.innerHTML = '';
+
+      const typing = showTyping();
+      const supabase = await window.owlDb.getSupabase();
+      const { data: logs, error } = await supabase
+        .from('chat_logs')
+        .select('*')
+        .eq('session_id', sessId)
+        .order('created_at', { ascending: true });
+      typing.remove();
+
+      if (error || !logs || logs.length === 0) {
+        addMessage('bot', 'This conversation could not be loaded.');
+        return;
+      }
+
+      await renderChatHistory(logs);
+    }
   </script>
 </body>
 

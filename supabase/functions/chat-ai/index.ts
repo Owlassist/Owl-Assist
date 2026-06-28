@@ -48,10 +48,12 @@ Deno.serve(async (req) => {
 
     // ── SESSION COOKIE HANDLING ──────────────────────────────────────
     let actual_session_id = session_id;
-    const cookieHeader = req.headers.get('cookie');
-    if (cookieHeader) {
-      const match = cookieHeader.match(new RegExp(`owl_session_${business_id}=([^;]+)`));
-      if (match) actual_session_id = match[1];
+    if (!actual_session_id) {
+      const cookieHeader = req.headers.get('cookie');
+      if (cookieHeader) {
+        const match = cookieHeader.match(new RegExp(`owl_session_${business_id}=([^;]+)`));
+        if (match) actual_session_id = match[1];
+      }
     }
     const isNewSession = !actual_session_id;
     if (isNewSession) actual_session_id = crypto.randomUUID();
@@ -118,8 +120,18 @@ Deno.serve(async (req) => {
 
     // ── GREETING (no AI call needed) ────────────────────────────────
     if (getGreeting) {
+      const greetingReply = `Good to have you here. I'm the assistant for ${business.name}. How may I assist you today?`;
+      if (actual_session_id) {
+        await supabase.from('chat_logs').insert({
+          business_id,
+          session_id: actual_session_id,
+          role: 'bot',
+          content: greetingReply,
+          is_read: true // Greetings are read by default
+        });
+      }
       return new Response(
-        JSON.stringify({ reply: `Good to have you here. I'm the assistant for ${business.name}. How may I assist you today?` }),
+        JSON.stringify({ reply: greetingReply, session_id: actual_session_id }),
         { headers: resHeaders }
       );
     }
@@ -282,10 +294,10 @@ Deno.serve(async (req) => {
     // ── SYSTEM PROMPT ────────────────────────────────────────────────
     const bookingInstructions = business.booking_url
       ? `- BOOKING APPOINTMENTS: If the user asks to book or see availability, DO NOT trigger the lead form. Offer this booking link: ${business.booking_url}.`
-      : `- FORM TRIGGER: When a user wants to book, get a quote, or leave details, trigger the form using [[SHOW_LEAD_FORM]].`;
+      : `- FORM TRIGGER: When a user wants to book, get a quote, or leave details, trigger the form by appending [[SHOW_LEAD_FORM]] to the very end of your response.`;
 
     const noDataWarning = (!business.ai_instructions && !websiteContext)
-      ? `\nCRITICAL WARNING: You currently have ZERO information about the specific services, pricing, or details of this business because the owner hasn't added any training data yet. If the user asks what services you offer, you MUST NOT invent or guess any services. You MUST reply: "I'm still being set up and my team hasn't added my knowledge base yet. Could you please leave your contact details so my team can get back to you personally?"`
+      ? `\nCRITICAL WARNING: You currently have ZERO information about the specific services, pricing, or details of this business because the owner hasn't added any training data yet. If the user asks what services you offer, you MUST NOT invent or guess any services. You MUST reply: "I'm still being set up and my team hasn't added my knowledge base yet. Could you please leave your contact details so my team can get back to you personally? [[SHOW_LEAD_FORM]]"`
       : ``;
 
     const systemPrompt = `You are the professional AI Assistant for "${business.name}".
@@ -296,11 +308,12 @@ CORE IDENTITY & LIMITS:
 - NEVER say "I am a large language model" or "I cannot click links". You are a professional assistant.
 - If asked "Who are you?", reply: "I'm the assistant for ${business.name}."${noDataWarning}
 
-STRICT ANTI-HALLUCINATION RULES:
+STRICT ANTI-HALLUCINATION & FORM TRIGGER RULES:
 - ONLY answer using the BUSINESS DATA and WEBSITE CONTEXT below.
-- If you don't know something, say: "I don't have verified information on that yet. Could you please leave your contact details so my team can get back to you personally?"
+- If you don't know something, or need to escalate, or want the user to leave their contact details so the team can reach out personally, you MUST ask them to leave their details and append the exact tag "[[SHOW_LEAD_FORM]]" to the very end of your response.
+- Example: "I'm sorry, I don't have that information. Could you please leave your contact details so my team can reach out? [[SHOW_LEAD_FORM]]"
 - NEVER invent URLs. Only refer to: ${business.website_url || 'the team once you leave your details'}.
-- ON no occasion should you ever give informations out of your head or hallucinate, if you don't have an answer for anything because the business didn't provide you with that information, toggle the contact form and tell the person/customer to submit thier contact so the team can reach out later or tell em to hold on while you handover the chat to the team.
+- ON no occasion should you ever give information out of your head or hallucinate. If you don't have an answer for anything because the business didn't provide you with that information, tell the customer to leave their contact details so the team can reach out later, and trigger the form by appending "[[SHOW_LEAD_FORM]]" to the end of your response.
 
 BUSINESS DATA:
 ${business.ai_instructions || 'Basic AI Assistant mode active.'}
@@ -311,7 +324,8 @@ ${(history || []).map((h: any) => `${h.role === 'user' ? 'User' : 'Assistant'}: 
 
 LEAD & BOOKING INSTRUCTIONS:
 ${bookingInstructions}
-- Only use [[SHOW_LEAD_FORM]] ONCE. Do not repeat if form was already shown or submitted.`;
+- IMPORTANT: Whenever you invite the user to leave their name, email, phone, or details, you MUST append the exact tag "[[SHOW_LEAD_FORM]]" to the very end of your message.
+- Only use [[SHOW_LEAD_FORM]] ONCE. Do not repeat if the form was already shown or submitted.`;
 
     const truncatedHistory = (history || []).slice(-10).map((h: any) => ({
       role: h.role === 'user' ? 'user' : (h.role === 'bot' ? 'assistant' : h.role),

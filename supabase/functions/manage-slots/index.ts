@@ -1,5 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "npm:@supabase/supabase-js@2";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 /**
  * Manage Slots - Secure Bridge
@@ -27,10 +27,10 @@ Deno.serve(async (req) => {
 
     const payload = await req.json();
     let { operation, business_id, settings, date, time, slot_id, image_url, slots, booking_id, session_id } = payload;
-    
-    // --- SESSION COOKIE PARSING ---
+
+    // --- SESSION COOKIE PARSING (only as fallback when session_id not in payload) ---
     const cookieHeader = req.headers.get('cookie');
-    if (cookieHeader && business_id) {
+    if (cookieHeader && business_id && !session_id) {
       const match = cookieHeader.match(new RegExp(`owl_session_${business_id}=([^;]+)`));
       if (match) {
         session_id = match[1];
@@ -40,7 +40,7 @@ Deno.serve(async (req) => {
     console.log(`🚀 Operation: ${operation} | Business: ${business_id}`);
 
     // Security Check: Only public operations are allowed without an Auth header
-    const publicOps = ['create_booking', 'create_lead', 'get_session_by_code'];
+    const publicOps = ['create_booking', 'create_lead', 'get_session_by_code', 'check_customer', 'get_customer_sessions'];
     if (!publicOps.includes(operation)) {
       const authHeader = req.headers.get('Authorization');
       if (!authHeader) {
@@ -54,29 +54,127 @@ Deno.serve(async (req) => {
     // CREATE LEAD — now persists customer_passcode
     // ─────────────────────────────────────────────────────────
     if (operation === 'create_lead') {
-      const { customer_name, customer_email, phone, service_name, access_code, customer_passcode } = payload;
-      
-      const { data: lead, error: leadErr } = await supabase
-        .from('bookings')
-        .insert([{
-          business_id: business_id,
-          customer_name: customer_name,
-          customer_email: customer_email ? customer_email.trim().toLowerCase() : null,
-          phone: phone || '',
-          service_name: service_name || "Lead Inquiry",
-          summary: service_name || "Lead Inquiry",
-          booking_time: new Date().toISOString(),
-          session_id: session_id || null,
-          status: 'pending',
-          session_status: 'active',
-          access_code: access_code || null,
-          customer_passcode: customer_passcode || null
-        }])
-        .select()
-        .single();
+      const { customer_name, customer_email, phone, service_name, access_code, customer_passcode, session_id, status } = payload;
 
-      if (leadErr) throw leadErr;
-      return new Response(JSON.stringify(lead), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      // Register customer in customers table ONLY when they willingly submit contact info
+      // (not on initial 'chat' session start — only on lead form submission)
+      if (customer_email && customer_name && status !== 'chat') {
+        const emailLower = customer_email.trim().toLowerCase();
+        const { error: custErr } = await supabase
+          .from('customers')
+          .upsert({
+            business_id: business_id,
+            email: emailLower,
+            name: customer_name.trim()
+          }, { onConflict: 'business_id,email' });
+
+        if (custErr) {
+          console.error("❌ Error upserting customer:", custErr);
+        }
+      }
+
+      // Check if a booking/session already exists for this session_id
+      let existingBooking = null;
+      if (session_id) {
+        const { data } = await supabase
+          .from('bookings')
+          .select('*')
+          .eq('session_id', session_id)
+          .maybeSingle();
+        existingBooking = data;
+      }
+
+      let result;
+      if (existingBooking) {
+        // Update existing booking (e.g. converting a 'chat' session to a real 'pending' lead)
+        const { data: updated, error: updateErr } = await supabase
+          .from('bookings')
+          .update({
+            customer_name: customer_name || existingBooking.customer_name,
+            customer_email: customer_email ? customer_email.trim().toLowerCase() : existingBooking.customer_email,
+            phone: phone !== undefined ? phone : existingBooking.phone,
+            service_name: service_name || existingBooking.service_name,
+            summary: service_name || existingBooking.summary,
+            status: status || 'pending',
+            customer_passcode: customer_passcode || existingBooking.customer_passcode
+          })
+          .eq('id', existingBooking.id)
+          .select()
+          .single();
+        
+        if (updateErr) throw updateErr;
+        result = updated;
+      } else {
+        // Insert new booking/session
+        const { data: inserted, error: insertErr } = await supabase
+          .from('bookings')
+          .insert([{
+            business_id: business_id,
+            customer_name: customer_name,
+            customer_email: customer_email ? customer_email.trim().toLowerCase() : null,
+            phone: phone || '',
+            service_name: service_name || "Lead Inquiry",
+            summary: service_name || "Lead Inquiry",
+            booking_time: new Date().toISOString(),
+            session_id: session_id || null,
+            status: status || 'pending',
+            session_status: 'active',
+            access_code: access_code || null,
+            customer_passcode: customer_passcode || null
+          }])
+          .select()
+          .single();
+        
+        if (insertErr) throw insertErr;
+        result = inserted;
+      }
+
+      return new Response(JSON.stringify(result), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
+    // ─────────────────────────────────────────────────────────
+    // CHECK CUSTOMER — checks if customer email exists for business
+    // ─────────────────────────────────────────────────────────
+    if (operation === 'check_customer') {
+      const { customer_email } = payload;
+      if (!customer_email || !business_id) {
+        return new Response(JSON.stringify({ error: "Missing required parameters" }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+
+      const { data: customer, error: custErr } = await supabase
+        .from('customers')
+        .select('name')
+        .eq('business_id', business_id)
+        .eq('email', customer_email.trim().toLowerCase())
+        .maybeSingle();
+
+      if (custErr) throw custErr;
+
+      return new Response(JSON.stringify({
+        registered: !!customer,
+        name: customer ? customer.name : null
+      }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
+    // ─────────────────────────────────────────────────────────
+    // GET CUSTOMER SESSIONS — get list of sessions for customer
+    // ─────────────────────────────────────────────────────────
+    if (operation === 'get_customer_sessions') {
+      const { customer_email } = payload;
+      if (!customer_email || !business_id) {
+        return new Response(JSON.stringify({ error: "Missing required parameters" }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
+
+      const { data: sessions, error: sessErr } = await supabase
+        .from('bookings')
+        .select('session_id, created_at, status, summary, session_status, customer_name')
+        .eq('business_id', business_id)
+        .eq('customer_email', customer_email.trim().toLowerCase())
+        .order('created_at', { ascending: false });
+
+      if (sessErr) throw sessErr;
+
+      return new Response(JSON.stringify({ sessions: sessions || [] }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
     // ─────────────────────────────────────────────────────────
@@ -178,7 +276,7 @@ Deno.serve(async (req) => {
         .select('*')
         .eq('id', slot_id)
         .single();
-      
+
       if (slotErr || !slot || slot.is_booked) {
         throw new Error("This slot is already booked or doesn't exist.");
       }
@@ -234,7 +332,7 @@ Deno.serve(async (req) => {
 
     if (operation === 'provision_business') {
       if (!business_id) throw new Error("Missing business_id");
-      
+
       const bizName = settings?.name || 'New Business';
       const bizEmail = settings?.email || null;
       const bizUsername = settings?.username || null;
@@ -254,7 +352,7 @@ Deno.serve(async (req) => {
           plan_credit_limit: 500,
           credits_reset_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
         });
-      
+
       // Code 23505 = duplicate key — row already exists, that's fine.
       // Any other error (e.g. missing column before migration) must be thrown.
       if (insertErr && insertErr.code !== '23505') {
@@ -346,6 +444,18 @@ Deno.serve(async (req) => {
       return new Response('Handoff toggled', { status: 200, headers: corsHeaders });
     }
 
+    if (operation === 'mark_session_as_read') {
+      const { session_id } = payload;
+      const { error } = await supabase
+        .from('chat_logs')
+        .update({ is_read: true })
+        .eq('session_id', session_id)
+        .eq('business_id', business_id)
+        .eq('role', 'user');
+      if (error) throw error;
+      return new Response('Session marked as read', { status: 200, headers: corsHeaders });
+    }
+
     // ─────────────────────────────────────────────────────────
     // SAVE THEME COLORS
     // ─────────────────────────────────────────────────────────
@@ -381,9 +491,14 @@ Deno.serve(async (req) => {
 
   } catch (err) {
     console.error("Function Error:", err);
-    const errorMessage = err instanceof Error ? err.message : String(err);
-    return new Response(JSON.stringify({ 
-      error: "Edge Function Error", 
+    let errorMessage = "";
+    if (err && typeof err === 'object') {
+      errorMessage = (err as any).message || JSON.stringify(err);
+    } else {
+      errorMessage = String(err);
+    }
+    return new Response(JSON.stringify({
+      error: "Edge Function Error",
       details: errorMessage
     }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
