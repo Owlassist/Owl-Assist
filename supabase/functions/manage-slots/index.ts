@@ -56,9 +56,8 @@ Deno.serve(async (req) => {
     if (operation === 'create_lead') {
       const { customer_name, customer_email, phone, service_name, access_code, customer_passcode, session_id, status } = payload;
 
-      // Register customer in customers table ONLY when they willingly submit contact info
-      // (not on initial 'chat' session start — only on lead form submission)
-      if (customer_email && customer_name && status !== 'chat') {
+      // Register customer in customers table so they can retrieve their history later
+      if (customer_email && customer_name) {
         const emailLower = customer_email.trim().toLowerCase();
         const { error: custErr } = await supabase
           .from('customers')
@@ -73,20 +72,24 @@ Deno.serve(async (req) => {
         }
       }
 
-      // Check if a booking/session already exists for this session_id
+      const targetStatus = status || 'pending';
+
+      // Check if a booking/session already exists for this session_id AND status type
+      // This prevents a 'pending' lead from overwriting the identity of the 'chat' session
       let existingBooking = null;
       if (session_id) {
         const { data } = await supabase
           .from('bookings')
           .select('*')
           .eq('session_id', session_id)
+          .eq('status', targetStatus)
           .maybeSingle();
         existingBooking = data;
       }
 
       let result;
       if (existingBooking) {
-        // Update existing booking (e.g. converting a 'chat' session to a real 'pending' lead)
+        // Update existing booking
         const { data: updated, error: updateErr } = await supabase
           .from('bookings')
           .update({
@@ -95,7 +98,7 @@ Deno.serve(async (req) => {
             phone: phone !== undefined ? phone : existingBooking.phone,
             service_name: service_name || existingBooking.service_name,
             summary: service_name || existingBooking.summary,
-            status: status || 'pending',
+            status: targetStatus,
             customer_passcode: customer_passcode || existingBooking.customer_passcode
           })
           .eq('id', existingBooking.id)
@@ -117,7 +120,7 @@ Deno.serve(async (req) => {
             summary: service_name || "Lead Inquiry",
             booking_time: new Date().toISOString(),
             session_id: session_id || null,
-            status: status || 'pending',
+            status: targetStatus,
             session_status: 'active',
             access_code: access_code || null,
             customer_passcode: customer_passcode || null
