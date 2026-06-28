@@ -709,6 +709,8 @@
     let businessId = null;
     let sessionId = null;
     let realtimeChannel = null;
+    let leadFormShown = false;
+    let leadFormSubmitted = false;
 
     const urlParams = new URLSearchParams(window.location.search);
     let identifier = urlParams.get('u') || urlParams.get('id');
@@ -727,12 +729,37 @@
       if (!text) return '';
       // Markdown bold
       let formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-      // Basic URL regex
-      const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+)/g;
-      return formatted.replace(urlRegex, (url) => {
+      
+      const linkStyle = 'color: #8b5cf6; text-decoration: underline; font-weight: 600; cursor: pointer;';
+      
+      // 1. Extract markdown links [text](url) and replace with placeholders
+      const placeholders = [];
+      formatted = formatted.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, linkText, url) => {
         const href = url.startsWith('http') ? url : `https://${url}`;
-        return `<a href="${href}" target="_blank" style="color: #8b5cf6; text-decoration: underline; font-weight: 600; cursor: pointer;">${url}</a>`;
+        placeholders.push(`<a href="${href}" target="_blank" style="${linkStyle}">${linkText}</a>`);
+        return `__MD_LINK_${placeholders.length - 1}__`;
       });
+
+      // 2. Apply basic URL regex to the rest
+      const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+)/g;
+      formatted = formatted.replace(urlRegex, (url) => {
+        // Strip trailing punctuation
+        let cleanUrl = url;
+        let trailing = '';
+        while (cleanUrl.length > 0 && ['.', ',', ')', '!', '?', ';', ']'].includes(cleanUrl[cleanUrl.length - 1])) {
+           trailing = cleanUrl[cleanUrl.length - 1] + trailing;
+           cleanUrl = cleanUrl.slice(0, -1);
+        }
+        const href = cleanUrl.startsWith('http') ? cleanUrl : `https://${cleanUrl}`;
+        return `<a href="${href}" target="_blank" style="${linkStyle}">${cleanUrl}</a>${trailing}`;
+      });
+
+      // 3. Restore markdown links
+      placeholders.forEach((html, i) => {
+        formatted = formatted.replace(`__MD_LINK_${i}__`, html);
+      });
+
+      return formatted;
     }
 
     function generateAccessCode() {
@@ -993,6 +1020,9 @@
 
         // Check if this session was already terminated by the business
         const isTerminated = logs.some(l => l.role === 'system' && l.content === 'SESSION_TERMINATED');
+        
+        // Check if lead was already submitted
+        leadFormSubmitted = logs.some(l => l.role === 'user' && l.content && l.content.startsWith('[SYSTEM: User submitted lead form'));
 
         logs.forEach(log => {
           if (log.role === 'system') return;
@@ -1106,8 +1136,9 @@
         chatMessages.appendChild(msgDiv);
       }
 
-      if (needsLeadForm) {
+      if (needsLeadForm && !leadFormSubmitted && !leadFormShown) {
         showLeadForm();
+        leadFormShown = true;
       }
 
       chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -1162,6 +1193,7 @@
 
           // Tell AI we collected info so it can continue
           chatHistory.push({ role: 'user', content: `[SYSTEM: User submitted lead form. Name: ${name}]` });
+          leadFormSubmitted = true;
         } catch (e) {
           console.error('Lead Capture Error Detail:', e);
           btn.innerText = 'Send Message';
