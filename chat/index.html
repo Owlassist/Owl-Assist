@@ -707,11 +707,73 @@
         <input type="email" id="cust-email" placeholder="Email Address" required>
         <input type="tel" id="cust-phone" placeholder="Phone Number (Optional)">
 
+        <!-- Optional Passcode Toggle -->
+        <div class="passcode-toggle-row">
+          <label class="toggle-label" for="use-passcode-check">
+            <input type="checkbox" id="use-passcode-check">
+            <span>Set a personal passcode <span style="font-size: 0.7rem; color: var(--primary); font-weight: 600;">(optional)</span></span>
+          </label>
+          <span class="toggle-hint">Easier to remember than a code. You'll still get a backup access code.</span>
+        </div>
+        <div id="passcode-fields" class="hidden-panel" style="width: 100%; flex-direction: column;">
+          <input type="password" id="cust-passcode" placeholder="Create a Passcode" style="margin-bottom: 0.75rem;">
+          <input type="password" id="cust-passcode-confirm" placeholder="Confirm Passcode">
+        </div>
+
         <div style="display: flex; gap: 1rem; margin-top: 0.5rem; width: 100%;">
           <button class="btn btn-outline" id="btn-tracked-back" style="flex: 1;">Back</button>
           <button class="btn btn-primary" id="btn-tracked-start" style="flex: 2;">Start Session</button>
         </div>
       </div>
+
+      <!-- Access Code Confirmation Panel (Hidden initially) -->
+      <div id="code-confirm-panel" class="hidden-panel" style="text-align: center; padding: 1rem 0;">
+        <span class="material-symbols-outlined" style="font-size: 3rem; color: #6366f1; margin-bottom: 1rem;">verified_user</span>
+        <h3>Session Created!</h3>
+        <p style="font-size: 0.85rem; color: var(--text-dim); margin-bottom: 1.5rem;" id="code-confirm-desc">
+          Your <strong>Backup Access Code</strong> is below. Save it so you can always resume your chat, even if you forget your passcode.
+        </p>
+        <div class="code-box">
+          <span id="display-access-code" style="font-size: 1.5rem; font-weight: 800; letter-spacing: 2px; color: #6366f1;">OWL-XXXXXX</span>
+          <button class="btn-icon" id="btn-copy-code" style="margin-left: 0.75rem;" title="Copy Code">
+            <span class="material-symbols-outlined" style="font-size: 1.25rem;">content_copy</span>
+          </button>
+        </div>
+        <button class="btn btn-primary" id="btn-code-continue" style="width: 100%; margin-top: 1.5rem;">Continue to Chat</button>
+      </div>
+
+      <!-- Resume Session Panel (Hidden initially) -->
+      <div id="resume-panel" class="hidden-panel booking-form">
+        <h3 style="margin-top: 0; display: flex; align-items: center; gap: 0.5rem;">
+          <span class="material-symbols-outlined">history</span> Resume Your Chat
+        </h3>
+        <p style="font-size: 0.8rem; color: var(--text-dim); margin-bottom: 1rem;">Enter your email and use either your passcode or backup access code.</p>
+        <input type="email" id="resume-email" placeholder="Your Email Address" required>
+
+        <!-- Passcode field -->
+        <input type="password" id="resume-passcode" placeholder="Your Passcode (if you set one)" autocomplete="current-password">
+
+        <!-- OR Divider -->
+        <div class="or-divider"><span>or use backup access code</span></div>
+
+        <!-- Backup access code field -->
+        <input type="text" id="resume-code" placeholder="Backup Code (e.g. OWL-XXXXXX)" style="text-transform: uppercase;">
+
+        <div id="resume-error" style="color: #ff9966; font-size: 0.8rem; display: none; background: rgba(255,153,102,0.1); padding: 0.5rem; border-radius: 0.5rem; text-align: center; margin-bottom: 0.5rem; width: 100%;"></div>
+
+        <div style="display: flex; gap: 1rem; margin-top: 0.5rem; width: 100%;">
+          <button class="btn btn-outline" id="btn-resume-back" style="flex: 1;">Back</button>
+          <button class="btn btn-primary" id="btn-resume-submit" style="flex: 2;">Resume Chat</button>
+        </div>
+      </div>
+
+      <!-- Footer Action -->
+      <div id="welcome-footer" class="welcome-footer">
+        <button id="btn-show-resume" class="link-btn">Already started? Resume your chat</button>
+      </div>
+    </div>
+  </div>
+
 
 
 
@@ -765,6 +827,7 @@
       <div id="history-list" style="flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem;">
          <!-- History items populate here -->
       </div>
+    </div>
   </div>
 
   <!-- FAQ Modal -->
@@ -1010,6 +1073,12 @@
         console.error("Error loading chat history:", err);
         addMessage('bot', 'Could not load chat history. Starting a new chat.');
       }
+    }
+
+    async function loadChatHistory(sessId) {
+      sessionId = sessId;
+      const logs = await window.owlDb.fetchChatLogs(businessId, sessId);
+      await renderChatHistory(logs);
     }
 
     function connectRealtimeListener(sessId) {
@@ -1511,6 +1580,7 @@
 
     // ── Conversation History Panel ──────────────────────────────────────
     async function openHistoryModal() {
+      closeWidgetFaqs(); // Close FAQs modal if open
       const historyList = document.getElementById('history-list');
       historyList.innerHTML = '<p style="color: var(--text-dim); text-align: center; margin-top: 2rem;">Loading conversations...</p>';
       document.getElementById('history-modal').style.display = 'flex';
@@ -1617,6 +1687,7 @@
 
     function openWidgetFaqs() {
       closeWidgetDropdown(); // close dropdown first
+      closeHistoryModal();   // Close history modal if open
       const faqList = document.getElementById('faq-widget-list');
       if (!faqList) return;
       

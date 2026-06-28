@@ -575,9 +575,9 @@ window.app = {
             btnElement.disabled = true;
         }
 
-        const url = document.getElementById('settings-url').value;
-        const instructions = document.getElementById('settings-instructions').value;
-        const bookingUrl = document.getElementById('settings-booking-url').value;
+        const url = document.getElementById('settings-url')?.value || '';
+        const instructions = document.getElementById('settings-instructions')?.value || '';
+        const bookingUrl = document.getElementById('settings-booking-url')?.value || '';
 
         try {
             const clerk = await window.owlAuth.getSession();
@@ -587,7 +587,7 @@ window.app = {
                 website_url: url,
                 ai_instructions: instructions,
                 booking_url: bookingUrl,
-                name: document.getElementById('settings-business-name').value || clerk.user.fullName
+                name: document.getElementById('settings-business-name')?.value || clerk.user.fullName || ''
             });
 
             if (window.OwlModal) OwlModal.alert('Success', 'AI Knowledge Base updated successfully!');
@@ -831,7 +831,8 @@ window.OwlFeatures = {
         'widget_setup': { tier: 'pro', type: 'widget_section', overlaySelector: '#widget-pro-overlay', contentSelector: '#widget-content' },
         'document_upload_desktop': { tier: 'pro', type: 'disable_input', selector: '#settings-document-upload' },
         'document_upload_mobile': { tier: 'pro', type: 'disable_input', selector: '#settings-document-upload-mobile' },
-        'remove_branding': { tier: 'pro', type: 'disable_input', selector: '#settings-remove-branding' }
+        'remove_branding': { tier: 'pro', type: 'disable_input', selector: '#settings-remove-branding' },
+        'settings_url': { tier: 'pro', type: 'disable_input', selector: '#settings-url' }
     },
     
     applyAccessControl: function(userTier, expiryDate) {
@@ -903,7 +904,12 @@ window.OwlFeatures = {
                 const elements = document.querySelectorAll(config.selector);
                 elements.forEach(el => {
                     el.disabled = !isAllowed;
-                    el.style.cursor = isAllowed ? 'pointer' : 'not-allowed';
+                    el.style.opacity = isAllowed ? '1' : '0.6';
+                    if (isAllowed) {
+                        el.style.cursor = (el.type === 'checkbox' || el.tagName === 'BUTTON' || el.tagName === 'LABEL') ? 'pointer' : 'text';
+                    } else {
+                        el.style.cursor = 'not-allowed';
+                    }
                     if (!isAllowed && el.type === 'checkbox') {
                         el.checked = false;
                     }
@@ -1239,6 +1245,9 @@ async function renderConversations(sessions) {
                 if (cPanel) cPanel.classList.add('panel-active');
             }
 
+            // On mobile: slide to the chat panel
+            if (typeof app.showChatPanel === 'function') app.showChatPanel();
+
             await loadTranscript(session.session_id, session.customer_name, session.summary, timeStr, session.session_status);
         };
 
@@ -1251,7 +1260,7 @@ async function loadTranscript(sessionId, name, summary, timeStr, sessionStatus =
     const chatMessages = document.getElementById('chat-messages');
     if (!chatMessages) return;
 
-    const backBtn = window.innerWidth <= 768 ? `<button onclick="app.showSessionList()" class="back-btn"><span class="material-symbols-outlined">arrow_back</span></button>` : '';
+    const backBtn = `<button onclick="app.showSessionPanel()" class="mob-back-btn" style="margin-right:0.5rem;"><span class="material-symbols-outlined" style="font-size:1.2rem;">arrow_back_ios</span></button>`;
 
     const isTerminated = sessionStatus === 'terminated';
     const headerName = isTerminated ? `${name} <span style="font-size: 0.75rem; padding: 0.1rem 0.5rem; background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.25); border-radius: 0.5rem; margin-left: 0.5rem; vertical-align: middle;">Ended</span>` : name;
@@ -1280,9 +1289,16 @@ async function loadTranscript(sessionId, name, summary, timeStr, sessionStatus =
         `;
     }
     
-    chatMessages.innerHTML = '<div style="text-align: center; color: var(--text-dim); padding: 2rem;">Loading...</div>';
+    chatMessages.innerHTML = '<div style="text-align: center; color: var(--text-dim); padding: 2rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem;"><span class="material-symbols-outlined rotating" style="font-size: 1.2rem;">sync</span> Loading transcript...</div>';
 
-    const logs = await window.owlDb.fetchChatLogs(currentUser?.id, sessionId);
+    let logs;
+    try {
+        logs = await window.owlDb.fetchChatLogsForDashboard(sessionId);
+    } catch (err) {
+        console.error('❌ Transcript load failed:', err);
+        chatMessages.innerHTML = '<div style="text-align:center; padding:2rem;"><span class="material-symbols-outlined" style="font-size:2.5rem; color:#ef4444; display:block; margin-bottom:0.75rem;">error_outline</span><p style="color:#ef4444; font-weight:600; margin-bottom:0.5rem;">Failed to load conversation</p><p style="color:var(--text-dim); font-size:0.85rem;">Please try again or refresh the page.</p></div>';
+        return;
+    }
     chatMessages.innerHTML = '';
 
     let hasHandoffActive = false;

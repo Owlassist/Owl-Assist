@@ -116,6 +116,25 @@
           </div>
         </div>
 
+        <!-- Step 4: 2FA Verification -->
+        <div id="mfa-section" style="display:none;">
+          <h2 style="margin-bottom:0.5rem;">Two-Factor Authentication</h2>
+          <p id="mfa-message" style="margin-bottom:1.5rem; color:var(--text-dim); font-size:0.9rem;">Enter the code from your authenticator app.</p>
+          
+          <div id="mfa-strategies" style="display:none; margin-bottom:1.5rem; flex-direction:column; gap:0.5rem;">
+            <label style="font-size:0.8rem; color:var(--text-dim);">Choose verification method:</label>
+          </div>
+
+          <div class="form-group">
+            <label for="mfa-code">Verification Code</label>
+            <input type="text" id="mfa-code" placeholder="000000" maxlength="6" style="text-align:center; font-size:1.4rem; letter-spacing:0.4rem;" required>
+          </div>
+          <button type="button" id="mfa-submit-btn" class="btn btn-primary btn-large" style="width:100%; margin-top:0.5rem;">Verify Code</button>
+          <div style="text-align:center; margin-top:1rem;">
+            <a href="#" id="mfa-back-to-login" style="font-size:0.8rem; color:var(--primary);">← Back to Sign In</a>
+          </div>
+        </div>
+
         <div class="auth-footer">
           Don't have an account? <a href="/auth/signup">Create Account</a>
         </div>
@@ -149,6 +168,8 @@
     }
     checkExistingSession();
 
+    let currentMfaStrategy = 'totp';
+
     document.getElementById('login-form').addEventListener('submit', async (e) => {
       e.preventDefault();
 
@@ -167,6 +188,8 @@
         if (result.status === 'complete') {
           // Success!
           window.location.href = '/dashboard';
+        } else if (result.status === 'needs_second_factor') {
+          setupMFA(result.signInAttempt);
         } else {
           if (window.OwlModal) OwlModal.alert('Sign In Issue', 'Sign in requires additional steps: ' + result.status);
           else alert('Sign in requires additional steps: ' + result.status);
@@ -184,6 +207,96 @@
       }
     });
 
+    // --- MFA Functions ---
+    function setupMFA(signInAttempt) {
+      const factors = signInAttempt.supportedSecondFactors;
+      const strategiesContainer = document.getElementById('mfa-strategies');
+      const mfaMessage = document.getElementById('mfa-message');
+
+      strategiesContainer.innerHTML = '<label style="font-size:0.8rem; color:var(--text-dim);">Choose verification method:</label>';
+
+      if (factors && factors.length > 1) {
+        strategiesContainer.style.display = 'flex';
+        factors.forEach(factor => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'btn btn-outline';
+          btn.style.fontSize = '0.8rem';
+          btn.style.padding = '0.5rem';
+          btn.style.textAlign = 'left';
+
+          let label = factor.strategy;
+          if (factor.strategy === 'totp') label = 'Authenticator App (TOTP)';
+          else if (factor.strategy === 'phone_code') label = 'SMS Code';
+          else if (factor.strategy === 'email_code') label = 'Email Code';
+
+          btn.innerText = label;
+          btn.onclick = async () => {
+            currentMfaStrategy = factor.strategy;
+            await prepareMfa(factor.strategy);
+          };
+          strategiesContainer.appendChild(btn);
+        });
+      } else if (factors && factors.length === 1) {
+        currentMfaStrategy = factors[0].strategy;
+        prepareMfa(factors[0].strategy);
+      } else {
+        currentMfaStrategy = 'totp';
+        mfaMessage.innerText = 'Enter the code from your authenticator app.';
+      }
+
+      showSection('mfa');
+    }
+
+    async function prepareMfa(strategy) {
+      const mfaMessage = document.getElementById('mfa-message');
+      const input = document.getElementById('mfa-code');
+      input.value = '';
+
+      if (strategy === 'totp') {
+        mfaMessage.innerText = 'Enter the 6-digit code from your authenticator app.';
+      } else if (strategy === 'phone_code' || strategy === 'email_code') {
+        mfaMessage.innerText = `Sending code via ${strategy === 'phone_code' ? 'SMS' : 'Email'}...`;
+        try {
+          await window.owlAuth.prepare2FA(strategy);
+          mfaMessage.innerText = `Enter the 6-digit code sent to your ${strategy === 'phone_code' ? 'phone' : 'email'}.`;
+        } catch (err) {
+          console.error('Failed to send 2FA code', err);
+          mfaMessage.innerText = `Error sending code: ${err.message}. Try another method.`;
+        }
+      }
+    }
+
+    document.getElementById('mfa-submit-btn').addEventListener('click', async () => {
+      const btn = document.getElementById('mfa-submit-btn');
+      const code = document.getElementById('mfa-code').value.trim();
+      if (!code) { alert('Please enter the code.'); return; }
+      try {
+        btn.innerText = 'Verifying...';
+        btn.disabled = true;
+        const result = await window.owlAuth.verify2FA(code, currentMfaStrategy);
+        if (result.status === 'complete') {
+          window.location.href = '/dashboard';
+        } else {
+          alert('Could not complete verification. Status: ' + result.status);
+        }
+      } catch (err) {
+        console.error('MFA Verification error:', err);
+        const msg = err.errors?.[0]?.message || err.message || 'MFA Verification failed';
+        if (window.OwlModal) OwlModal.alert('Verification Failed', msg); else alert('Error: ' + msg);
+      } finally {
+        btn.innerText = 'Verify Code';
+        btn.disabled = false;
+      }
+    });
+
+    document.getElementById('mfa-back-to-login').addEventListener('click', (e) => {
+      e.preventDefault();
+      showSection('login');
+      document.getElementById('submit-btn').disabled = false;
+      document.getElementById('submit-btn').innerText = 'Sign In';
+    });
+
     // --- OAuth Logic ---
     async function handleOAuth(strategy) {
       try {
@@ -198,11 +311,13 @@
     const loginForm    = document.getElementById('login-form');
     const forgotEmailSection = document.getElementById('forgot-email-section');
     const forgotResetSection = document.getElementById('forgot-reset-section');
+    const mfaSection = document.getElementById('mfa-section');
 
     function showSection(show) {
       loginForm.style.display         = show === 'login'  ? '' : 'none';
       forgotEmailSection.style.display = show === 'email'  ? '' : 'none';
       forgotResetSection.style.display = show === 'reset'  ? '' : 'none';
+      mfaSection.style.display         = show === 'mfa'    ? '' : 'none';
     }
 
     document.getElementById('forgot-link').addEventListener('click', (e) => {

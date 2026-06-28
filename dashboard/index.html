@@ -2,41 +2,6 @@
 <html lang="en">
 
 <head>
-  <script>
-    (function () {
-      var MOBILE_BP = 768;
-
-      // Detect real mobile devices by user-agent AND screen width.
-      // This fixes the bug where phones were not loading the mobile UI
-      // because document.write() doesn't trigger on a real device's first load.
-      function isMobileDevice() {
-        var ua = (navigator.userAgent || navigator.vendor || '').toLowerCase();
-        var isMobileUA = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini|mobile|silk|kindle|bb\d+|meego|fennec|tablet|touch/i.test(ua);
-        var isSmallScreen = window.innerWidth <= MOBILE_BP || window.screen.width <= MOBILE_BP;
-        return isMobileUA || isSmallScreen;
-      }
-
-      if (isMobileDevice()) {
-        document.documentElement.style.display = 'none';
-        fetch('/dashboard/mobile.html')
-          .then(function (res) { return res.text(); })
-          .then(function (html) {
-            document.open();
-            document.write(html);
-            document.close();
-          })
-          .catch(function () {
-            // Fallback: show page as-is if fetch fails
-            document.documentElement.style.display = '';
-          });
-      } else {
-        // Desktop: watch for resize crossing into mobile territory
-        window.addEventListener('resize', function () {
-          if (isMobileDevice()) window.location.reload();
-        });
-      }
-    })();
-  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <base href="/">
@@ -112,7 +77,7 @@
       position: absolute;
       right: 0;
       top: 100%;
-      background: rgba(30, 30, 45, 0.9);
+      background: rgba(30, 30, 45, 0.95);
       backdrop-filter: blur(12px);
       border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: var(--radius-md);
@@ -153,22 +118,6 @@
 
     .db-table tr:hover {
       background: rgba(255, 255, 255, 0.02);
-    }
-
-    .action-menu {
-      display: none;
-      position: absolute;
-      right: 0;
-      top: 100%;
-      background: rgba(30, 30, 45, 0.95);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: var(--radius-md);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-      z-index: 1000;
-      min-width: 180px;
-      padding: 0.5rem;
-      margin-top: 0.5rem;
     }
 
     .action-menu.active {
@@ -219,18 +168,46 @@
     }
 
     /* Responsive Layout Classes */
-    .settings-layout {
-      display: flex;
-      gap: 2rem;
-      margin-top: 2rem;
-    }
-
     .table-responsive {
       width: 100%;
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
       margin-top: 1rem;
       border-radius: var(--radius-md);
+    }
+
+    .settings-layout {
+      display: flex;
+      gap: 2rem;
+      align-items: flex-start;
+      margin-top: 2rem;
+    }
+
+    .settings-sidebar {
+      min-width: 250px;
+    }
+
+    .settings-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.85rem 1rem;
+      border-radius: var(--radius-md);
+      color: var(--text-sub);
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: all var(--transition-fast);
+      text-decoration: none;
+    }
+
+    .settings-nav-item:hover {
+      background: var(--surface-hover);
+      color: white;
+    }
+
+    .settings-nav-item.active {
+      background: var(--primary);
+      color: var(--on-primary);
     }
 
     .profile-flex {
@@ -261,191 +238,6 @@
       grid-template-columns: 300px 1fr;
       gap: 1.5rem;
       height: calc(100vh - 250px);
-    }
-
-    @media (max-width: 768px) {
-
-      /* Table to Cards Pattern */
-      .db-table thead {
-        display: none;
-      }
-
-      .db-table {
-        display: block;
-        border: none;
-      }
-
-      .db-table tbody {
-        display: block;
-      }
-
-      .db-table tr {
-        display: flex;
-        flex-direction: column;
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid var(--border);
-        border-radius: var(--radius-md);
-        margin-bottom: 1rem;
-        padding: 1rem;
-        position: relative;
-      }
-
-      .db-table td {
-        display: block;
-        padding: 0.25rem 0;
-        border: none !important;
-        width: 100% !important;
-        text-align: left !important;
-      }
-
-      .db-table td:before {
-        content: attr(data-label);
-        font-size: 0.7rem;
-        text-transform: uppercase;
-        color: var(--text-dim);
-        display: block;
-        margin-bottom: 0.2rem;
-      }
-
-      .db-table .action-dropdown {
-        position: absolute;
-        top: 1rem;
-        right: 1rem;
-      }
-
-      .db-table td:last-child:before {
-        display: none;
-      }
-
-      /* Header & Card Refinements */
-      .db-view-header {
-        flex-direction: column !important;
-        align-items: flex-start !important;
-        gap: 1rem;
-        margin-bottom: 2rem !important;
-      }
-
-      .glass-card {
-        padding: 1.25rem !important;
-      }
-
-      .share-box {
-        flex-direction: column;
-        background: transparent !important;
-        border: none !important;
-        gap: 0.75rem !important;
-      }
-
-      .share-box input {
-        background: rgba(0, 0, 0, 0.2) !important;
-        border: 1px solid var(--border) !important;
-        border-radius: var(--radius-sm) !important;
-        width: 100%;
-      }
-
-      .share-box .btn {
-        width: 100%;
-      }
-
-      .stats-grid {
-        grid-template-columns: 1fr !important;
-      }
-
-      .app-content {
-        padding: 1rem !important;
-      }
-    }
-
-    @media (max-width: 768px) {
-      .conversation-layout {
-        grid-template-columns: 1fr;
-        height: calc(100vh - 180px);
-      }
-
-      #session-panel,
-      #chat-panel {
-        display: none;
-      }
-
-      #session-panel.panel-active,
-      #chat-panel.panel-active {
-        display: flex;
-        flex-direction: column;
-      }
-    }
-
-    /* ── Premium Credits Widget (Desktop Header) ─────────────────── */
-    .credits-widget-desktop {
-      position: relative;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 0.45rem 1rem 0.45rem 0.6rem;
-      background: linear-gradient(135deg, rgba(192,193,255,0.08) 0%, rgba(128,131,255,0.03) 100%);
-      border: 1px solid rgba(192,193,255,0.18);
-      border-radius: 0.75rem;
-      overflow: hidden;
-      cursor: default;
-      transition: border-color 0.25s ease, box-shadow 0.25s ease;
-    }
-    .credits-widget-desktop:hover {
-      border-color: rgba(192,193,255,0.38);
-      box-shadow: 0 0 22px rgba(192,193,255,0.12), inset 0 0 12px rgba(192,193,255,0.04);
-    }
-    /* Subtle ambient glow orb */
-    .cw-orb {
-      position: absolute;
-      top: -12px;
-      right: -12px;
-      width: 48px;
-      height: 48px;
-      background: radial-gradient(circle, rgba(192,193,255,0.35) 0%, transparent 70%);
-      pointer-events: none;
-      animation: cwPulse 3s ease-in-out infinite;
-    }
-    @keyframes cwPulse {
-      0%,100% { opacity: 0.6; transform: scale(1); }
-      50%      { opacity: 1;   transform: scale(1.2); }
-    }
-    /* Icon pill */
-    .cw-icon-wrap {
-      flex-shrink: 0;
-      width: 30px;
-      height: 30px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 8px;
-      background: linear-gradient(135deg, rgba(192,193,255,0.22), rgba(128,131,255,0.1));
-      border: 1px solid rgba(192,193,255,0.15);
-    }
-    .cw-icon-wrap .material-symbols-outlined {
-      font-size: 1rem;
-      color: var(--primary);
-      font-variation-settings: 'FILL' 1;
-    }
-    /* Label + value stack */
-    .cw-body {
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-      min-width: 0;
-    }
-    .cw-label {
-      font-size: 0.6rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: var(--text-dim);
-      line-height: 1;
-    }
-    .cw-value {
-      font-size: 1rem;
-      font-weight: 800;
-      color: #fff;
-      line-height: 1.25;
-      font-variant-numeric: tabular-nums;
-      letter-spacing: -0.01em;
     }
   </style>
 </head>
@@ -485,7 +277,36 @@
     }
   </style>
 
-  <!-- Mobile Nav Toggle -->
+  <!-- ==================== MOBILE HEADER (hidden on desktop via CSS) ==================== -->
+  <header class="mob-header">
+    <div class="mob-header-user">
+      <div class="mob-avatar ui-avatar" id="mob-ui-avatar" onclick="app.navigate('settings')">B</div>
+      <div class="mob-header-text">
+        <span class="mob-welcome">Welcome back</span>
+        <strong class="mob-name ui-name" id="mob-ui-name">Loading...</strong>
+      </div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 0.75rem;">
+      <!-- Premium Credits Widget (Mobile) -->
+      <div class="mob-credits-widget">
+        <div class="mob-cw-orb"></div>
+        <div class="mob-cw-icon">
+          <span class="material-symbols-outlined">bolt</span>
+        </div>
+        <div class="mob-cw-body">
+          <span class="mob-cw-label">Credits</span>
+          <div style="display: flex; align-items: center; gap: 0.3rem;">
+            <strong class="mob-cw-value ui-credits" id="mob-ui-credits">—</strong>
+            <button onclick="app.navigate('settings'); setTimeout(() => app.setSettingsTab('billing'), 100);" title="Buy Credits" style="background: transparent; border: none; color: var(--primary); cursor: pointer; display: flex; align-items: center; padding: 0;">
+              <span class="material-symbols-outlined" style="font-size: 1.05rem; font-weight: 800;">add_circle</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Nav Toggle (legacy — hidden on both desktop and mobile now) -->
   <button class="mobile-toggle" onclick="app.toggleSidebar()">
     <span class="material-symbols-outlined">menu</span>
   </button>
@@ -589,8 +410,8 @@
               <p style="color: var(--text-dim); font-size: 0.9rem;">Copy your dedicated Assistant chat link and share it
                 with your customers & acquaintances by pasting this link on your social handles bio.</p>
             </div>
-            <div
-              style="display: flex; gap: 0.5rem; background: rgba(0,0,0,0.3); padding: 0.5rem; border-radius: var(--radius-md); border: 1px solid var(--border); flex-grow: 1; max-width: 500px; min-width: 280px;">
+            <div class="share-box-container"
+              style="display: flex; gap: 0.5rem; background: rgba(0,0,0,0.3); padding: 0.5rem; border-radius: var(--radius-md); border: 1px solid var(--border); flex-grow: 1; max-width: 500px; width: 100%;">
               <input type="text" id="share-link-input" readonly value="Loading link..."
                 style="flex-grow: 1; background: transparent; border: none; color: white; padding: 0.5rem; font-size: 0.85rem; outline: none; width: 50px;">
               <button class="btn btn-primary" onclick="app.copyShareLink()" id="btn-copy-link"
@@ -637,6 +458,7 @@
             <h3>No Leads Yet</h3>
             <p>When the AI receptionist collects a visitor's details, they will appear here.</p>
           </div>
+          <!-- Desktop Table -->
           <div class="table-responsive hidden" id="recent-bookings-table">
             <table class="db-table">
               <thead>
@@ -651,6 +473,8 @@
               <tbody id="recent-bookings-list"></tbody>
             </table>
           </div>
+          <!-- Mobile Lead Cards -->
+          <div class="mobile-leads-container" id="mobile-leads-list"></div>
         </section>
       </section>
 
@@ -665,6 +489,7 @@
             <h3>Your lead board is empty</h3>
             <p>Share your AI widget to start receiving leads.</p>
           </div>
+          <!-- Desktop Table -->
           <div class="table-responsive hidden" id="all-bookings-table">
             <table class="db-table">
               <thead>
@@ -678,6 +503,13 @@
               </thead>
               <tbody id="all-bookings-list"></tbody>
             </table>
+          </div>
+          <!-- Mobile Lead Cards -->
+          <div class="mobile-leads-container" id="all-leads-list"></div>
+          <div class="empty-state hidden" id="all-leads-empty" style="display:none;">
+            <span class="material-symbols-outlined">contact_page</span>
+            <h3>Your lead board is empty</h3>
+            <p>Share your AI widget to start receiving leads.</p>
           </div>
         </section>
       </section>
@@ -702,10 +534,16 @@
 
           <!-- Chat History -->
           <div id="chat-panel" class="glass-card"
-            style="padding: 0; display: flex; flex-direction: column; overflow: hidden;">
+            style="padding: 0; overflow: hidden;">
             <div id="chat-header"
               style="padding: 1rem; border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.02); min-height: 70px; display: flex; justify-content: space-between; align-items: center;">
-              <h3 style="font-size: 1rem; margin: 0;">Select a conversation</h3>
+              <div style="display: flex; align-items: center;">
+                <!-- Mobile-only back button -->
+                <button class="mob-back-btn" onclick="app.showSessionPanel()" aria-label="Back to sessions">
+                  <span class="material-symbols-outlined" style="font-size:1.2rem;">arrow_back_ios</span>
+                </button>
+                <h3 style="font-size: 1rem; margin: 0;">Select a conversation</h3>
+              </div>
             </div>
             <div id="chat-messages"
               style="flex-grow: 1; overflow-y: auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
@@ -734,7 +572,7 @@
                 #toggle-handoff-btn:checked + .slider .knob { transform: translateX(20px); }
               </style>
               <div style="display: flex; gap: 0.5rem; opacity: 0.5; pointer-events: none; transition: all 0.3s;" id="chat-input-wrapper">
-                <input type="text" id="owner-chat-input" placeholder="Type a message as the business owner..." style="flex-grow: 1; padding: 0.75rem 1rem; border-radius: 20px; border: 1px solid var(--border); background: rgba(255,255,255,0.05); color: white; outline: none;">
+                <input type="text" id="owner-chat-input" placeholder="Type a message as the business owner..." autocomplete="off" data-lpignore="true" name="chat_msg_random_ignore" style="flex-grow: 1; padding: 0.75rem 1rem; border-radius: 20px; border: 1px solid var(--border); background: rgba(255,255,255,0.05); color: white; outline: none;">
                 <button class="btn btn-primary" id="btn-send-owner-msg" onclick="app.handleSendOwnerMessage()" style="border-radius: 20px; padding: 0.75rem 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
                   Send <span class="material-symbols-outlined" style="font-size: 1rem;">send</span>
                 </button>
@@ -753,24 +591,24 @@
 
         <div class="settings-layout">
           <!-- Settings Sidebar -->
-          <aside style="min-width: 250px; display: flex; flex-direction: column; gap: 0.5rem;">
+          <aside class="settings-sidebar" style="display: flex; flex-direction: column; gap: 0.5rem;">
             <a href="javascript:void(0)" onclick="app.setSettingsTab('account')" id="tab-nav-account"
-              class="db-nav-item active" style="padding: 0.75rem 1rem; width: 100%;">
+              class="settings-nav-item active" style="padding: 0.75rem 1rem; width: 100%;">
               <span class="material-symbols-outlined">person</span>
               <span>Account Management</span>
             </a>
-            <a href="javascript:void(0)" onclick="app.setSettingsTab('ai')" id="tab-nav-ai" class="db-nav-item"
+            <a href="javascript:void(0)" onclick="app.setSettingsTab('ai')" id="tab-nav-ai" class="settings-nav-item"
               style="padding: 0.75rem 1rem; width: 100%;">
               <span class="material-symbols-outlined">smart_toy</span>
               <span>AI Knowledge Base</span>
             </a>
             <a href="javascript:void(0)" onclick="app.setSettingsTab('customization')" id="tab-nav-customization"
-              class="db-nav-item" style="padding: 0.75rem 1rem; width: 100%;">
+              class="settings-nav-item" style="padding: 0.75rem 1rem; width: 100%;">
               <span class="material-symbols-outlined">palette</span>
               <span>Customization</span>
             </a>
             <a href="javascript:void(0)" onclick="app.setSettingsTab('billing')" id="tab-nav-billing"
-              class="db-nav-item" style="padding: 0.75rem 1rem; width: 100%;">
+              class="settings-nav-item" style="padding: 0.75rem 1rem; width: 100%;">
               <span class="material-symbols-outlined">credit_card</span>
               <span>Billing & Plan</span>
             </a>
@@ -1150,29 +988,6 @@
                     transform: translateY(-2px);
                     box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
                   }
-
-                  @keyframes badgePulse {
-
-                    0%,
-                    100% {
-                      box-shadow: 0 0 0 1px rgba(167, 139, 250, 0.3), 0 0 18px rgba(124, 58, 237, 0.55), 0 2px 8px rgba(0, 0, 0, 0.4);
-                    }
-
-                    50% {
-                      box-shadow: 0 0 0 1px rgba(167, 139, 250, 0.5), 0 0 28px rgba(124, 58, 237, 0.8), 0 2px 8px rgba(0, 0, 0, 0.4);
-                    }
-                  }
-
-                  @keyframes badgeShine {
-                    0% {
-                      transform: translateX(-100%);
-                    }
-
-                    40%,
-                    100% {
-                      transform: translateX(200%);
-                    }
-                  }
                 </style>
 
                 <div class="pricing-grid">
@@ -1432,6 +1247,50 @@
     </main>
   </div>
 
+  <!-- Mobile Bottom Navigation Bar -->
+  <nav class="mob-bottom-nav" role="navigation" aria-label="Mobile navigation">
+    <a href="javascript:void(0)" onclick="app.navigate('overview')" class="mob-nav-item active" data-target="overview">
+      <span class="material-symbols-outlined">home</span>
+      <span>Home</span>
+    </a>
+    <a href="javascript:void(0)" onclick="app.navigate('bookings')" class="mob-nav-item" data-target="bookings">
+      <span class="material-symbols-outlined">contact_page</span>
+      <span>Leads</span>
+    </a>
+    <a href="javascript:void(0)" onclick="app.navigate('conversations')" class="mob-nav-item" data-target="conversations">
+      <span class="material-symbols-outlined">forum</span>
+      <span>Chats</span>
+    </a>
+    <a href="javascript:void(0)" onclick="app.navigate('widget')" class="mob-nav-item" data-target="widget">
+      <span class="material-symbols-outlined">code</span>
+      <span>Widget</span>
+    </a>
+    <a href="javascript:void(0)" onclick="app.navigate('settings')" class="mob-nav-item" data-target="settings">
+      <span class="material-symbols-outlined">manage_accounts</span>
+      <span>Settings</span>
+    </a>
+  </nav>
+
+  <!-- Mobile panel navigation helpers (conversations view) -->
+  <script>
+    // Expose mobile panel helpers on window.app so the back button can use them
+    document.addEventListener('DOMContentLoaded', function () {
+      window.app = window.app || {};
+      window.app.showSessionPanel = function () {
+        var sp = document.getElementById('session-panel');
+        var cp = document.getElementById('chat-panel');
+        if (sp) sp.classList.add('panel-active');
+        if (cp) cp.classList.remove('panel-active');
+      };
+      window.app.showChatPanel = function () {
+        var sp = document.getElementById('session-panel');
+        var cp = document.getElementById('chat-panel');
+        if (sp) sp.classList.remove('panel-active');
+        if (cp) cp.classList.add('panel-active');
+      };
+    });
+  </script>
+
   <!-- Auth & App Logic -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -1474,7 +1333,7 @@
 
   <!-- FAQ Modal -->
   <div id="faq-modal" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.7); backdrop-filter:blur(4px); align-items:center; justify-content:center; padding:1rem;">
-    <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:2rem; width:100%; max-width:500px; position:relative;">
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:1.5rem; width:90%; max-width:500px; position:relative; max-height: 90vh; overflow-y: auto;">
       <button onclick="app.closeFaqModal()" style="position:absolute; top:1rem; right:1rem; background:none; border:none; color:var(--text-dim); cursor:pointer; font-size:1.5rem; line-height:1;">&#x2715;</button>
       <h3 id="faq-modal-title" style="margin:0 0 1.5rem;">Add FAQ</h3>
       <input type="hidden" id="faq-edit-index" value="-1">

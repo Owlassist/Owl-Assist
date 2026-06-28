@@ -43,7 +43,8 @@ Deno.serve(async (req) => {
         "svix-signature": svix_signature,
       });
     } catch (err) {
-      console.error("Verification failed:", err.message);
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      console.error("Verification failed:", errorMessage);
       return new Response("Error: Verification failed", { status: 400 });
     }
 
@@ -101,6 +102,7 @@ Deno.serve(async (req) => {
 
   } catch (err) {
     console.error("Webhook Processing Error:", err);
-    return new Response(JSON.stringify({ error: err.message }), { status: 500 });
+    const errorMessage = err instanceof Error ? err.message : String(err);
+    return new Response(JSON.stringify({ error: errorMessage }), { status: 500 });
   }
 });

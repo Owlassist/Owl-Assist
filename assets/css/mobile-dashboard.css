@@ -733,6 +733,7 @@ body.mobile-ui {
   position: relative;
   display: flex;
   align-items: center;
+  height: 42px;
   gap: 0.5rem;
   padding: 0.3rem 0.65rem 0.3rem 0.4rem;
   background: linear-gradient(135deg, rgba(192,193,255,0.09) 0%, rgba(128,131,255,0.03) 100%);
@@ -741,8 +742,6 @@ body.mobile-ui {
   overflow: hidden;
   cursor: default;
   transition: border-color 0.25s ease, box-shadow 0.25s ease;
-  /* Prevent it from growing too wide on small screens */
-  max-width: 130px;
 }
 
 .mob-credits-widget:active {

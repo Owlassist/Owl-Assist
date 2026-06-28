@@ -524,19 +524,28 @@ async function fetchChatSessions(businessId) {
   });
 }
 
-async function fetchChatLogs(businessId, sessionId = null) {
-  // Try querying DB directly if we have a session token (Dashboard mode)
-  const sessionToken = await window.owlAuth.getToken().catch(() => null);
-  if (sessionId && sessionToken) {
-    const supabase = await getSupabase();
-    const { data: logs, error } = await supabase
-      .from('chat_logs')
-      .select('*')
-      .eq('session_id', sessionId)
-      .order('created_at', { ascending: true });
-    if (!error) return logs || [];
-  }
+/**
+ * Dashboard-only: fetch chat logs for a specific session via direct Supabase query.
+ * This NEVER falls through to the widget proxy — it throws on error so the caller
+ * can show a visible error state instead of an infinite loading spinner.
+ */
+async function fetchChatLogsForDashboard(sessionId) {
+  if (!sessionId) throw new Error('fetchChatLogsForDashboard: sessionId is required');
+  const supabase = await getSupabase();
+  const { data: logs, error } = await supabase
+    .from('chat_logs')
+    .select('*')
+    .eq('session_id', sessionId)
+    .order('created_at', { ascending: true });
 
+  if (error) {
+    console.error('❌ fetchChatLogsForDashboard error:', error);
+    throw error;
+  }
+  return logs || [];
+}
+
+async function fetchChatLogs(businessId, sessionId = null) {
   // Chat widget mode — use the Netlify proxy for all environments
   const url = '/api/chat-ai';
   try {
@@ -655,6 +664,7 @@ window.owlDb = {
   chatWithAI,
   fetchChatSessions,
   fetchChatLogs,
+  fetchChatLogsForDashboard,
   fetchPublicChatSessions,
   deleteChatSession,
   fetchSessionByCode,

@@ -1,5 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient } from "npm:@supabase/supabase-js@2";
 
 /**
  * Manage Slots - Secure Bridge
@@ -381,9 +381,10 @@ Deno.serve(async (req) => {
 
   } catch (err) {
     console.error("Function Error:", err);
+    const errorMessage = err instanceof Error ? err.message : String(err);
     return new Response(JSON.stringify({ 
       error: "Edge Function Error", 
-      details: err.message || "Internal error"
+      details: errorMessage
     }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
 });

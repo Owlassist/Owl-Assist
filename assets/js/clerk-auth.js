@@ -93,7 +93,7 @@ async function signIn(email, password) {
       await clerk.setActive({ session: signInAttempt.createdSessionId });
       return { status: 'complete' };
     }
-    return { status: signInAttempt.status };
+    return { status: signInAttempt.status, signInAttempt };
   } catch (err) {
     // If Clerk says we are already signed in, treat it as success
     if (err.errors?.[0]?.code === 'session_exists' || err.message?.includes('already signed in')) {
@@ -101,6 +101,39 @@ async function signIn(email, password) {
     }
     throw err;
   }
+}
+
+async function prepare2FA(strategy) {
+  const clerk = await clerkPromise;
+  const signInAttempt = clerk.client.signIn;
+  
+  const factor = signInAttempt.supportedSecondFactors.find(f => f.strategy === strategy);
+  if (!factor) throw new Error(`Strategy ${strategy} not supported.`);
+  
+  const prepParams = { strategy };
+  if (strategy === 'phone_code' && factor.phoneNumberId) {
+    prepParams.phoneNumberId = factor.phoneNumberId;
+  } else if (strategy === 'email_code' && factor.emailAddressId) {
+    prepParams.emailAddressId = factor.emailAddressId;
+  }
+  
+  await signInAttempt.prepareSecondFactor(prepParams);
+}
+
+async function verify2FA(code, strategy = 'totp') {
+  const clerk = await clerkPromise;
+  const signInAttempt = clerk.client.signIn;
+  
+  const attempt = await signInAttempt.attemptSecondFactor({
+    strategy: strategy,
+    code: code
+  });
+  
+  if (attempt.status === 'complete') {
+    await clerk.setActive({ session: attempt.createdSessionId });
+    return { status: 'complete' };
+  }
+  return { status: attempt.status };
 }
 
 async function signOut() {
@@ -201,7 +234,9 @@ window.owlAuth = {
   mountProfile,
   updateUsername,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  prepare2FA,
+  verify2FA
 };
 
 

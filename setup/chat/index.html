@@ -887,6 +887,12 @@
       }
     }
 
+    async function loadChatHistory(sessId) {
+      sessionId = sessId;
+      const logs = await window.owlDb.fetchChatLogs(businessId, sessId);
+      await renderChatHistory(logs);
+    }
+
     function connectRealtimeListener(sessId) {
       if (realtimeChannel) {
         realtimeChannel.unsubscribe();

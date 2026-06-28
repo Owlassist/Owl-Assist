@@ -1,6 +1,17 @@
 /* 
   Owl Assist - Dashboard Styles
+  Desktop + Responsive Mobile Layout (Unified Codebase)
 */
+
+/* Loading Spinner Utility */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.rotating {
+  display: inline-block;
+  animation: spin 1s linear infinite;
+}
 
 .db-layout {
   display: flex;
@@ -208,72 +219,18 @@
   font-size: 0.75rem;
   font-weight: 700;
   display: inline-block;
+  text-transform: capitalize;
 }
 
 .status-pending { background: rgba(255, 183, 131, 0.15); color: #ffb783; }
 .status-confirmed { background: rgba(129, 199, 132, 0.15); color: #81c784; }
+.status-new { background: rgba(192, 193, 255, 0.12); color: var(--primary); }
+.status-contacted { background: rgba(96, 165, 250, 0.15); color: #60a5fa; }
+.status-qualified { background: rgba(129, 199, 132, 0.15); color: #81c784; }
+.status-lost { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+.status-won { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
 
-/* Responsive Dashboard */
-@media (max-width: 1024px) {
-  .db-sidebar { width: 80px; padding: 2rem 0; align-items: center; }
-  .db-sidebar .nav-logo { padding-left: 0; }
-  .db-nav-item span:not(.material-symbols-outlined) { display: none; }
-  .db-nav-item { padding: 1rem; }
-  .user-info, .sidebar-footer h4 { display: none; }
-  .db-main { margin-left: 80px; padding: 2rem; }
-}
-
-@media (max-width: 768px) {
-  .db-sidebar {
-    width: 280px;
-    transform: translateX(-100%);
-    transition: transform 0.3s ease;
-    box-shadow: 20px 0 50px rgba(0,0,0,0.5);
-  }
-  .db-sidebar.mobile-open {
-    transform: translateX(0);
-  }
-  .db-main {
-    margin-left: 0;
-    padding: 1.5rem;
-    padding-top: 5rem;
-  }
-  .stats-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-  .db-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
-  }
-  .db-header h1 { font-size: 1.5rem; }
-  
-  /* Mobile Nav Toggle */
-  .mobile-toggle {
-    display: flex !important;
-    position: fixed;
-    top: 1.25rem;
-    left: 1.25rem;
-    z-index: 100;
-    background: var(--primary);
-    color: white;
-    width: 45px;
-    height: 45px;
-    border-radius: 12px;
-    align-items: center;
-    justify-content: center;
-    border: none;
-    box-shadow: 0 4px 12px rgba(82, 107, 245, 0.4);
-    cursor: pointer;
-  }
-
-  .db-table th:nth-child(4),
-  .db-table td:nth-child(4) {
-    display: none; /* Hide created_at on mobile for space */
-  }
-}
-
+/* Mobile Toggle Button (hidden by default) */
 .mobile-toggle { display: none; }
 
 /* Dashboard Chat Conversation Styles */
@@ -307,4 +264,755 @@
   color: #8b5cf6 !important;
   text-decoration: underline;
   font-weight: 600;
+}
+
+
+/* ============================================================
+   MOBILE HEADER (hidden on desktop)
+============================================================ */
+.mob-header {
+  display: none;
+}
+
+/* ============================================================
+   BOTTOM NAVIGATION (hidden on desktop)
+============================================================ */
+.mob-bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 68px;
+  background: rgba(12, 19, 36, 0.97);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-top: 1px solid var(--border);
+  z-index: 1000;
+  align-items: flex-start;
+  justify-content: space-around;
+  padding-top: 0.55rem;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.mob-bottom-nav .mob-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  flex: 1;
+  padding: 0.3rem 0.5rem;
+  color: var(--text-dim);
+  font-size: 0.6rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  transition: color 0.2s;
+  position: relative;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mob-bottom-nav .mob-nav-item .material-symbols-outlined {
+  font-size: 1.5rem;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), font-variation-settings 0.2s;
+  font-variation-settings: 'FILL' 0, 'wght' 400;
+}
+
+.mob-bottom-nav .mob-nav-item.active {
+  color: var(--primary);
+}
+
+.mob-bottom-nav .mob-nav-item.active .material-symbols-outlined {
+  transform: translateY(-2px) scale(1.05);
+  font-variation-settings: 'FILL' 1, 'wght' 600;
+}
+
+/* Active dot indicator */
+.mob-bottom-nav .mob-nav-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--primary);
+}
+
+/* ============================================================
+   MOBILE BACK BUTTON (hidden on desktop)
+============================================================ */
+.mob-back-btn {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--primary);
+  cursor: pointer;
+  padding: 0.4rem;
+  margin-right: 0.5rem;
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mob-back-btn:active {
+  background: rgba(255,255,255,0.08);
+}
+
+/* ============================================================
+   MOBILE LEAD CARDS (hidden on desktop, shown on mobile)
+============================================================ */
+.mobile-leads-container {
+  display: none;
+}
+
+.mobile-lead-card {
+  background: rgba(21, 27, 45, 0.85);
+  border: 1px solid var(--border);
+  border-radius: 1.25rem;
+  padding: 1.1rem;
+  margin-bottom: 0.85rem;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: border-color 0.2s;
+}
+
+.mobile-lead-card:active {
+  border-color: rgba(192, 193, 255, 0.25);
+}
+
+.mobile-lead-card .card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.6rem;
+}
+
+.mobile-lead-card .card-title {
+  font-weight: 700;
+  font-size: 1rem;
+  color: white;
+}
+
+.mobile-lead-card .summary {
+  font-size: 0.83rem;
+  color: var(--text-sub);
+  line-height: 1.5;
+  margin-bottom: 0.85rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.mobile-lead-card .meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  font-size: 0.74rem;
+  color: var(--text-dim);
+  margin-bottom: 1rem;
+}
+
+.mobile-lead-card .meta span {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.mobile-lead-card .meta .material-symbols-outlined {
+  font-size: 0.95rem;
+}
+
+.mobile-lead-card .card-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+}
+
+/* Small action buttons on mobile lead cards */
+.btn-small {
+  padding: 0.55rem 0.75rem;
+  font-size: 0.78rem;
+  border-radius: 0.65rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s;
+  font-family: 'Inter', sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn-small:active {
+  background: rgba(192, 193, 255, 0.1);
+}
+
+.btn-small .material-symbols-outlined {
+  font-size: 1rem;
+}
+
+
+/* ============================================================
+   PREMIUM CREDITS WIDGET (Desktop Header — overview page)
+============================================================ */
+.credits-widget-desktop {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.45rem 1rem 0.45rem 0.6rem;
+  background: linear-gradient(135deg, rgba(192,193,255,0.08) 0%, rgba(128,131,255,0.03) 100%);
+  border: 1px solid rgba(192,193,255,0.18);
+  border-radius: 0.75rem;
+  overflow: hidden;
+  cursor: default;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+.credits-widget-desktop:hover {
+  border-color: rgba(192,193,255,0.38);
+  box-shadow: 0 0 22px rgba(192,193,255,0.12), inset 0 0 12px rgba(192,193,255,0.04);
+}
+
+.cw-orb {
+  position: absolute;
+  top: -12px; right: -12px;
+  width: 48px; height: 48px;
+  background: radial-gradient(circle, rgba(192,193,255,0.35) 0%, transparent 70%);
+  pointer-events: none;
+  animation: cwPulse 3s ease-in-out infinite;
+}
+@keyframes cwPulse {
+  0%,100% { opacity: 0.6; transform: scale(1); }
+  50%     { opacity: 1;   transform: scale(1.2); }
+}
+
+.cw-icon-wrap {
+  flex-shrink: 0;
+  width: 30px; height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(192,193,255,0.22), rgba(128,131,255,0.1));
+  border: 1px solid rgba(192,193,255,0.15);
+}
+.cw-icon-wrap .material-symbols-outlined {
+  font-size: 1rem;
+  color: var(--primary);
+  font-variation-settings: 'FILL' 1;
+}
+
+.cw-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 0;
+}
+.cw-label {
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+  line-height: 1;
+}
+.cw-value {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+
+/* ============================================================
+   TABLET RESPONSIVE (1024px)
+============================================================ */
+@media (max-width: 1024px) {
+  .db-sidebar { width: 80px; padding: 2rem 0; align-items: center; }
+  .db-sidebar .nav-logo { padding-left: 0; }
+  .db-nav-item span:not(.material-symbols-outlined) { display: none; }
+  .db-nav-item { padding: 1rem; }
+  .user-info, .sidebar-footer h4 { display: none; }
+  .db-main { margin-left: 80px; padding: 2rem; }
+}
+
+
+/* ── DESKTOP CHAT PANEL ──────────────────────────────── */
+#chat-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ============================================================
+   ═══════════════════════════════════════════════════════
+   MOBILE RESPONSIVE (≤768px) — Full Mobile-Native Layout
+   ═══════════════════════════════════════════════════════
+============================================================ */
+@media (max-width: 768px) {
+
+  /* ── HIDE DESKTOP, SHOW MOBILE SHELL ───────────────── */
+  .db-sidebar {
+    display: none !important;
+  }
+
+  .mobile-toggle {
+    display: none !important;
+  }
+
+  .db-main {
+    margin-left: 0 !important;
+    padding: 0 !important;
+    padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px) + 16px) !important;
+    min-height: 100vh;
+  }
+
+  /* ── MOBILE HEADER ─────────────────────────────────── */
+  .mob-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1.1rem;
+    height: 68px;
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    background: rgba(12, 19, 36, 0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .mob-header-user {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .mob-avatar {
+    width: 42px;
+    height: 42px;
+    min-width: 42px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: var(--on-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 1rem;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid rgba(192, 193, 255, 0.2);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .mob-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+  }
+
+  .mob-header-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.3;
+  }
+
+  .mob-welcome {
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    font-weight: 500;
+  }
+
+  .mob-name {
+    font-size: 1rem;
+    font-weight: 800;
+    color: #fff;
+  }
+
+  /* ── MOBILE CREDITS WIDGET (header) ────────────────── */
+  .mob-credits-widget {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 42px;
+    gap: 0.5rem;
+    padding: 0.3rem 0.65rem 0.3rem 0.4rem;
+    background: linear-gradient(135deg, rgba(192,193,255,0.09) 0%, rgba(128,131,255,0.03) 100%);
+    border: 1px solid rgba(192,193,255,0.2);
+    border-radius: 0.65rem;
+    overflow: hidden;
+    cursor: default;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .mob-cw-orb {
+    position: absolute;
+    top: -8px; right: -8px;
+    width: 36px; height: 36px;
+    background: radial-gradient(circle, rgba(192,193,255,0.4) 0%, transparent 70%);
+    pointer-events: none;
+    animation: cwPulse 3s ease-in-out infinite;
+  }
+
+  .mob-cw-icon {
+    flex-shrink: 0;
+    width: 26px; height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 7px;
+    background: linear-gradient(135deg, rgba(192,193,255,0.22), rgba(128,131,255,0.1));
+    border: 1px solid rgba(192,193,255,0.15);
+  }
+
+  .mob-cw-icon .material-symbols-outlined {
+    font-size: 0.95rem;
+    color: var(--primary);
+    font-variation-settings: 'FILL' 1;
+  }
+
+  .mob-cw-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    min-width: 0;
+  }
+
+  .mob-cw-label {
+    font-size: 0.55rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .mob-cw-value {
+    font-size: 0.92rem;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.25;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Hide desktop credits widget on mobile */
+  .credits-widget-desktop {
+    display: none !important;
+  }
+
+  /* ── BOTTOM NAVIGATION ─────────────────────────────── */
+  .mob-bottom-nav {
+    display: flex !important;
+  }
+
+  /* ── MAIN CONTENT PADDING ──────────────────────────── */
+  .app-view {
+    padding: 1.1rem;
+  }
+
+  /* ── VIEW HEADERS ──────────────────────────────────── */
+  .db-view-header,
+  .db-header.db-view-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem !important;
+  }
+
+  .db-header h1 {
+    font-size: 1.4rem;
+  }
+
+  /* ── SHARE CARD ────────────────────────────────────── */
+  .share-box-container {
+    flex-direction: column !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .share-box-container input {
+    background: rgba(0, 0, 0, 0.2) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-sm) !important;
+    width: 100% !important;
+    padding: 0.75rem !important;
+    font-size: 0.85rem !important;
+  }
+
+  .share-box-container .btn {
+    width: 100% !important;
+    justify-content: center;
+  }
+
+  /* ── STATS GRID — 2×2 Mobile ───────────────────────── */
+  .stats-grid,
+  #stats-container {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 0.85rem !important;
+  }
+
+  .stat-card {
+    padding: 1rem !important;
+    border-radius: 1.25rem;
+  }
+
+  .stat-card .stat-label {
+    font-size: 0.7rem;
+  }
+
+  .stat-card .stat-value {
+    font-size: 1.6rem;
+  }
+
+  .stat-card canvas {
+    height: 40px !important;
+  }
+
+  /* ── GLASS CARD adjustments ────────────────────────── */
+  .glass-card {
+    padding: 1.1rem !important;
+    border-radius: 1.25rem;
+  }
+
+  /* ── TABLE → CARD transformation ───────────────────── */
+  .table-responsive {
+    display: none !important;
+  }
+
+  .mobile-leads-container {
+    display: block !important;
+  }
+
+  /* ── CONVERSATIONS — Full panel switching ──────────── */
+  .conversation-layout {
+    display: flex !important;
+    flex-direction: column;
+    grid-template-columns: 1fr !important;
+    height: calc(100vh - 68px - 68px - env(safe-area-inset-bottom, 0px) - 16px);
+    gap: 0;
+    position: relative;
+  }
+
+  #session-panel,
+  #chat-panel {
+    display: none;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 0 !important;
+    z-index: 10;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--surface) !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+
+  #session-panel.panel-active,
+  #chat-panel.panel-active {
+    display: flex;
+  }
+
+  .mob-back-btn {
+    display: flex !important;
+  }
+
+  /* ── SETTINGS LAYOUT ───────────────────────────────── */
+  .settings-layout {
+    flex-direction: column !important;
+    gap: 1.25rem !important;
+  }
+
+  /* Settings sidebar → horizontal scrollable tabs */
+  .settings-layout aside,
+  .settings-sidebar {
+    min-width: 100% !important;
+    width: 100% !important;
+    flex-direction: row !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+    gap: 0.5rem !important;
+    display: flex !important;
+  }
+
+  .settings-nav-item {
+    padding: 0.6rem 1rem !important;
+    white-space: nowrap !important;
+    font-size: 0.82rem !important;
+    min-height: 44px;
+  }
+
+  .settings-nav-item span:not(.material-symbols-outlined) {
+    display: inline !important;
+  }
+
+  /* Hide scrollbar on settings tabs */
+  .settings-layout aside::-webkit-scrollbar,
+  .settings-sidebar::-webkit-scrollbar {
+    display: none;
+  }
+  .settings-layout aside,
+  .settings-sidebar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Profile flex stacks on mobile */
+  .profile-flex {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    width: 100% !important;
+  }
+
+  .profile-flex > div {
+    width: 100% !important;
+  }
+
+  /* Form inputs full width on mobile */
+  .form-group input,
+  .form-group textarea {
+    font-size: 16px !important; /* Prevents iOS zoom on focus */
+  }
+
+  /* ── PRICING — single column on mobile ─────────────── */
+  .pricing-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* ── MODAL → bottom-sheet on mobile ────────────────── */
+  .modal-overlay,
+  #custom-modal {
+    align-items: flex-end !important;
+    padding: 0 !important;
+    padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+  }
+
+  .modal-overlay > div,
+  #custom-modal > div {
+    border-radius: 1.5rem 1.5rem 0 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    animation: mobileSheetUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  }
+
+  @keyframes mobileSheetUp {
+    from { transform: translateY(60px); opacity: 0; }
+    to   { transform: translateY(0); opacity: 1; }
+  }
+
+  /* FAQ Modal bottom sheet on mobile */
+  #faq-modal {
+    align-items: flex-end !important;
+    padding: 0 !important;
+  }
+
+  #faq-modal > div {
+    border-radius: 1.5rem 1.5rem 0 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+
+  /* ── THEME PREVIEW compact on mobile ───────────────── */
+  #theme-preview {
+    max-width: 100% !important;
+  }
+
+  /* ── WIDGET SETUP full width ───────────────────────── */
+  #view-widget .glass-card {
+    border-radius: 1.25rem;
+  }
+
+  /* ── SECTION HEADERS (overview recent leads) ───────── */
+  .db-view-header h2 {
+    font-size: 1.1rem;
+  }
+
+  /* ── EMPTY STATES compact on mobile ────────────────── */
+  .empty-state {
+    padding: 2.5rem 1rem;
+  }
+
+  .empty-state .material-symbols-outlined {
+    font-size: 3rem;
+  }
+
+  /* ── Touch-friendly: ensure min tap targets ────────── */
+  button, a, .action-trigger, .settings-nav-item, .mob-nav-item {
+    min-height: 44px;
+  }
+
+  /* ── Scrollable containers smooth touch scroll ───────── */
+  #session-panel,
+  #chat-messages {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  /* ── Session items — enhanced for mobile ───────────── */
+  .session-item,
+  #session-list > div {
+    border-radius: 0.75rem !important;
+    margin-bottom: 0.5rem;
+  }
+
+  /* ── CHAT INPUT — mobile adjustments ───────────────── */
+  #chat-input-area {
+    padding: 0.75rem !important;
+  }
+
+  #chat-input-area .toggle-switch {
+    font-size: 0.75rem;
+  }
+
+  #owner-chat-input {
+    font-size: 16px !important; /* Prevent iOS zoom */
+  }
+}
+
+
+/* ============================================================
+   VERY SMALL SCREENS (≤400px)
+============================================================ */
+@media (max-width: 400px) {
+  .stats-grid,
+  #stats-container {
+    grid-template-columns: 1fr !important;
+  }
+
+  .mobile-lead-card .card-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .mob-header {
+    padding: 0 0.75rem;
+  }
+
+  .mob-cw-label {
+    display: none;
+  }
 }
