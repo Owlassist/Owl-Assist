@@ -464,11 +464,10 @@ async function createBooking(details) {
 /**
  * Chat with Gemini Flash AI using our secure Edge Function
  */
-async function chatWithAI(businessId, message, history = [], getGreeting = false, sessionId = null) {
+async function chatWithAI(businessId, message, history = [], getGreeting = false, sessionId = null, abortSignal = null) {
   const url = '/api/chat-ai';
 
-  // Use proxy for HttpOnly cookies instead of supabase.functions.invoke
-  const res = await fetch(url, {
+  const fetchOpts = {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
@@ -479,7 +478,12 @@ async function chatWithAI(businessId, message, history = [], getGreeting = false
       is_greeting: getGreeting,
       session_id: sessionId
     })
-  });
+  };
+  if (abortSignal) {
+    fetchOpts.signal = abortSignal;
+  }
+
+  const res = await fetch(url, fetchOpts);
   
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Failed to fetch from AI");
@@ -505,6 +509,9 @@ async function fetchChatSessions(businessId) {
   const uniqueSessions = [];
   const seen = new Set();
   logs.forEach(item => {
+    if (item.session_id && item.session_id.startsWith('copilot_')) {
+      return; // Skip copilot sessions between owner and Noctra
+    }
     if (!seen.has(item.session_id)) {
       seen.add(item.session_id);
       uniqueSessions.push(item);
@@ -722,6 +729,52 @@ async function saveTheme(businessId, colors) {
   if (error) throw error;
 }
 
+/**
+ * Notifications Management
+ */
+async function fetchNotifications(businessId) {
+  const supabase = await getSupabase();
+  const { data, error } = await supabase
+    .from('notifications')
+    .select('*')
+    .eq('business_id', businessId)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching notifications:', error);
+    return [];
+  }
+  return data;
+}
+
+async function markNotificationsRead(businessId) {
+  const supabase = await getSupabase();
+  const { error } = await supabase
+    .from('notifications')
+    .update({ is_read: true })
+    .eq('business_id', businessId)
+    .eq('is_read', false);
+
+  if (error) {
+    console.error('Error marking notifications read:', error);
+    throw error;
+  }
+}
+
+function subscribeToNotifications(businessId, callback) {
+  getSupabase().then(supabase => {
+    supabase.channel('custom-all-channel')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'notifications', filter: `business_id=eq.${businessId}` },
+        (payload) => {
+          callback(payload);
+        }
+      )
+      .subscribe();
+  });
+}
+
 window.owlDb = {
   getSupabase,
   fetchBusinessData,
@@ -753,5 +806,8 @@ window.owlDb = {
   saveTheme,
   checkCustomer,
   getCustomerSessions,
-  markSessionAsRead
+  markSessionAsRead,
+  fetchNotifications,
+  markNotificationsRead,
+  subscribeToNotifications
 };

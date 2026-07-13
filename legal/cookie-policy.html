@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Cookie Policy | Owl Assist</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap"
+    rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    rel="stylesheet" />
+
+  <!-- Favicons -->
+  <link rel="icon" type="image/x-icon" href="/assets/img/logo/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/logo/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/img/logo/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/logo/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/img/logo/site.webmanifest">
+
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "inverse-on-surface": "#2a3043",
+            "surface-container-low": "#151b2d",
+            "surface-container": "#191f31",
+            "tertiary-fixed": "#ffdcc5",
+            "surface-container-high": "#23293c",
+            "on-tertiary": "#4f2500",
+            "primary-fixed-dim": "#c0c1ff",
+            "surface-bright": "#33394c",
+            "tertiary-fixed-dim": "#ffb783",
+            "primary-fixed": "#e1e0ff",
+            "secondary-fixed-dim": "#bec6e0",
+            "tertiary-container": "#d97721",
+            "secondary-fixed": "#dae2fd",
+            "on-tertiary-fixed": "#301400",
+            "on-secondary-fixed-variant": "#3f465c",
+            "on-background": "#dce1fb",
+            "error": "#ffb4ab",
+            "secondary-container": "#3f465c",
+            "surface-dim": "#0c1324",
+            "on-primary": "#1000a9",
+            "surface-variant": "#2e3447",
+            "on-error-container": "#ffdad6",
+            "on-secondary": "#283044",
+            "tertiary": "#ffb783",
+            "on-tertiary-fixed-variant": "#703700",
+            "on-primary-fixed-variant": "#2f2ebe",
+            "error-container": "#93000a",
+            "on-primary-container": "#0d0096",
+            "inverse-primary": "#494bd6",
+            "on-secondary-fixed": "#131b2e",
+            "on-primary-fixed": "#07006c",
+            "background": "#0c1324",
+            "on-secondary-container": "#adb4ce",
+            "outline-variant": "#464554",
+            "on-tertiary-container": "#452000",
+            "surface-container-lowest": "#070d1f",
+            "primary": "#c0c1ff",
+            "secondary": "#bec6e0",
+            "outline": "#908fa0",
+            "on-error": "#690005",
+            "surface-tint": "#c0c1ff",
+            "primary-container": "#8083ff",
+            "surface": "#0c1324",
+            "on-surface-variant": "#c7c4d7",
+            "surface-container-highest": "#2e3447",
+            "on-surface": "#dce1fb",
+            "inverse-surface": "#dce1fb"
+          },
+          fontFamily: {
+            "headline": ["Inter"],
+            "body": ["Inter"],
+            "label": ["Inter"]
+          },
+          borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+        },
+      },
+    }
+  </script>
+  <style>
+    body {
+      background-color: #0c1324;
+      color: #dce1fb;
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+    }
+
+    .glass-card {
+      background: rgba(35, 41, 60, 0.6);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(199, 196, 215, 0.1);
+    }
+  </style>
+</head>
+
+<body class="bg-surface selection:bg-primary selection:text-on-primary">
+  <!-- TopNavBar Component (will be synchronized by update_nav_footer.js) -->
+  <nav class="fixed top-0 w-full z-50 border-b border-[#c7c4d7]/10 bg-[#0c1324]/70 backdrop-blur-xl">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+
+      <!-- Logo -->
+      <a href="/" class="text-xl font-black tracking-tight text-white flex items-center gap-2" style="text-decoration:none;">
+        <img src="/assets/img/logo/logo.png" alt="Owl Assist Logo" class="h-8 w-8 object-contain" />
+        Owl Assist
+      </a>
+
+      <!-- Desktop Menu -->
+      <div class="hidden md:flex items-center gap-8 font-medium text-sm">
+        <a class="text-[#c7c4d7] hover:text-white" href="/">Home</a>
+        <a class="text-[#c7c4d7] hover:text-white" href="/pricing">Pricing</a>
+        <a class="text-[#c7c4d7] hover:text-white" href="/faq">FAQ</a>
+      </div>
+
+      <!-- CTA -->
+      <div class="hidden md:flex items-center gap-4">
+        <a href="/auth/login" class="text-white font-bold text-sm hover:text-primary transition-colors">
+          Log In
+        </a>
+        <a href="/auth/signup"
+          class="bg-primary text-on-primary px-6 py-2.5 rounded-xl font-bold text-sm shadow-lg hover:scale-105 transition-all">
+          Get Started
+        </a>
+      </div>
+
+      <!-- Hamburger -->
+      <button id="menuBtn" class="md:hidden text-white">
+        <span class="material-symbols-outlined text-3xl">menu</span>
+      </button>
+
+    </div>
+
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="hidden md:hidden px-6 pb-6 space-y-4 bg-[#0c1324]/95 backdrop-blur-xl">
+
+      <a href="/" class="block text-white font-semibold">Home</a>
+      <a href="/pricing" class="block text-[#c7c4d7]">Pricing</a>
+      <a href="/faq" class="block text-[#c7c4d7]">FAQ</a>
+
+      <div class="flex flex-col gap-3 mt-4">
+        <a href="/auth/login"
+          class="w-full text-center border border-outline-variant text-white py-3 rounded-xl font-bold">
+          Log In
+        </a>
+        <a href="/auth/signup" class="w-full text-center bg-primary text-on-primary py-3 rounded-xl font-bold">
+          Get Started
+        </a>
+      </div>
+
+    </div>
+  </nav>
+
+  <!-- Content -->
+  <main class="pt-32 pb-20 px-6 max-w-4xl mx-auto">
+    <h1 class="text-4xl font-extrabold text-white mb-2 tracking-tight">Cookie Policy</h1>
+    <p class="text-sm text-on-surface-variant mb-8">Last Updated: July 13, 2026</p>
+
+    <div class="space-y-8 text-[#c7c4d7] leading-relaxed font-['Inter']">
+      <section class="glass-card p-6 rounded-2xl">
+        <h2 class="text-xl font-bold text-white mb-3 flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary">cookie</span>
+          1. What Are Cookies?
+        </h2>
+        <p class="text-sm text-[#adb4ce]">
+          Cookies are small text files stored on your computer or mobile device when you visit a website. They are widely used to make websites work, or work more efficiently, as well as to provide information to the owners of the site.
+        </p>
+      </section>
+
+      <section class="glass-card p-6 rounded-2xl">
+        <h2 class="text-xl font-bold text-white mb-3 flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary">category</span>
+          2. How We Use Cookies
+        </h2>
+        <p class="mb-3">We use cookies on Owl Assist for the following reasons:</p>
+        <ul class="list-disc pl-5 space-y-3 text-sm text-[#adb4ce]">
+          <li><strong>Essential & Authentication Cookies:</strong> These cookies are strictly necessary to provide you with services available through our platform and to use some of its features, such as accessing secure dashboard areas via Clerk auth.</li>
+          <li><strong>Performance & Analytics Cookies:</strong> These cookies collect information that is used in aggregate form to help us understand how our website is being used (e.g., tracking country locations to serve pricing) and to measure how effective our marketing campaigns are.</li>
+          <li><strong>AI Widget Context:</strong> Functional cookies are used by the AI widget to remember user sessions, conversation states, and booking progression without prompting authentication.</li>
+        </ul>
+      </section>
+
+      <section class="glass-card p-6 rounded-2xl">
+        <h2 class="text-xl font-bold text-white mb-3 flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary">tune</span>
+          3. Controlling Cookies
+        </h2>
+        <p class="mb-3">
+          You have the right to decide whether to accept or reject cookies. You can set or amend your web browser controls to accept or refuse cookies.
+        </p>
+        <p class="text-sm text-[#adb4ce]">
+          If you choose to reject cookies, you may still use our website, though your access to some functionality and areas of our website (like log-in dashboards and saved chat histories in the booking widget) may be restricted.
+        </p>
+      </section>
+
+      <section class="glass-card p-6 rounded-2xl">
+        <h2 class="text-xl font-bold text-white mb-3 flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary">mail</span>
+          4. More Information
+        </h2>
+        <p class="mb-4">For any inquiries regarding our Cookie Policy, please contact our privacy desk:</p>
+        <div class="p-4 rounded-xl bg-surface-container-low/50 border border-outline-variant/10">
+          <p class="text-white font-semibold">Privacy Team</p>
+          <p class="text-sm text-[#c7c4d7]">Email: <a href="mailto:privacy@owlassist.app" class="text-primary hover:underline font-medium">privacy@owlassist.app</a></p>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Footer Component (will be synchronized by update_nav_footer.js) -->
+  <footer class="w-full border-t border-[#c7c4d7]/5 bg-[#0c1324]">
+    <div class="max-w-7xl mx-auto px-8 py-12 flex flex-col md:flex-row justify-between">
+      <div class="mb-8 md:mb-0">
+        <div class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+          <img src="/assets/img/logo/logo.png" alt="Owl Assist Logo" class="h-7 w-7 object-contain" />
+          Owl Assist
+        </div>
+        <p class="font-['Inter'] text-[#c7c4d7] text-sm max-w-xs leading-relaxed">
+          Pioneering the future of AI reception and automated customer experiences for global enterprises.
+        </p>
+      </div>
+      <div class="grid grid-cols-2 lg:grid-cols-3 gap-12">
+        <div class="flex flex-col gap-4">
+          <h4 class="text-white font-bold text-sm uppercase tracking-widest">Platform</h4>
+          <a class="font-['Inter'] text-[#c7c4d7] text-sm hover:text-white transition-colors duration-200"
+            href="/pricing">Pricing</a>
+        </div>
+        <div class="flex flex-col gap-4">
+          <h4 class="text-white font-bold text-sm uppercase tracking-widest">Company</h4>
+          <a class="font-['Inter'] text-[#c7c4d7] text-sm hover:text-white transition-colors duration-200"
+            href="/legal/privacy-policy">Privacy Policy</a>
+          <a class="font-['Inter'] text-[#c7c4d7] text-sm hover:text-white transition-colors duration-200"
+            href="/legal/terms-of-service">Terms of Service</a>
+          <a class="font-['Inter'] text-[#c7c4d7] text-sm hover:text-white transition-colors duration-200"
+            href="/legal/cookie-policy">Cookie Policy</a>
+          <a class="font-['Inter'] text-[#c7c4d7] text-sm hover:text-white transition-colors duration-200"
+            href="mailto:Hello@owlassist.app">Contact Us</a>
+          <a class="font-['Inter'] text-[#c7c4d7] text-sm hover:text-white transition-colors duration-200"
+            href="mailto:support@owlassist.app">Support</a>
+        </div>
+        <div class="flex flex-col gap-4">
+          <h4 class="text-white font-bold text-sm uppercase tracking-widest">Social</h4>
+          <a class="font-['Inter'] text-[#c7c4d7] text-sm hover:text-white transition-colors duration-200"
+            href="https://X.com/owlassistapp" target="_blank">Twitter / X</a>
+          <a class="font-['Inter'] text-[#c7c4d7] text-sm hover:text-white transition-colors duration-200"
+            href="https://instagram.com/owlassistapp" target="_blank">Instagram</a>
+          <a class="font-['Inter'] text-[#c7c4d7] text-sm hover:text-white transition-colors duration-200"
+            href="https://tiktok.com/@owlassist" target="_blank">TikTok</a>
+        </div>
+      </div>
+    </div>
+    <div class="max-w-7xl mx-auto px-8 pb-8 text-center md:text-left">
+      <p class="font-['Inter'] text-[#c7c4d7] text-xs opacity-50">© 2026 Owl Assist AI. All rights reserved.</p>
+    </div>
+  </footer>
+<script>
+    // ── Mobile menu ───────────────────────────────────────────────────────────
+    const menuBtn = document.getElementById('menuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    if(menuBtn) {
+        menuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    }
+</script>
+</body>
+
+</html>

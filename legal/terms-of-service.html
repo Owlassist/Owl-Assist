@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Terms of Service | Owl Assist</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap"
+    rel="stylesheet" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+    rel="stylesheet" />
+
+  <!-- Favicons -->
+  <link rel="icon" type="image/x-icon" href="/assets/img/logo/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/logo/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/img/logo/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/logo/apple-touch-icon.png">
+  <link rel="manifest" href="/assets/img/logo/site.webmanifest">
+
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "inverse-on-surface": "#2a3043",
+            "surface-container-low": "#151b2d",
+            "surface-container": "#191f31",
+            "tertiary-fixed": "#ffdcc5",
+            "surface-container-high": "#23293c",
+            "on-tertiary": "#4f2500",
+            "primary-fixed-dim": "#c0c1ff",
+            "surface-bright": "#33394c",
+            "tertiary-fixed-dim": "#ffb783",
+            "primary-fixed": "#e1e0ff",
+            "secondary-fixed-dim": "#bec6e0",
+            "tertiary-container": "#d97721",
+            "secondary-fixed": "#dae2fd",
+            "on-tertiary-fixed": "#301400",
+            "on-secondary-fixed-variant": "#3f465c",
+            "on-background": "#dce1fb",
+            "error": "#ffb4ab",
+            "secondary-container": "#3f465c",
+            "surface-dim": "#0c1324",
+            "on-primary": "#1000a9",
+            "surface-variant": "#2e3447",
+            "on-error-container": "#ffdad6",
+            "on-secondary": "#283044",
+            "tertiary": "#ffb783",
+            "on-tertiary-fixed-variant": "#703700",
+            "on-primary-fixed-variant": "#2f2ebe",
+            "error-container": "#93000a",
+            "on-primary-container": "#0d0096",
+            "inverse-primary": "#494bd6",
+            "on-secondary-fixed": "#131b2e",
+            "on-primary-fixed": "#07006c",
+            "background": "#0c1324",
+            "on-secondary-container": "#adb4ce",
+            "outline-variant": "#464554",
+            "on-tertiary-container": "#452000",
+            "surface-container-lowest": "#070d1f",
+            "primary": "#c0c1ff",
+            "secondary": "#bec6e0",
+            "outline": "#908fa0",
+            "on-error": "#690005",
+            "surface-tint": "#c0c1ff",
+            "primary-container": "#8083ff",
+            "surface": "#0c1324",
+            "on-surface-variant": "#c7c4d7",
+            "surface-container-highest": "#2e3447",
+            "on-surface": "#dce1fb",
+            "inverse-surface": "#dce1fb"
+          },
+          fontFamily: {
+            "headline": ["Inter"],
+            "body": ["Inter"],
+            "label": ["Inter"]
+          },
+          borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+        },
+      },
+    }
+  </script>
+  <style>
+    body {
+      background-color: #0c1324;
+      color: #dce1fb;
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+    }
+
+    .glass-card {
+      background: rgba(35, 41, 60, 0.6);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(199, 196, 215, 0.1);
+    }
+  </style>
+</head>
+
+<body class="bg-surface selection:bg-primary selection:text-on-primary">
+  <!-- TopNavBar Component (will be synchronized by update_nav_footer.js) -->
+  <nav class="fixed top-0 w-full z-50 border-b border-[#c7c4d7]/10 bg-[#0c1324]/70 backdrop-blur-xl">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+
+      <!-- Logo -->
+      <a href="/" class="text-xl font-black tracking-tight text-white flex items-center gap-2" style="text-decoration:none;">
+        <img src="/assets/img/logo/logo.png" alt="Owl Assist Logo" class="h-8 w-8 object-contain" />
+        Owl Assist
+      </a>
+
+      <!-- Desktop Menu -->
+      <div class="hidden md:flex items-center gap-8 font-medium text-sm">
+        <a class="text-[#c7c4d7] hover:text-white" href="/">Home</a>
+        <a class="text-[#c7c4d7] hover:text-white" href="/pricing">Pricing</a>
+        <a class="text-[#c7c4d7] hover:text-white" href="/faq">FAQ</a>
+      </div>
+
+      <!-- CTA -->
+      <div class="hidden md:flex items-center gap-4">
+        <a href="/auth/login" class="text-white font-bold text-sm hover:text-primary transition-colors">
+          Log In
+        </a>
+        <a href="/auth/signup"
+          class="bg-primary text-on-primary px-6 py-2.5 rounded-xl font-bold text-sm shadow-lg hover:scale-105 transition-all">
+          Get Started
+        </a>
+      </div>
+
+      <!-- Hamburger -->
+      <button id="menuBtn" class="md:hidden text-white">
+        <span class="material-symbols-outlined text-3xl">menu</span>
+      </button>
+
+    </div>
+
+    <!-- Mobile Menu -->
+    <div id="mobileMenu" class="hidden md:hidden px-6 pb-6 space-y-4 bg-[#0c1324]/95 backdrop-blur-xl">
+
+      <a href="/" class="block text-white font-semibold">Home</a>
+      <a href="/pricing" class="block text-[#c7c4d7]">Pricing</a>
+      <a href="/faq" class="block text-[#c7c4d7]">FAQ</a>
+
+      <div class="flex flex-col gap-3 mt-4">
+        <a href="/auth/login"
+          class="w-full text-center border border-outline-variant text-white py-3 rounded-xl font-bold">
+          Log In
+        </a>
+        <a href="/auth/signup" class="w-full text-center bg-primary text-on-primary py-3 rounded-xl font-bold">
+          Get Started
+        </a>
+      </div>
+
+    </div>
+  </nav>
+
+  <!-- Content -->
+  <main class="pt-32 pb-20 px-6 max-w-4xl mx-auto">
+    <h1 class="text-4xl font-extrabold text-white mb-2 tracking-tight">Terms of Service</h1>
+    <p class="text-sm text-on-surface-variant mb-8">Last Updated: July 13, 2026</p>
+
+    <div class="space-y-8 text-[#c7c4d7] leading-relaxed font-['Inter']">
+      <section class="glass-card p-6 rounded-2xl">
+        <h2 class="text-xl font-bold text-white mb-3 flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary">gavel</span>
+          1. Agreement to Terms
+        </h2>
+        <p class="text-sm text-[#adb4ce]">
+          Welcome to Owl Assist. By registering for an account, embedding our receptionist chat widget, or utilizing any of our automated customer experience services, you agree to comply with and be bound by these Terms of Service. If you disagree with any part of these terms, you must immediately cease using the platform.
+        </p>
+      </section>
+
+      <section class="glass-card p-6 rounded-2xl">
+        <h2 class="text-xl font-bold text-white mb-3 flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary">smart_toy</span>
+          2. Artificial Intelligence and LLM Service Integration
+        </h2>
+        <p class="mb-3">
+          Our platform integrates advanced Large Language Models (LLMs) to facilitate receptionist conversations, schedule bookings, and query your business FAQs. 
+        </p>
+        <p class="mb-3 text-sm text-[#adb4ce]">
+          Specifically, we leverage models and APIs provided by:
+        </p>
+        <ul class="list-disc pl-5 space-y-2 mb-3 text-sm text-[#adb4ce]">
+          <li><strong>Google Gemini:</strong> Serving as our primary language model API provider.</li>
+          <li><strong>Mistral AI:</strong> Supporting fallback structures and specific localized intent categorization.</li>
+          <li><strong>Groq:</strong> Powering ultra-low latency open models (e.g., Llama 3, Mixtral) to ensure rapid booking confirmation flows.</li>
+          <li><strong>OpenRouter:</strong> Providing robust API routing and multi-provider models fallback capabilities.</li>
+        </ul>
+        <p class="text-xs text-on-surface-variant">
+          Note: By utilizing our AI receptionist services, you acknowledge that AI models generate content based on parameters and data provided by your business. While we train and optimize models for reliability, Owl Assist is not liable for minor hallucinations, conversational errors, or formatting anomalies caused by these third-party AI APIs.
+        </p>
+      </section>
+
+      <section class="glass-card p-6 rounded-2xl">
+        <h2 class="text-xl font-bold text-white mb-3 flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary">account_box</span>
+          3. Account Registration and Subscriptions
+        </h2>
+        <p class="mb-3">
+          To access the Owl Assist dashboard, you must register using Clerk credentials. You are responsible for safeguarding your login session.
+        </p>
+        <p class="text-sm text-[#adb4ce]">
+          We currently offer a Starter (free) plan and a Pro subscription (billed in USD or NGN via Paystack). Subscriptions are governed by standard credit limits and feature toggles, which can be modified at our discretion.
+        </p>
+      </section>
+
+      <section class="glass-card p-6 rounded-2xl">
+        <h2 class="text-xl font-bold text-white mb-3 flex items-center gap-2">
+          <span class="material-symbols-outlined text-primary">admin_panel_settings</span>
+          4. Contact Information
+        </h2>
+        <p class="mb-4">For any inquiries, legal concerns, or security incident reports, please contact us at the appropriate desk below:</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="p-4 rounded-xl bg-surface-container-low/50 border border-outline-variant/10">
+            <p class="text-white font-semibold flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary text-lg">gavel</span> Legal Desk
+            </p>
+            <p class="text-xs text-on-surface-variant mt-1">For Terms revisions, disputes, and compliance queries:</p>
+            <p class="text-sm text-[#c7c4d7] mt-2">Email: <a href="mailto:legal@owlassist.app" class="text-primary hover:underline font-medium">legal@owlassist.app</a></p>
+          </div>
+          
+          <div class="p-4 rounded-xl bg-surface-container-low/50 border border-outline-variant/10">
+            <p class="text-white font-semibold flex items-center gap-2">
+              <span class="material-symbols-outlined text-primary text-lg">security</span> Security Desk
+            </p>
+            <p class="text-xs text-on-surface-variant mt-1">For reporting vulnerabilities, data breaches, or compliance incidents:</p>
+            <p class="text-sm text-[#c7c4d7] mt-2">Email: <a href="mailto:security@owlassist.app" class="text-primary hover:underline font-medium">security@owlassist.app</a></p>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Footer Component (will be synchronized by update_nav_footer.js) -->
+  <footer class="w-full border-t border-[#c7c4d7]/5 bg-[#0c1324]">
+    <div class="max-w-7xl mx-auto px-8 py-12 flex flex-col md:flex-row justify-between">
+      <div class="mb-8 md:mb-0">
+        <div class="text-lg font-bold text-white mb-4 flex items-center gap-2">
+          <img src="/assets/img/logo/logo.png" alt="Owl Assist Logo" class="h-7 w-7 object-contain" />
+          Owl Assist
+        </div>
+        <p class="font-['Inter'] text-[#c7c4d7] text-sm max-w-xs leading-relaxed">
+          Pioneering the future of AI reception and automated customer experiences for global enterprises.
+        </p>
+      </div>
+      <div class="grid grid-cols-2 lg:grid-cols-3 gap-12">
+        <div class="flex flex-col gap-4">
+          <h4 class="text-white font-bold text-sm uppercase tracking-widest">Platform</h4>
+          <a class="font-['Inter'] text-[#c7c4d7] text-sm hover:text-white transition-colors duration-200"
+            href="/pricing">Pricing</a>
+        </div>
+        <div class="flex flex-col gap-4">
+          <h4 class="text-white font-bold text-sm uppercase tracking-widest">Company</h4>
+          <a class="font-['Inter'] text-[#c7c4d7] text-sm hover:text-white transition-colors duration-200"
+            href="/legal/privacy-policy">Privacy Policy</a>
+          <a class="font-['Inter'] text-[#c7c4d7] text-sm hover:text-white transition-colors duration-200"
+            href="/legal/terms-of-service">Terms of Service</a>
+          <a class="font-['Inter'] text-[#c7c4d7] text-sm hover:text-white transition-colors duration-200"
+            href="/legal/cookie-policy">Cookie Policy</a>
+          <a class="font-['Inter'] text-[#c7c4d7] text-sm hover:text-white transition-colors duration-200"
+            href="mailto:Hello@owlassist.app">Contact Us</a>
+          <a class="font-['Inter'] text-[#c7c4d7] text-sm hover:text-white transition-colors duration-200"
+            href="mailto:support@owlassist.app">Support</a>
+        </div>
+        <div class="flex flex-col gap-4">
+          <h4 class="text-white font-bold text-sm uppercase tracking-widest">Social</h4>
+          <a class="font-['Inter'] text-[#c7c4d7] text-sm hover:text-white transition-colors duration-200"
+            href="https://X.com/owlassistapp" target="_blank">Twitter / X</a>
+          <a class="font-['Inter'] text-[#c7c4d7] text-sm hover:text-white transition-colors duration-200"
+            href="https://instagram.com/owlassistapp" target="_blank">Instagram</a>
+          <a class="font-['Inter'] text-[#c7c4d7] text-sm hover:text-white transition-colors duration-200"
+            href="https://tiktok.com/@owlassist" target="_blank">TikTok</a>
+        </div>
+      </div>
+    </div>
+    <div class="max-w-7xl mx-auto px-8 pb-8 text-center md:text-left">
+      <p class="font-['Inter'] text-[#c7c4d7] text-xs opacity-50">© 2026 Owl Assist AI. All rights reserved.</p>
+    </div>
+  </footer>
+<script>
+    // ── Mobile menu ───────────────────────────────────────────────────────────
+    const menuBtn = document.getElementById('menuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    if(menuBtn) {
+        menuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    }
+</script>
+</body>
+
+</html>

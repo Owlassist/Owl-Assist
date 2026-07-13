@@ -130,6 +130,104 @@
   border-bottom-left-radius: 0;
 }
 
+/* Markdown styling inside bot message bubble */
+.owl-msg.bot p {
+  margin: 0 0 0.5rem 0;
+}
+.owl-msg.bot p:last-child {
+  margin-bottom: 0;
+}
+.owl-msg.bot a {
+  color: #c0c1ff;
+  text-decoration: underline;
+  font-weight: 600;
+  transition: opacity 0.2s;
+}
+.owl-msg.bot a:hover {
+  opacity: 0.8;
+}
+.owl-msg.bot ol, .owl-msg.bot ul {
+  margin-left: 1.25rem;
+  margin-top: 0.4rem;
+  margin-bottom: 0.4rem;
+  padding: 0;
+}
+.owl-msg.bot ul {
+  list-style-type: disc;
+}
+.owl-msg.bot ol {
+  list-style-type: decimal;
+}
+.owl-msg.bot li {
+  margin-bottom: 0.35rem;
+  color: #a1a1aa;
+}
+.owl-msg.bot li::marker {
+  color: #c0c1ff;
+  font-weight: 700;
+}
+.owl-msg.bot table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75rem 0;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  display: block;
+  overflow-x: auto;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.02);
+}
+.owl-msg.bot th {
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+  font-weight: 600;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: left;
+}
+.owl-msg.bot td {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.75);
+}
+.owl-msg.bot tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.02);
+}
+.owl-msg.bot code {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 0.85em;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.25rem;
+  color: #ff859d;
+}
+.owl-msg.bot pre {
+  margin: 0.75rem 0;
+  padding: 0.75rem;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.5rem;
+  overflow-x: auto;
+}
+.owl-msg.bot pre code {
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  color: #e2e8f0;
+  display: block;
+}
+.owl-msg.bot h1, .owl-msg.bot h2, .owl-msg.bot h3, .owl-msg.bot h4 {
+  color: white;
+  margin-top: 0.75rem;
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+}
+.owl-msg.bot h1 { font-size: 1.3rem; }
+.owl-msg.bot h2 { font-size: 1.2rem; }
+.owl-msg.bot h3 { font-size: 1.1rem; }
+.owl-msg.bot h4 { font-size: 1rem; }
+
 .owl-msg.user {
   background: #c0c1ff;
   color: #1000a9;
@@ -219,4 +317,131 @@
 @media (max-width: 480px) {
   #owl-chat-widget { bottom: 1rem; right: 1rem; }
   .owl-window { width: calc(100vw - 2rem); height: calc(100vh - 7rem); }
+}
+
+/* Interactive Slots Component */
+.owl-slots-container {
+  background: #151b2d;
+  border: 1px solid rgba(192, 193, 255, 0.15);
+  border-radius: 1rem;
+  padding: 1.25rem;
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-self: flex-start;
+  max-width: 90%;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+.owl-slots-title {
+  color: white;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+.owl-slots-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+}
+.owl-slot-btn {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.5rem;
+  padding: 0.65rem 0.5rem;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  transition: all 0.2s ease;
+}
+.owl-slot-btn:hover {
+  background: rgba(192, 193, 255, 0.15);
+  border-color: #c0c1ff;
+  transform: translateY(-1px);
+}
+.owl-slot-btn strong {
+  font-size: 0.85rem;
+  color: #c0c1ff;
+}
+.owl-slot-btn span {
+  font-size: 0.7rem;
+  color: #908fa0;
+}
+.owl-slots-loading, .owl-slots-empty {
+  color: #908fa0;
+  font-size: 0.85rem;
+  text-align: center;
+  padding: 0.5rem;
+}
+
+/* Booking Confirm Card */
+.owl-booking-confirm-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+.owl-booking-confirm-card .confirm-header {
+  color: white;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+.owl-booking-confirm-card .confirm-time {
+  color: #c0c1ff;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.owl-booking-confirm-card .confirm-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.owl-booking-confirm-card input, .owl-booking-confirm-card textarea {
+  background: #0c1324;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.4rem;
+  padding: 0.5rem 0.75rem;
+  color: white;
+  font-size: 0.85rem;
+  outline: none;
+}
+.owl-booking-confirm-card .confirm-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+.owl-booking-confirm-card .confirm-btn {
+  flex: 1;
+  border: none;
+  padding: 0.6rem;
+  border-radius: 0.4rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+.owl-booking-confirm-card .confirm-btn.btn-primary {
+  background: #c0c1ff;
+  color: #1000a9;
+}
+.owl-booking-confirm-card .confirm-btn.btn-primary:hover {
+  background: #aeb0ff;
+}
+.owl-booking-confirm-card .confirm-btn.btn-secondary {
+  background: rgba(255, 255, 255, 0.05);
+  color: #908fa0;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+.owl-booking-confirm-card .confirm-btn.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+/* Success Card */
+.owl-booking-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 0.5rem;
 }

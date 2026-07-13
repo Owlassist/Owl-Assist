@@ -16,7 +16,7 @@ const mobileScript = `
     }
 `;
 
-['pricing.html', 'faq.html'].forEach(file => {
+['pricing.html', 'faq.html', 'legal/privacy-policy.html', 'legal/cookie-policy.html', 'legal/terms-of-service.html'].forEach(file => {
   let content = fs.readFileSync(file, 'utf8');
   
   // replace nav

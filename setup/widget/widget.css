@@ -130,6 +130,104 @@
   border-bottom-left-radius: 0;
 }
 
+/* Markdown styling inside bot message bubble */
+.owl-msg.bot p {
+  margin: 0 0 0.5rem 0;
+}
+.owl-msg.bot p:last-child {
+  margin-bottom: 0;
+}
+.owl-msg.bot a {
+  color: #c0c1ff;
+  text-decoration: underline;
+  font-weight: 600;
+  transition: opacity 0.2s;
+}
+.owl-msg.bot a:hover {
+  opacity: 0.8;
+}
+.owl-msg.bot ol, .owl-msg.bot ul {
+  margin-left: 1.25rem;
+  margin-top: 0.4rem;
+  margin-bottom: 0.4rem;
+  padding: 0;
+}
+.owl-msg.bot ul {
+  list-style-type: disc;
+}
+.owl-msg.bot ol {
+  list-style-type: decimal;
+}
+.owl-msg.bot li {
+  margin-bottom: 0.35rem;
+  color: #a1a1aa;
+}
+.owl-msg.bot li::marker {
+  color: #c0c1ff;
+  font-weight: 700;
+}
+.owl-msg.bot table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75rem 0;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  display: block;
+  overflow-x: auto;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.02);
+}
+.owl-msg.bot th {
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+  font-weight: 600;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  text-align: left;
+}
+.owl-msg.bot td {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.75);
+}
+.owl-msg.bot tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.02);
+}
+.owl-msg.bot code {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 0.85em;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.2rem 0.4rem;
+  border-radius: 0.25rem;
+  color: #ff859d;
+}
+.owl-msg.bot pre {
+  margin: 0.75rem 0;
+  padding: 0.75rem;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.5rem;
+  overflow-x: auto;
+}
+.owl-msg.bot pre code {
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  color: #e2e8f0;
+  display: block;
+}
+.owl-msg.bot h1, .owl-msg.bot h2, .owl-msg.bot h3, .owl-msg.bot h4 {
+  color: white;
+  margin-top: 0.75rem;
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+}
+.owl-msg.bot h1 { font-size: 1.3rem; }
+.owl-msg.bot h2 { font-size: 1.2rem; }
+.owl-msg.bot h3 { font-size: 1.1rem; }
+.owl-msg.bot h4 { font-size: 1rem; }
+
 .owl-msg.user {
   background: #c0c1ff;
   color: #1000a9;

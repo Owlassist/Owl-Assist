@@ -2,29 +2,6 @@
 <html lang="en">
 
 <head>
-  <script>
-    (function () {
-      var MOBILE_BP = 768;
-      var isMobile = window.innerWidth <= MOBILE_BP;
-
-      if (isMobile) {
-        // Initial load on mobile: fetch mobile.html invisibly
-        document.documentElement.style.display = 'none';
-        fetch('mobile.html').then(function (res) { return res.text(); }).then(function (html) {
-          document.open();
-          document.write(html);
-          document.close();
-        });
-      } else {
-        // Desktop: watch for resize crossing into mobile territory
-        window.addEventListener('resize', function () {
-          if (window.innerWidth <= MOBILE_BP) {
-            window.location.reload();
-          }
-        });
-      }
-    })();
-  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <base href="/">
@@ -100,7 +77,7 @@
       position: absolute;
       right: 0;
       top: 100%;
-      background: rgba(30, 30, 45, 0.9);
+      background: rgba(30, 30, 45, 0.95);
       backdrop-filter: blur(12px);
       border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: var(--radius-md);
@@ -141,22 +118,6 @@
 
     .db-table tr:hover {
       background: rgba(255, 255, 255, 0.02);
-    }
-
-    .action-menu {
-      display: none;
-      position: absolute;
-      right: 0;
-      top: 100%;
-      background: rgba(30, 30, 45, 0.95);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: var(--radius-md);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-      z-index: 1000;
-      min-width: 180px;
-      padding: 0.5rem;
-      margin-top: 0.5rem;
     }
 
     .action-menu.active {
@@ -207,18 +168,46 @@
     }
 
     /* Responsive Layout Classes */
-    .settings-layout {
-      display: flex;
-      gap: 2rem;
-      margin-top: 2rem;
-    }
-
     .table-responsive {
       width: 100%;
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
       margin-top: 1rem;
       border-radius: var(--radius-md);
+    }
+
+    .settings-layout {
+      display: flex;
+      gap: 2rem;
+      align-items: flex-start;
+      margin-top: 2rem;
+    }
+
+    .settings-sidebar {
+      min-width: 250px;
+    }
+
+    .settings-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.85rem 1rem;
+      border-radius: var(--radius-md);
+      color: var(--text-sub);
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: all var(--transition-fast);
+      text-decoration: none;
+    }
+
+    .settings-nav-item:hover {
+      background: var(--surface-hover);
+      color: white;
+    }
+
+    .settings-nav-item.active {
+      background: var(--primary);
+      color: var(--on-primary);
     }
 
     .profile-flex {
@@ -249,117 +238,6 @@
       grid-template-columns: 300px 1fr;
       gap: 1.5rem;
       height: calc(100vh - 250px);
-    }
-
-    @media (max-width: 768px) {
-
-      /* Table to Cards Pattern */
-      .db-table thead {
-        display: none;
-      }
-
-      .db-table {
-        display: block;
-        border: none;
-      }
-
-      .db-table tbody {
-        display: block;
-      }
-
-      .db-table tr {
-        display: flex;
-        flex-direction: column;
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid var(--border);
-        border-radius: var(--radius-md);
-        margin-bottom: 1rem;
-        padding: 1rem;
-        position: relative;
-      }
-
-      .db-table td {
-        display: block;
-        padding: 0.25rem 0;
-        border: none !important;
-        width: 100% !important;
-        text-align: left !important;
-      }
-
-      .db-table td:before {
-        content: attr(data-label);
-        font-size: 0.7rem;
-        text-transform: uppercase;
-        color: var(--text-dim);
-        display: block;
-        margin-bottom: 0.2rem;
-      }
-
-      .db-table .action-dropdown {
-        position: absolute;
-        top: 1rem;
-        right: 1rem;
-      }
-
-      .db-table td:last-child:before {
-        display: none;
-      }
-
-      /* Header & Card Refinements */
-      .db-view-header {
-        flex-direction: column !important;
-        align-items: flex-start !important;
-        gap: 1rem;
-        margin-bottom: 2rem !important;
-      }
-
-      .glass-card {
-        padding: 1.25rem !important;
-      }
-
-      .share-box {
-        flex-direction: column;
-        background: transparent !important;
-        border: none !important;
-        gap: 0.75rem !important;
-      }
-
-      .share-box input {
-        background: rgba(0, 0, 0, 0.2) !important;
-        border: 1px solid var(--border) !important;
-        border-radius: var(--radius-sm) !important;
-        width: 100%;
-      }
-
-      .share-box .btn {
-        width: 100%;
-      }
-
-      .stats-grid {
-        grid-template-columns: 1fr !important;
-      }
-
-      .app-content {
-        padding: 1rem !important;
-      }
-    }
-
-    @media (max-width: 768px) {
-      .conversation-layout {
-        grid-template-columns: 1fr;
-        height: calc(100vh - 180px);
-      }
-
-      #session-panel,
-      #chat-panel {
-        display: none;
-      }
-
-      #session-panel.panel-active,
-      #chat-panel.panel-active {
-        display: flex;
-        flex-direction: column;
-      }
     }
   </style>
 </head>
@@ -399,12 +277,82 @@
     }
   </style>
 
-  <!-- Mobile Nav Toggle -->
+  <!-- ==================== MOBILE HEADER (hidden on desktop via CSS) ==================== -->
+  <header class="mob-header">
+    <div class="mob-header-user">
+      <div class="mob-avatar ui-avatar" id="mob-ui-avatar" onclick="app.navigate('settings')">B</div>
+      <div class="mob-header-text">
+        <span class="mob-welcome">Welcome back</span>
+        <strong class="mob-name ui-name" id="mob-ui-name">Loading...</strong>
+      </div>
+    </div>
+    <div style="display: flex; align-items: center; gap: 0.75rem;">
+      <!-- Notification Bell (Mobile) -->
+      <div class="mob-notif-wrap" style="position: relative; cursor: pointer; display: flex; align-items: center;" onclick="app.toggleNotifications()">
+        <span class="material-symbols-outlined" style="font-size: 1.5rem; color: var(--text-dim);">notifications</span>
+        <span id="mob-notif-badge" style="position: absolute; top: -4px; right: -4px; background: #ef4444; color: white; font-size: 0.65rem; font-weight: bold; width: 16px; height: 16px; border-radius: 50%; display: none; align-items: center; justify-content: center;">0</span>
+      </div>
+      <!-- Premium Credits Widget (Mobile) -->
+      <div class="mob-credits-widget">
+        <div class="mob-cw-orb"></div>
+        <div class="mob-cw-icon">
+          <span class="material-symbols-outlined">bolt</span>
+        </div>
+        <div class="mob-cw-body">
+          <span class="mob-cw-label">Credits</span>
+          <div style="display: flex; align-items: center; gap: 0.3rem;">
+            <strong class="mob-cw-value ui-credits" id="mob-ui-credits">—</strong>
+            <button onclick="app.navigate('settings'); setTimeout(() => app.setSettingsTab('billing'), 100);" title="Buy Credits" style="background: transparent; border: none; color: var(--primary); cursor: pointer; display: flex; align-items: center; padding: 0;">
+              <span class="material-symbols-outlined" style="font-size: 1.05rem; font-weight: 800;">add_circle</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Nav Toggle (legacy — hidden on both desktop and mobile now) -->
   <button class="mobile-toggle" onclick="app.toggleSidebar()">
     <span class="material-symbols-outlined">menu</span>
   </button>
 
   <div class="db-layout">
+    
+    <!-- Global Top Notifications -->
+    <div class="global-notif-container" style="position: absolute; top: 2.5rem; right: 3.5rem; z-index: 1000; display: flex; align-items: center;">
+      <div class="notif-wrap glass-icon-btn" style="position: relative;" onclick="app.toggleNotifications()">
+        <span class="material-symbols-outlined">notifications</span>
+        <span id="desk-notif-badge" class="notif-badge" style="display: none;">0</span>
+      </div>
+
+      <!-- Notification Dropdown -->
+      <div id="notif-dropdown" class="glass-card" style="display: none; position: absolute; top: calc(100% + 1rem); right: 0; width: 340px; padding: 0; box-shadow: 0 15px 40px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.1); border-radius: var(--radius-md); overflow: hidden; transform-origin: top right; animation: modalScale 0.2s ease-out;">
+        <div style="padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.2);">
+          <h3 style="margin: 0; font-size: 1rem; color: white;">Notifications</h3>
+          <span style="font-size: 0.75rem; color: var(--primary); cursor: pointer;" onclick="app.markAllNotificationsRead()">Mark all read</span>
+        </div>
+        <div id="notif-dropdown-list" style="max-height: 350px; overflow-y: auto; background: rgba(30,30,45,0.95);">
+          <!-- Dropdown items injected here -->
+        </div>
+        <div style="padding: 0.75rem; text-align: center; border-top: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.4);">
+          <a href="javascript:void(0)" onclick="app.navigate('notifications'); document.getElementById('notif-dropdown').style.display = 'none';" style="color: var(--text-sub); font-size: 0.85rem; font-weight: 500; text-decoration: none;">View all notifications</a>
+        </div>
+      </div>
+    </div>
+    <style>
+      .glass-icon-btn { width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.25s ease; backdrop-filter: blur(8px); }
+      .glass-icon-btn:hover { background: rgba(255,255,255,0.12); transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0,0,0,0.3); border-color: rgba(255,255,255,0.15); }
+      .glass-icon-btn .material-symbols-outlined { font-size: 1.35rem; color: var(--text-dim); transition: color 0.25s ease; font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+      .glass-icon-btn:hover .material-symbols-outlined { color: white; }
+      .notif-badge { position: absolute; top: -2px; right: -2px; background: #ef4444; color: white; font-size: 0.65rem; font-weight: bold; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--bg-color); box-shadow: 0 2px 8px rgba(239,68,68,0.4); }
+      
+      @media (max-width: 992px) {
+        .global-notif-container { top: 0 !important; right: 0 !important; }
+        .global-notif-container .notif-wrap { display: none !important; }
+        #notif-dropdown { top: 4.5rem !important; right: 1rem !important; width: calc(100vw - 2rem) !important; max-width: 360px !important; position: fixed !important; }
+      }
+    </style>
+
     <aside class="db-sidebar" id="main-sidebar">
       <div class="sidebar-header"
         style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 3rem; padding-left: 0.5rem; width: 100%;">
@@ -422,16 +370,24 @@
         </button>
       </div>
 
-      <nav class="db-sidebar-nav">
         <a href="javascript:void(0)" onclick="app.navigate('overview')" class="db-nav-item active"
           data-target="overview">
           <span class="material-symbols-outlined">dashboard</span>
           <span>Overview</span>
         </a>
-        <a href="javascript:void(0)" onclick="app.navigate('bookings')" class="db-nav-item" data-target="bookings">
-          <span class="material-symbols-outlined">contact_page</span>
-          <span>Leads Captured</span>
+        <a href="javascript:void(0)" onclick="app.navigate('assistant')" class="db-nav-item" data-target="assistant">
+          <img src="../assets/img/logo/logo.png" style="width: 1.2rem; height: 1.2rem; object-fit: contain;" alt="Noctra Copilot">
+          <span>Noctra Copilot</span>
         </a>
+        <a href="javascript:void(0)" onclick="app.navigate('slots')" class="db-nav-item" data-target="slots">
+          <span class="material-symbols-outlined">calendar_month</span>
+          <span>Booking System</span>
+        </a>
+        <a href="javascript:void(0)" onclick="app.navigate('appointments')" class="db-nav-item" data-target="appointments">
+          <span class="material-symbols-outlined">book_online</span>
+          <span>Booked Slots</span>
+        </a>
+
         <a href="javascript:void(0)" onclick="app.navigate('conversations')" class="db-nav-item"
           data-target="conversations">
           <span class="material-symbols-outlined">forum</span>
@@ -441,19 +397,21 @@
           <span class="material-symbols-outlined">settings</span>
           <span>Settings</span>
         </a>
-        <a href="javascript:void(0)" onclick="app.navigate('widget')" class="db-nav-item" data-target="widget">
-          <span class="material-symbols-outlined">code</span>
-          <span>Widget Setup</span>
+        <a href="javascript:void(0)" onclick="app.navigate('notifications')" class="db-nav-item hidden" data-target="notifications" style="display:none;">
+          <span class="material-symbols-outlined">notifications</span>
+          <span>Notifications</span>
         </a>
-      </nav>
 
       <div class="sidebar-footer">
         <div class="user-profile" onclick="app.navigate('settings'); app.setSettingsTab('account');"
           title="Account Management">
           <div class="user-avatar" id="ui-avatar">...</div>
-          <div class="user-info">
-            <span class="user-name" id="ui-name">Loading...</span>
-            <span class="user-email" id="ui-email">Please wait</span>
+          <div class="user-info" style="min-width: 0; overflow: hidden; display: flex; flex-direction: column;">
+            <span class="user-name" id="ui-name"
+              style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; display: block;">Loading...</span>
+            <span class="user-email" id="ui-email"
+              style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; display: block;">Please
+              wait</span>
           </div>
         </div>
         <a href="javascript:void(0)" onclick="handleLogout()" class="db-nav-item"
@@ -471,6 +429,21 @@
       <section id="view-overview" class="app-view active-view">
         <header class="db-header db-view-header">
           <h1>Dashboard Overview</h1>
+          <div class="credits-widget-desktop" style="margin-right: 4.5rem;">
+            <div class="cw-orb"></div>
+            <div class="cw-icon-wrap">
+              <span class="material-symbols-outlined">bolt</span>
+            </div>
+            <div class="cw-body">
+              <span class="cw-label">Credits</span>
+              <div style="display: flex; align-items: center; gap: 0.3rem;">
+                <strong class="cw-value" id="ui-credits">—</strong>
+                <button onclick="app.navigate('settings'); setTimeout(() => app.setSettingsTab('billing'), 100);" title="Buy Credits" style="background: transparent; border: none; color: var(--primary); cursor: pointer; display: flex; align-items: center; padding: 0;">
+                  <span class="material-symbols-outlined" style="font-size: 1.15rem; font-weight: 800;">add_circle</span>
+                </button>
+              </div>
+            </div>
+          </div>
         </header>
 
         <!-- Share your Assistant Card -->
@@ -485,8 +458,8 @@
               <p style="color: var(--text-dim); font-size: 0.9rem;">Copy your dedicated Assistant chat link and share it
                 with your customers & acquaintances by pasting this link on your social handles bio.</p>
             </div>
-            <div
-              style="display: flex; gap: 0.5rem; background: rgba(0,0,0,0.3); padding: 0.5rem; border-radius: var(--radius-md); border: 1px solid var(--border); flex-grow: 1; max-width: 500px; min-width: 280px;">
+            <div class="share-box-container"
+              style="display: flex; gap: 0.5rem; background: rgba(0,0,0,0.3); padding: 0.5rem; border-radius: var(--radius-md); border: 1px solid var(--border); flex-grow: 1; max-width: 500px; width: 100%;">
               <input type="text" id="share-link-input" readonly value="Loading link..."
                 style="flex-grow: 1; background: transparent; border: none; color: white; padding: 0.5rem; font-size: 0.85rem; outline: none; width: 50px;">
               <button class="btn btn-primary" onclick="app.copyShareLink()" id="btn-copy-link"
@@ -497,22 +470,26 @@
 
         <!-- Dynamic Stats Grid -->
         <section class="stats-grid" id="stats-container"
-          style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem;">
+          style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem;">
           <div class="glass-card stat-card">
-            <div class="stat-label">Total Leads Captured</div>
+            <div class="stat-label">Booked Appointments (Today)</div>
             <div class="stat-value" id="stat-bookings">0</div>
+            <div style="height: 60px; margin-top: 1rem;"><canvas id="chart-leads"></canvas></div>
           </div>
           <div class="glass-card stat-card">
-            <div class="stat-label">Total Chat Conversations</div>
+            <div class="stat-label">Chat Conversations (Today)</div>
             <div class="stat-value" id="stat-sessions">0</div>
+            <div style="height: 60px; margin-top: 1rem;"><canvas id="chart-sessions"></canvas></div>
           </div>
           <div class="glass-card stat-card">
-            <div class="stat-label">AI Messages Sent</div>
+            <div class="stat-label">AI Messages Sent (Today)</div>
             <div class="stat-value" id="stat-messages">0</div>
+            <div style="height: 60px; margin-top: 1rem;"><canvas id="chart-messages"></canvas></div>
           </div>
           <div class="glass-card stat-card">
-            <div class="stat-label">Estimated Time Saved</div>
+            <div class="stat-label">Time Saved (Today)</div>
             <div class="stat-value" id="stat-time-saved" style="color: var(--success);">0 hrs</div>
+            <div style="height: 60px; margin-top: 1rem;"><canvas id="chart-time-saved"></canvas></div>
           </div>
         </section>
 
@@ -520,29 +497,32 @@
         <section class="glass-card">
           <div class="db-view-header"
             style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-            <h2 style="font-size: 1.25rem;">Recent Leads Captured</h2>
-            <a href="javascript:void(0)" onclick="app.navigate('bookings')"
+            <h2 style="font-size: 1.25rem;">Recent Booked Appointments</h2>
+            <a href="javascript:void(0)" onclick="app.navigate('appointments')"
               style="font-size: 0.85rem; color: var(--primary);">View all →</a>
           </div>
           <div class="empty-state" id="recent-bookings-empty">
-            <span class="material-symbols-outlined">contact_page</span>
-            <h3>No Leads Yet</h3>
-            <p>When the AI receptionist collects a visitor's details, they will appear here.</p>
+            <span class="material-symbols-outlined">book_online</span>
+            <h3>No Appointments Yet</h3>
+            <p>When the AI receptionist books an appointment, they will appear here.</p>
           </div>
+          <!-- Desktop Table -->
           <div class="table-responsive hidden" id="recent-bookings-table">
             <table class="db-table">
               <thead>
                 <tr>
-                  <th style="width: 30%;">Contact Details</th>
-                  <th style="width: 30%;">Intent / Summary</th>
-                  <th style="width: 15%;">Captured At</th>
-                  <th style="width: 15%;">Status</th>
+                  <th style="width: 25%;">Client Details</th>
+                  <th style="width: 25%;">Appointment Time</th>
+                  <th style="width: 30%;">Booking Reason / Intent</th>
+                  <th style="width: 10%;">Status</th>
                   <th style="width: 10%; text-align: center;">Actions</th>
                 </tr>
               </thead>
               <tbody id="recent-bookings-list"></tbody>
             </table>
           </div>
+          <!-- Mobile Lead Cards -->
+          <div class="mobile-leads-container" id="mobile-leads-list"></div>
         </section>
       </section>
 
@@ -557,6 +537,7 @@
             <h3>Your lead board is empty</h3>
             <p>Share your AI widget to start receiving leads.</p>
           </div>
+          <!-- Desktop Table -->
           <div class="table-responsive hidden" id="all-bookings-table">
             <table class="db-table">
               <thead>
@@ -570,6 +551,49 @@
               </thead>
               <tbody id="all-bookings-list"></tbody>
             </table>
+          </div>
+          <!-- Mobile Lead Cards -->
+          <div class="mobile-leads-container" id="all-leads-list"></div>
+          <div class="empty-state hidden" id="all-leads-empty" style="display:none;">
+            <span class="material-symbols-outlined">contact_page</span>
+            <h3>Your lead board is empty</h3>
+            <p>Share your AI widget to start receiving leads.</p>
+          </div>
+        </section>
+      </section>
+
+      <!-- ================= VIEW: APPOINTMENTS ================= -->
+      <section id="view-appointments" class="app-view">
+        <header class="db-header db-view-header">
+          <h1>Booked Slots</h1>
+        </header>
+        <section class="glass-card">
+          <div class="empty-state" id="all-appointments-empty">
+            <span class="material-symbols-outlined">book_online</span>
+            <h3>No booked slots found</h3>
+            <p>Share your booking link to start scheduling sessions.</p>
+          </div>
+          <!-- Desktop Table -->
+          <div class="table-responsive hidden" id="all-appointments-table">
+            <table class="db-table">
+              <thead>
+                <tr>
+                  <th style="width: 25%;">Client Details</th>
+                  <th style="width: 25%;">Appointment Time</th>
+                  <th style="width: 30%;">Booking Reason / Intent</th>
+                  <th style="width: 10%;">Status</th>
+                  <th style="width: 10%; text-align: center;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="all-appointments-list"></tbody>
+            </table>
+          </div>
+          <!-- Mobile Lead Cards -->
+          <div class="mobile-leads-container" id="all-appointments-mobile-list"></div>
+          <div class="empty-state hidden" id="all-appointments-mobile-empty" style="display:none;">
+            <span class="material-symbols-outlined">book_online</span>
+            <h3>No booked slots found</h3>
+            <p>Share your booking link to start scheduling sessions.</p>
           </div>
         </section>
       </section>
@@ -594,10 +618,16 @@
 
           <!-- Chat History -->
           <div id="chat-panel" class="glass-card"
-            style="padding: 0; display: flex; flex-direction: column; overflow: hidden;">
+            style="padding: 0; overflow: hidden;">
             <div id="chat-header"
               style="padding: 1rem; border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.02); min-height: 70px; display: flex; justify-content: space-between; align-items: center;">
-              <h3 style="font-size: 1rem; margin: 0;">Select a conversation</h3>
+              <div style="display: flex; align-items: center;">
+                <!-- Mobile-only back button -->
+                <button class="mob-back-btn" onclick="app.showSessionPanel()" aria-label="Back to sessions">
+                  <span class="material-symbols-outlined" style="font-size:1.2rem;">arrow_back_ios</span>
+                </button>
+                <h3 style="font-size: 1rem; margin: 0;">Select a conversation</h3>
+              </div>
             </div>
             <div id="chat-messages"
               style="flex-grow: 1; overflow-y: auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
@@ -607,9 +637,281 @@
                 <p>Choose a session from the left to read the transcript.</p>
               </div>
             </div>
+            
+            <!-- Chat Input Area (Hidden by default) -->
+            <div id="chat-input-area" style="display: none; padding: 1rem; border-top: 1px solid var(--border); background: rgba(0,0,0,0.2);">
+              <div style="display: flex; gap: 0.5rem; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
+                <span style="font-size: 0.8rem; color: var(--text-dim);" id="handoff-status-text">AI is replying to this customer.</span>
+                <label class="toggle-switch" style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                  <input type="checkbox" id="toggle-handoff-btn" onchange="app.handleToggleHandoff(this)">
+                  <span class="slider" style="position: relative; display: inline-block; width: 40px; height: 20px; background-color: var(--border); border-radius: 20px; transition: .4s;">
+                    <span class="knob" style="position: absolute; height: 16px; width: 16px; left: 2px; bottom: 2px; background-color: white; border-radius: 50%; transition: .4s;"></span>
+                  </span>
+                  <span style="font-size: 0.8rem;" id="handoff-toggle-label">Take Over Chat</span>
+                </label>
+              </div>
+              <style>
+                #toggle-handoff-btn { display: none; }
+                #toggle-handoff-btn:checked + .slider { background-color: var(--primary); }
+                #toggle-handoff-btn:checked + .slider .knob { transform: translateX(20px); }
+              </style>
+              <div id="copilot-suggestions-container" style="display: none; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem; padding: 0.25rem 0;">
+                <!-- Suggestions injected here -->
+              </div>
+              <div style="display: flex; gap: 0.5rem; opacity: 0.5; pointer-events: none; transition: all 0.3s;" id="chat-input-wrapper">
+                <input type="text" id="owner-chat-input" placeholder="Type a message as the business owner..." autocomplete="off" data-lpignore="true" name="chat_msg_random_ignore" style="flex-grow: 1; padding: 0.75rem 1rem; border-radius: 20px; border: 1px solid var(--border); background: rgba(255,255,255,0.05); color: white; outline: none;">
+                <button class="btn btn-primary" id="btn-send-owner-msg" onclick="app.handleSendOwnerMessage()" style="border-radius: 20px; padding: 0.75rem 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                  Send <span class="material-symbols-outlined" style="font-size: 1rem;">send</span>
+                </button>
+              </div>
+            </div>
 
           </div>
         </div>
+      </section>
+
+      <!-- ================= VIEW: ASSISTANT ================= -->
+      <section id="view-assistant" class="app-view">
+        <header class="db-header" style="display: flex; align-items: center; justify-content: space-between;">
+          <div>
+            <h1 style="display: flex; align-items: center; gap: 0.5rem;">
+              <img src="../assets/img/logo/logo.png" style="width: 2.25rem; height: 2.25rem; object-fit: contain; filter: drop-shadow(0 0 6px rgba(82, 107, 245, 0.35));" alt="Noctra Copilot Logo">
+              Noctra Copilot
+            </h1>
+            <p id="copilot-subtitle" style="color: var(--text-dim); margin-top: 0.5rem;">Manage settings, bookings, FAQs, and get operational insights.</p>
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <button onclick="app.toggleCopilotSize('minimize')" class="glass-icon-btn" style="width: 36px; height: 36px;" title="Minimize to Corner (Floating Chat)">
+              <span class="material-symbols-outlined" id="copilot-min-icon" style="font-size: 1.15rem;">picture_in_picture_alt</span>
+            </button>
+            <button onclick="app.toggleCopilotSize('maximize')" class="glass-icon-btn" style="width: 36px; height: 36px;" title="Maximize to Fullscreen">
+              <span class="material-symbols-outlined" id="copilot-max-icon" style="font-size: 1.15rem;">fullscreen</span>
+            </button>
+          </div>
+        </header>
+
+        <style>
+          #view-assistant.copilot-minimized {
+            display: block !important;
+            position: fixed !important;
+            bottom: 1.5rem !important;
+            right: 1.5rem !important;
+            width: 380px !important;
+            height: 520px !important;
+            z-index: 9999 !important;
+            background: rgba(22, 22, 35, 0.98) !important;
+            backdrop-filter: blur(20px) !important;
+            border: 1px solid rgba(255,255,255,0.12) !important;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6) !important;
+            border-radius: var(--radius-md) !important;
+            animation: modalScale 0.25s ease-out !important;
+            overflow: hidden !important;
+            padding: 0 !important;
+          }
+          #view-assistant.copilot-minimized .db-header {
+            margin-bottom: 0 !important;
+            padding: 0.75rem 1rem !important;
+            background: rgba(0,0,0,0.2) !important;
+            border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+          }
+          #view-assistant.copilot-minimized .db-header h1 {
+            font-size: 1.1rem !important;
+          }
+          #view-assistant.copilot-minimized .db-header h1 span {
+            font-size: 1.4rem !important;
+          }
+          #view-assistant.copilot-minimized #copilot-subtitle {
+            display: none !important;
+          }
+          #view-assistant.copilot-minimized .assistant-container {
+            height: calc(100% - 56px) !important;
+            min-height: auto !important;
+            border: none !important;
+            border-radius: 0 !important;
+          }
+          #view-assistant.copilot-minimized #copilot-sidebar {
+            display: none !important;
+          }
+          #view-assistant.copilot-maximized {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            z-index: 9999 !important;
+            background: var(--bg-color) !important;
+            padding: 2rem !important;
+            box-sizing: border-box !important;
+            display: block !important;
+          }
+          #view-assistant.copilot-maximized .assistant-container {
+            height: calc(100vh - 160px) !important;
+          }
+          
+          /* Mobile Responsiveness for Copilot Sidebar */
+          @media (max-width: 768px) {
+            .assistant-container {
+              flex-direction: column !important;
+            }
+            #copilot-sidebar {
+              width: 100% !important;
+              height: auto !important;
+              max-height: 140px !important;
+              border-right: none !important;
+              border-bottom: 1px solid var(--border) !important;
+            }
+            #copilot-session-list {
+              flex-direction: row !important;
+              overflow-x: auto !important;
+              overflow-y: hidden !important;
+              padding: 0.5rem !important;
+            }
+            #copilot-session-list > div {
+              width: 160px !important;
+              flex-shrink: 0 !important;
+            }
+          }
+        </style>
+
+        <div class="assistant-container glass-card" style="display: flex; height: calc(100vh - 220px); min-height: 480px; padding: 0; overflow: hidden; border: 1px solid var(--border); border-radius: var(--radius-md);">
+          <!-- Copilot Sessions Sidebar -->
+          <div id="copilot-sidebar" style="width: 250px; border-right: 1px solid var(--border); display: flex; flex-direction: column; background: rgba(10,15,25,0.45); flex-shrink: 0;">
+            <div style="padding: 1.25rem 1rem; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+              <span style="font-size: 0.85rem; font-weight: 700; color: white; letter-spacing: 0.5px;">Chat History</span>
+              <button onclick="app.startNewCopilotSession()" class="btn btn-primary" style="padding: 0.4rem 0.75rem; font-size: 0.75rem; display: flex; align-items: center; gap: 0.25rem; border-radius: var(--radius-sm);">
+                <span class="material-symbols-outlined" style="font-size: 1rem;">add</span> New
+              </button>
+            </div>
+            <div id="copilot-session-list" style="flex: 1; overflow-y: auto; padding: 0.75rem 0.5rem; display: flex; flex-direction: column; gap: 0.35rem;">
+              <!-- Copilot sessions list will be injected here -->
+            </div>
+          </div>
+
+          <!-- Chat Panel -->
+          <div style="flex: 1; display: flex; flex-direction: column; background: rgba(10,15,30,0.4);">
+            <!-- Message List -->
+            <div id="assistant-messages" style="flex: 1; padding: 1.5rem; overflow-y: auto; display: flex; flex-direction: column; gap: 1.25rem;">
+              <div class="message bot" style="display: flex; gap: 1rem; max-width: 80%;">
+                <div style="width: 2.5rem; height: 2.5rem; border-radius: 50%; background: rgba(255,255,255,0.05); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; overflow: hidden;"><img src="../assets/img/logo/logo.png" style="width: 75%; height: 75%; object-fit: contain;"></div>
+                <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 1rem; border-radius: 0 1rem 1rem 1rem; color: #dce1fb; font-size: 0.9rem; line-height: 1.5;">
+                  Hello! I am Noctra, your Operations Copilot. I have full access to your business settings, recent bookings, FAQs, and customer profiles. 
+                  <br><br>
+                  You can ask me questions about your bookings, or instruct me to do things like:
+                  <ul style="margin: 0.5rem 0 0 1rem; padding: 0; line-height: 1.6;">
+                    <li><em>"How many bookings do we have?"</em></li>
+                    <li><em>"Update my website to https://mybrand.com"</em></li>
+                    <li><em>"Add a FAQ: Do you offer refunds? -> No, all sales are final."</em></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- Input Box -->
+            <div style="padding: 1.25rem 1.5rem; border-top: 1px solid var(--border); display: flex; gap: 1rem; background: rgba(0,0,0,0.2); align-items: center;">
+              <input type="text" id="assistant-chat-input" placeholder="Ask Noctra to summarize bookings, update settings..." style="flex: 1; background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 0.85rem 1.25rem; border-radius: var(--radius-md); color: white; outline: none; font-size: 0.9rem; transition: border 0.2s;" onkeypress="if (event.key === 'Enter') app.sendAssistantMessage()">
+              <button onclick="app.sendAssistantMessage()" id="btn-send-assistant-msg" style="background: var(--primary); border: none; color: white; padding: 0.85rem 1.5rem; border-radius: var(--radius-md); font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; transition: background 0.2s;">
+                <span>Send</span>
+                <span class="material-symbols-outlined" style="font-size: 1.1rem;">send</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= VIEW: SLOTS ================= -->
+      <section id="view-slots" class="app-view">
+        <header class="db-header db-view-header">
+          <div>
+            <h1 style="display: flex; align-items: center; gap: 0.5rem;">
+              <span class="material-symbols-outlined" style="font-size: 2.25rem; color: var(--primary);">calendar_month</span>
+              Booking System
+            </h1>
+            <p style="color: var(--text-dim); margin-top: 0.5rem;">Manage your availability and slots. Noctra reads this data to schedule client calls dynamically.</p>
+          </div>
+        </header>
+
+        <div style="display: grid; grid-template-columns: 1fr; gap: 2rem; margin-top: 1.5rem;">
+          
+          <!-- Column 1: Weekly Availability Settings -->
+          <div class="glass-card" style="padding: 1.5rem;">
+            <h3 style="margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+              <span class="material-symbols-outlined" style="color: var(--primary);">schedule</span>
+              Weekly Working Hours
+            </h3>
+            <div id="availability-hours-list" style="display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem;">
+              <!-- Javascript will render 7 days here -->
+            </div>
+            <button class="btn btn-primary" onclick="app.saveWeeklyHours(this)" style="width: 100%;">Save Weekly Hours</button>
+          </div>
+
+          <!-- Column 2: Specific Slots & Manual Add -->
+          <div class="glass-card" style="padding: 1.5rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 1rem;">
+              <h3 style="display: flex; align-items: center; gap: 0.5rem; margin: 0;">
+                <span class="material-symbols-outlined" style="color: var(--primary);">event_available</span>
+                Active Booking Slots
+              </h3>
+              
+              <!-- Quick Generate / Add Custom Slot -->
+              <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                <button class="btn btn-outline" onclick="app.autoGenerateSlots(this)" style="font-size: 0.8rem; padding: 0.5rem 1rem;">
+                  <span class="material-symbols-outlined" style="font-size: 1rem; color: var(--primary);">auto_awesome</span>
+                  Auto-Gen 7 Days
+                </button>
+                <div style="display: flex; gap: 0.5rem; align-items: center; background: rgba(255,255,255,0.03); border: 1px solid var(--border); padding: 0.35rem 0.75rem; border-radius: var(--radius-sm);">
+                  <input type="date" id="new-slot-date" style="background: transparent; border: none; color: white; outline: none; font-size: 0.8rem;">
+                  <input type="time" id="new-slot-time" style="background: transparent; border: none; color: white; outline: none; font-size: 0.8rem;">
+                  <button class="btn btn-primary" onclick="app.handleAddSlot(this)" style="font-size: 0.8rem; padding: 0.25rem 0.75rem;">+ Add</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Slots List Table/Grid -->
+            <div id="slots-manager-container" style="max-height: 400px; overflow-y: auto;">
+              <div class="empty-state" id="slots-empty-state">
+                <span class="material-symbols-outlined">event_busy</span>
+                <h3>No slots created yet</h3>
+                <p>Add specific custom slots or click "Auto-Gen 7 Days" to populate based on your weekly working hours.</p>
+              </div>
+              <div id="slots-list-table-wrapper" style="display: none;">
+                <table class="db-table" style="width: 100%;">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Time</th>
+                      <th>Status</th>
+                      <th>Booked Customer</th>
+                      <th style="text-align: center;">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="dashboard-slots-list-body">
+                    <!-- Rendered dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          
+        </div>
+      </section>
+
+      <!-- ================= VIEW: NOTIFICATIONS ================= -->
+      <section id="view-notifications" class="app-view">
+        <header class="db-header db-view-header">
+          <h1>All Notifications</h1>
+          <button class="btn btn-outline" style="font-size: 0.8rem;" onclick="app.markAllNotificationsRead()">Mark all read</button>
+        </header>
+
+        <section class="glass-card" style="padding: 0; overflow: hidden;">
+          <div class="empty-state" id="all-notifs-empty" style="padding: 4rem 2rem; border: none; margin: 0;">
+            <span class="material-symbols-outlined">notifications_active</span>
+            <h3>You're all caught up!</h3>
+            <p>We'll let you know when there's new activity.</p>
+          </div>
+          <div id="all-notifs-list" style="display: flex; flex-direction: column;">
+            <!-- Rendered by JS -->
+          </div>
+        </section>
       </section>
 
       <!-- ================= VIEW: SETTINGS ================= -->
@@ -620,19 +922,29 @@
 
         <div class="settings-layout">
           <!-- Settings Sidebar -->
-          <aside style="min-width: 250px; display: flex; flex-direction: column; gap: 0.5rem;">
+          <aside class="settings-sidebar" style="display: flex; flex-direction: column; gap: 0.5rem;">
             <a href="javascript:void(0)" onclick="app.setSettingsTab('account')" id="tab-nav-account"
-              class="db-nav-item active" style="padding: 0.75rem 1rem; width: 100%;">
+              class="settings-nav-item active" style="padding: 0.75rem 1rem; width: 100%;">
               <span class="material-symbols-outlined">person</span>
               <span>Account Management</span>
             </a>
-            <a href="javascript:void(0)" onclick="app.setSettingsTab('ai')" id="tab-nav-ai" class="db-nav-item"
+            <a href="javascript:void(0)" onclick="app.setSettingsTab('ai')" id="tab-nav-ai" class="settings-nav-item"
               style="padding: 0.75rem 1rem; width: 100%;">
               <span class="material-symbols-outlined">smart_toy</span>
               <span>AI Knowledge Base</span>
             </a>
+            <a href="javascript:void(0)" onclick="app.setSettingsTab('customization')" id="tab-nav-customization"
+              class="settings-nav-item" style="padding: 0.75rem 1rem; width: 100%;">
+              <span class="material-symbols-outlined">palette</span>
+              <span>Customization</span>
+            </a>
+            <a href="javascript:void(0)" onclick="app.setSettingsTab('widget')" id="tab-nav-widget"
+              class="settings-nav-item" style="padding: 0.75rem 1rem; width: 100%;">
+              <span class="material-symbols-outlined">code</span>
+              <span>Widget Setup</span>
+            </a>
             <a href="javascript:void(0)" onclick="app.setSettingsTab('billing')" id="tab-nav-billing"
-              class="db-nav-item" style="padding: 0.75rem 1rem; width: 100%;">
+              class="settings-nav-item" style="padding: 0.75rem 1rem; width: 100%;">
               <span class="material-symbols-outlined">credit_card</span>
               <span>Billing & Plan</span>
             </a>
@@ -718,6 +1030,8 @@
                   </label>
                 </div>
 
+
+
                 <button class="btn btn-primary" onclick="app.updateProfile()" id="btn-save-profile"
                   style="margin-top: 1.5rem;">Save Profile Settings</button>
               </div>
@@ -725,67 +1039,136 @@
 
             <!-- 2. AI Knowledge Base Tab -->
             <div id="settings-tab-ai" style="display: none;">
-              <div class="glass-card">
+              <div class="glass-card" style="margin-bottom: 1.5rem;">
                 <h3 style="margin-bottom: 1.5rem;">AI Knowledge Base</h3>
                 <div class="form-group" style="margin-bottom: 1.5rem;">
                   <label
                     style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem; color:var(--text-sub); font-size:0.85rem;">
                     Website URL (For Auto-Scraping)
                     <span class="pro-badge"
-                      style="background: var(--primary); color: var(--on-primary); padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.65rem; font-weight: bold; text-transform: uppercase;">Pro
-                      Only</span>
+                      style="background: var(--primary); color: var(--on-primary); padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.65rem; font-weight: bold; text-transform: uppercase;">Pro Only</span>
                   </label>
                   <input type="url" id="settings-url" placeholder="https://www.yourdomain.com"
                     style="width:100%; padding:0.75rem; border-radius:var(--radius-sm); border:1px solid var(--border); background:rgba(0,0,0,0.2); color:white; opacity:0.6; cursor:not-allowed;"
                     disabled>
-                  <p style="font-size: 0.8rem; color: var(--text-dim); margin-top: 0.5rem;">The AI will read this
-                    website to answer customer questions automatically.</p>
+                  <p style="font-size: 0.8rem; color: var(--text-dim); margin-top: 0.5rem;">The AI will automatically read this website to answer customer questions.</p>
                 </div>
 
-                <div class="form-group" style="margin-bottom: 1.5rem;">
-                  <label style="display:block; margin-bottom:0.5rem; color:var(--text-sub); font-size:0.85rem;">External
-                    Booking Link</label>
-                  <input type="url" id="settings-booking-url" placeholder="https://your-booking-link.com/..."
-                    style="width:100%; padding:0.75rem; border-radius:var(--radius-sm); border:1px solid var(--border); background:rgba(0,0,0,0.2); color:white;">
-                  <p style="font-size: 0.8rem; color: var(--text-dim); margin-top: 0.5rem;">Share your booking link
-                    (Calendly, Google Calendar, etc.) for AI-assisted appointment booking.</p>
-                </div>
+
 
                 <div class="form-group" style="margin-bottom: 1.5rem;">
                   <label
                     style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem; color:var(--text-sub); font-size:0.85rem;">
                     Upload Document Knowledge (PDF)
                     <span class="pro-badge"
-                      style="background: var(--primary); color: var(--on-primary); padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.65rem; font-weight: bold; text-transform: uppercase;">Pro
-                      Only</span>
+                      style="background: var(--primary); color: var(--on-primary); padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.65rem; font-weight: bold; text-transform: uppercase;">Pro Only</span>
                   </label>
                   <div style="display: flex; gap: 1rem; align-items: center; opacity:0.6;">
                     <label class="btn btn-outline"
                       style="cursor: not-allowed; padding: 0.75rem 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
                       <span class="material-symbols-outlined">upload_file</span> Choose PDF
-                      <input type="file" id="settings-document-upload" accept="application/pdf" style="display: none;"
-                        disabled>
+                      <input type="file" id="settings-document-upload" accept="application/pdf" style="display: none;" disabled>
                     </label>
-                    <span id="document-upload-status" style="font-size: 0.85rem; color: var(--text-dim);">No document
-                      uploaded</span>
+                    <span id="document-upload-status" style="font-size: 0.85rem; color: var(--text-dim);">No document uploaded</span>
                   </div>
-                  <p style="font-size: 0.8rem; color: var(--text-dim); margin-top: 0.5rem;">Upload menus, price lists,
-                    or FAQs. The AI will read this to answer questions.</p>
                 </div>
 
                 <div class="form-group">
-                  <label style="display:block; margin-bottom:0.5rem; color:var(--text-sub); font-size:0.85rem;">Custom
-                    Instructions & Company Information</label>
+                  <label style="display:block; margin-bottom:0.5rem; color:var(--text-sub); font-size:0.85rem;">Custom Instructions &amp; Company Information</label>
                   <textarea id="settings-instructions" rows="6"
-                    placeholder="Example: We are open Monday to Friday from 9am to 5pm. Please behave professionally but warmly. If a customer asks about a refund, tell them we process refunds within 3-5 business days. Never offer discounts unless explicitly asked."
+                    placeholder="Example: We are open Monday to Friday from 9am to 5pm. Please behave professionally but warmly. If a customer asks about a refund, tell them we process refunds within 3-5 business days."
                     style="width:100%; padding:0.75rem; border-radius:var(--radius-sm); border:1px solid var(--border); background:rgba(0,0,0,0.2); color:white; font-family:var(--font-family); resize:vertical;"></textarea>
-                  <p style="font-size: 0.8rem; color: var(--text-dim); margin-top: 0.5rem;">Explicitly tell the AI how
-                    it should behave, respond, and what specific facts it must memorize.</p>
+                  <p style="font-size: 0.8rem; color: var(--text-dim); margin-top: 0.5rem;">Tell the AI how to behave, what to say, and key business facts to remember.</p>
                 </div>
 
-                <button class="btn btn-primary" onclick="app.saveSettings(this)" style="margin-top: 1rem;">Save
-                  Knowledge
-                  Base</button>
+                <button class="btn btn-primary" onclick="app.saveSettings(this)" style="margin-top: 1rem;">Save Knowledge Base</button>
+              </div>
+
+              <!-- FAQ Manager -->
+              <div class="glass-card">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; flex-wrap:wrap; gap:0.75rem;">
+                  <div>
+                    <h3 style="margin:0;">Frequently Asked Questions</h3>
+                    <p style="font-size:0.8rem; color:var(--text-dim); margin:0.3rem 0 0;">FAQs are shown in the customer chat menu and also trained into the AI.</p>
+                  </div>
+                  <div style="display:flex; align-items:center; gap:0.75rem;">
+                    <span id="faq-count-badge" style="font-size:0.75rem; padding:0.2rem 0.6rem; background:rgba(82,107,245,0.15); border:1px solid rgba(82,107,245,0.3); border-radius:99px; color:var(--primary); font-weight:600;">0 / 3</span>
+                    <button id="add-faq-btn" onclick="app.openFaqModal()" class="btn btn-primary" style="padding:0.5rem 1rem; font-size:0.85rem; display:flex; align-items:center; gap:0.4rem;">
+                      <span class="material-symbols-outlined" style="font-size:1rem;">add</span> Add FAQ
+                    </button>
+                  </div>
+                </div>
+                <div id="faq-list" style="display:flex; flex-direction:column; gap:0.75rem;">
+                  <div style="text-align:center; color:var(--text-dim); padding:2rem 0; font-size:0.9rem;">No FAQs yet. Click &ldquo;Add FAQ&rdquo; to get started.</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. Customization Tab (Pro Only) -->
+            <div id="settings-tab-customization" style="display: none;">
+              <div class="glass-card" style="position:relative;">
+                <!-- Pro Lock Overlay -->
+                <div id="customization-pro-lock" style="display:none; position:absolute; inset:0; z-index:10; border-radius:var(--radius); background:rgba(10,10,20,0.85); backdrop-filter:blur(6px); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:1rem; text-align:center; padding:2rem;">
+                  <span class="material-symbols-outlined" style="font-size:3rem; color:var(--primary);">lock</span>
+                  <h3 style="margin:0;">Pro Feature</h3>
+                  <p style="color:var(--text-dim); max-width:340px;">Custom branding &amp; theming is available on the <strong style="color:white;">Pro Plan</strong>. Upgrade to unlock your brand colors on the dashboard and customer chat widget.</p>
+                  <button class="btn btn-primary" onclick="app.navigate('settings'); app.setSettingsTab('billing');">Upgrade to Pro</button>
+                </div>
+
+                <h3 style="margin-bottom:0.5rem;">Brand &amp; Theme</h3>
+                <p style="font-size:0.85rem; color:var(--text-dim); margin-bottom:2rem;">Customize the colors of your Noctra chat widget to match your brand. Changes apply instantly to your customer-facing chat.</p>
+
+                <!-- Live Preview -->
+                <div style="margin-bottom:2rem;">
+                  <label style="display:block; margin-bottom:0.75rem; color:var(--text-sub); font-size:0.85rem; font-weight:600;">Live Preview</label>
+                  <div id="theme-preview" style="border-radius:0.75rem; overflow:hidden; border:1px solid var(--border); max-width:320px;">
+                    <div id="preview-header" style="padding:0.75rem 1rem; display:flex; align-items:center; gap:0.6rem; background:#1e1e32;">
+                      <div style="width:28px; height:28px; border-radius:50%; background:var(--primary); display:flex; align-items:center; justify-content:center; font-size:0.75rem; font-weight:700; color:white;">N</div>
+                      <span style="font-size:0.85rem; font-weight:600; color:white;">Noctra</span>
+                    </div>
+                    <div id="preview-body" style="padding:1rem; background:#0e0e1a; display:flex; flex-direction:column; gap:0.5rem;">
+                      <div id="preview-bot-bubble" style="align-self:flex-start; background:#1e1e32; color:white; padding:0.5rem 0.75rem; border-radius:0 0.75rem 0.75rem 0.75rem; font-size:0.8rem; max-width:80%;">Hi! How can I help you today?</div>
+                      <div id="preview-user-bubble" style="align-self:flex-end; background:var(--primary); color:white; padding:0.5rem 0.75rem; border-radius:0.75rem 0.75rem 0 0.75rem; font-size:0.8rem; max-width:80%;">I have a question!</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Color Pickers -->
+                <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(200px,1fr)); gap:1.5rem; margin-bottom:2rem;">
+
+                  <div>
+                    <label style="display:block; margin-bottom:0.4rem; font-weight:600; font-size:0.9rem;">Primary Accent Color</label>
+                    <p style="font-size:0.75rem; color:var(--text-dim); margin:0 0 0.75rem;">Buttons, links, and highlights throughout the chat widget.</p>
+                    <div style="display:flex; align-items:center; gap:0.75rem;">
+                      <input type="color" id="theme-primary-picker" value="#526BF5" oninput="app.previewTheme()" style="width:48px; height:48px; border:none; border-radius:0.5rem; cursor:pointer; padding:2px; background:rgba(255,255,255,0.05); border:2px solid var(--border);">
+                      <input type="text" id="theme-primary-hex" value="#526BF5" oninput="app.syncHexInput('theme-primary', this.value)" maxlength="7" style="width:90px; padding:0.5rem; border-radius:0.4rem; border:1px solid var(--border); background:rgba(0,0,0,0.2); color:white; font-family:monospace; font-size:0.85rem;">
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style="display:block; margin-bottom:0.4rem; font-weight:600; font-size:0.9rem;">Chat Background Color</label>
+                    <p style="font-size:0.75rem; color:var(--text-dim); margin:0 0 0.75rem;">The background of the chat window that customers see.</p>
+                    <div style="display:flex; align-items:center; gap:0.75rem;">
+                      <input type="color" id="theme-bg-picker" value="#0e0e1a" oninput="app.previewTheme()" style="width:48px; height:48px; border:none; border-radius:0.5rem; cursor:pointer; padding:2px; background:rgba(255,255,255,0.05); border:2px solid var(--border);">
+                      <input type="text" id="theme-bg-hex" value="#0e0e1a" oninput="app.syncHexInput('theme-bg', this.value)" maxlength="7" style="width:90px; padding:0.5rem; border-radius:0.4rem; border:1px solid var(--border); background:rgba(0,0,0,0.2); color:white; font-family:monospace; font-size:0.85rem;">
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style="display:block; margin-bottom:0.4rem; font-weight:600; font-size:0.9rem;">AI Chat Bubble Color</label>
+                    <p style="font-size:0.75rem; color:var(--text-dim); margin:0 0 0.75rem;">Background color of Noctra's reply bubbles.</p>
+                    <div style="display:flex; align-items:center; gap:0.75rem;">
+                      <input type="color" id="theme-bubble-picker" value="#1e1e32" oninput="app.previewTheme()" style="width:48px; height:48px; border:none; border-radius:0.5rem; cursor:pointer; padding:2px; background:rgba(255,255,255,0.05); border:2px solid var(--border);">
+                      <input type="text" id="theme-bubble-hex" value="#1e1e32" oninput="app.syncHexInput('theme-bubble', this.value)" maxlength="7" style="width:90px; padding:0.5rem; border-radius:0.4rem; border:1px solid var(--border); background:rgba(0,0,0,0.2); color:white; font-family:monospace; font-size:0.85rem;">
+                    </div>
+                  </div>
+
+                </div>
+
+                <div style="display:flex; gap:1rem; align-items:center; flex-wrap:wrap;">
+                  <button class="btn btn-primary" onclick="app.saveTheme(this)">Save Theme</button>
+                  <button class="btn btn-outline" onclick="app.resetTheme()" style="font-size:0.85rem;">Reset to Defaults</button>
+                </div>
               </div>
             </div>
 
@@ -794,7 +1177,323 @@
             <div id="settings-tab-billing" style="display: none;">
               <div class="glass-card">
                 <h3 style="margin-bottom: 1.5rem;">Billing & Plan</h3>
-                <p>You are currently on the <strong>Free Trial</strong>.</p>
+                <p style="margin-bottom: 2rem;">You are currently on the <strong id="current-plan-name"
+                    style="color: var(--primary);">Free Trial</strong>.</p>
+                <style>
+                  .pricing-grid {
+                    display: grid;
+                    grid-template-columns: 1fr;
+                    gap: 2rem;
+                    margin-top: 1.5rem;
+                  }
+
+                  @media (min-width: 768px) {
+                    .pricing-grid {
+                      grid-template-columns: 1fr 1fr;
+                    }
+                  }
+
+                  .pricing-card {
+                    position: relative;
+                    display: flex;
+                    flex-direction: column;
+                    border-radius: 1rem;
+                    padding: 2rem;
+                    border: 1px solid rgba(255, 255, 255, 0.05);
+                    background: rgba(255, 255, 255, 0.02);
+                  }
+
+                  .pricing-card.pro {
+                    background: linear-gradient(to bottom, rgba(139, 92, 246, 0.1), rgba(15, 23, 42, 0.5));
+                    border: 1px solid var(--primary);
+                  }
+
+                  .pricing-badge {
+                    position: absolute;
+                    top: -0.75rem;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: var(--primary);
+                    color: var(--on-primary);
+                    padding: 0.25rem 1rem;
+                    border-radius: 9999px;
+                    font-size: 0.75rem;
+                    font-weight: bold;
+                    text-transform: uppercase;
+                  }
+
+                  .pricing-header h3 {
+                    font-size: 1.5rem;
+                    font-weight: bold;
+                    margin-bottom: 0.5rem;
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    color: white;
+                  }
+
+                  .pricing-header p {
+                    color: var(--text-dim);
+                    font-size: 0.85rem;
+                  }
+
+                  .pricing-price {
+                    margin: 1.5rem 0;
+                    display: flex;
+                    align-items: baseline;
+                  }
+
+                  .pricing-price .amount {
+                    font-size: 3rem;
+                    font-weight: 900;
+                    color: white;
+                  }
+
+                  .pricing-price .period {
+                    color: var(--text-dim);
+                    margin-left: 0.5rem;
+                  }
+
+                  .pricing-features {
+                    flex-grow: 1;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 1rem;
+                    margin-bottom: 2rem;
+                    padding: 0;
+                    list-style: none;
+                  }
+
+                  .pricing-feature {
+                    display: flex;
+                    align-items: flex-start;
+                    gap: 0.75rem;
+                  }
+
+                  .pricing-feature span.icon {
+                    color: var(--primary);
+                    font-size: 1.25rem;
+                  }
+
+                  .pricing-feature span.text {
+                    color: white;
+                    font-size: 0.85rem;
+                  }
+
+                  .pricing-feature.disabled span.icon {
+                    color: var(--text-dim);
+                    opacity: 0.5;
+                  }
+
+                  .pricing-feature.disabled span.text {
+                    color: var(--text-dim);
+                    text-decoration: line-through;
+                    opacity: 0.5;
+                  }
+
+                  .pricing-btn {
+                    width: 100%;
+                    text-align: center;
+                    padding: 0.8rem;
+                    border-radius: 0.75rem;
+                    font-weight: bold;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    border: none;
+                    font-size: 0.95rem;
+                  }
+
+                  .pricing-btn.outline {
+                    background: transparent;
+                    border: 1px solid var(--border);
+                    color: var(--text-dim);
+                    cursor: not-allowed;
+                  }
+
+                  .pricing-btn.primary {
+                    background: var(--primary);
+                    color: var(--on-primary);
+                  }
+
+                  .pricing-btn.primary:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+                  }
+                </style>
+
+                <div class="pricing-grid">
+                  <!-- Free Tier -->
+                  <div class="pricing-card">
+                    <div class="pricing-header">
+                      <h3>Starter</h3>
+                      <p>Test the AI receptionist capabilities without upfront commitment.</p>
+                    </div>
+
+                    <div class="pricing-price">
+                      <span class="price-display amount" data-usd="$0" data-ngn="₦0">$0</span>
+                      <span class="period">/month</span>
+                    </div>
+
+                    <ul class="pricing-features">
+                      <li class="pricing-feature">
+                        <span class="material-symbols-outlined icon">check_circle</span>
+                        <span class="text"><strong>Hosted Chat Link</strong> (No website widget)</span>
+                      </li>
+                      <li class="pricing-feature">
+                        <span class="material-symbols-outlined icon">check_circle</span>
+                        <span class="text">Up to <strong>20 AI conversations</strong> per month</span>
+                      </li>
+                      <li class="pricing-feature">
+                        <span class="material-symbols-outlined icon">check_circle</span>
+                        <span class="text">Manual knowledge base entry</span>
+                      </li>
+                      <li class="pricing-feature">
+                        <span class="material-symbols-outlined icon">check_circle</span>
+                        <span class="text">Up to <strong>3 FAQs</strong> on the chat widget</span>
+                      </li>
+                      <li class="pricing-feature disabled">
+                        <span class="material-symbols-outlined icon">cancel</span>
+                        <span class="text">No website scraping or document uploads</span>
+                      </li>
+                    </ul>
+
+                    <button id="btn-free-current-plan" class="pricing-btn outline" disabled>Current Plan</button>
+                  </div>
+
+                  <!-- Pro Tier -->
+                  <div class="pricing-card pro">
+                    <div class="pricing-badge">Most Popular</div>
+
+                    <div class="pricing-header">
+                      <h3>Pro <span class="pro-badge" style="font-size: 0.65rem; padding: 0.2rem 0.6rem;"><img src="/assets/img/verified-badge.png" alt="Pro" style="height:0.9rem; vertical-align:middle; margin-right:0.2rem;" onerror="this.style.display='none'"> Pro</span></h3>
+                      <p>Full automation, professional branding, and higher volume.</p>
+                    </div>
+
+                    <div class="pricing-price">
+                      <span class="price-display amount" data-usd="$19.99" data-ngn="₦15,999">$19.99</span>
+                      <span class="period">/month</span>
+                    </div>
+
+                    <ul class="pricing-features">
+                      <li class="pricing-feature">
+                        <span class="material-symbols-outlined icon">check_circle</span>
+                        <span class="text"><strong>Embeddable Website Widget</strong></span>
+                      </li>
+                      <li class="pricing-feature">
+                        <span class="material-symbols-outlined icon">check_circle</span>
+                        <span class="text"><strong>500</strong> AI credits per month</span>
+                      </li>
+                      <li class="pricing-feature">
+                        <span class="material-symbols-outlined icon">check_circle</span>
+                        <span class="text"><strong>Website Scraping</strong> & Document Uploads</span>
+                      </li>
+                      <li class="pricing-feature">
+                        <span class="material-symbols-outlined icon">check_circle</span>
+                        <span class="text">Removable branding</span>
+                      </li>
+                      <li class="pricing-feature">
+                        <span class="material-symbols-outlined icon">check_circle</span>
+                        <span class="text"><strong>Custom Brand Colors</strong> — personalize chat widget UI</span>
+                      </li>
+                      <li class="pricing-feature">
+                        <span class="material-symbols-outlined icon">check_circle</span>
+                        <span class="text"><strong>Unlimited FAQs</strong> on the chat widget</span>
+                      </li>
+                      <li class="pricing-feature">
+                        <span class="material-symbols-outlined icon">check_circle</span>
+                        <span class="text"><strong>Human Takeover</strong> — live chat with customers</span>
+                      </li>
+                    </ul>
+
+                    <button id="btn-upgrade-pro-billing" onclick="app.initiatePaystackCheckout()"
+                      class="pricing-btn primary">Upgrade to Pro</button>
+                  </div>
+                </div> <!-- End of Pricing Grid -->
+
+                <!-- Buy Credits Bundles Section -->
+                <div style="margin-top: 3rem;">
+                  <h3 style="color: white; margin-bottom: 1rem; font-size: 1.25rem;">Buy Credit Bundles</h3>
+                  <p style="color: var(--text-dim); font-size: 0.9rem; margin-bottom: 1.5rem;">Need more credits this month? Top up your balance. Purchased credits expire 1 month after purchase.</p>
+                  
+                  <div class="pricing-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
+                    <!-- Bundle 1 -->
+                    <div class="pricing-card" style="border: 1px solid rgba(192, 193, 255, 0.2); background: linear-gradient(135deg, rgba(82, 107, 245, 0.05), rgba(0,0,0,0));">
+                      <div class="pricing-header">
+                        <h3>1,000 Credits</h3>
+                      </div>
+                      <div class="pricing-price">
+                        <span class="price-display amount" data-usd="$10.00" data-ngn="₦15,050">₦15,050</span>
+                      </div>
+                      <ul class="pricing-features" style="margin-bottom: 1.5rem;">
+                        <li class="pricing-feature">
+                          <span class="material-symbols-outlined icon">bolt</span>
+                          <span class="text">1,000 extra AI credits</span>
+                        </li>
+                      </ul>
+                      <button class="pricing-btn primary" onclick="app.initiatePaystackCheckout({ action: 'buy_credits', amount: 15050 * 100, bundleAmount: 1000 })">Buy Now</button>
+                    </div>
+
+                    <!-- Bundle 2 -->
+                    <div class="pricing-card" style="border: 1px solid var(--primary); background: linear-gradient(135deg, rgba(167, 139, 250, 0.1), rgba(0,0,0,0)); box-shadow: 0 4px 20px rgba(124, 58, 237, 0.15);">
+                      <div class="pricing-badge" style="background: var(--primary);">Best Value</div>
+                      <div class="pricing-header">
+                        <h3>5,000 Credits</h3>
+                      </div>
+                      <div class="pricing-price">
+                        <span class="price-display amount" data-usd="$40.00" data-ngn="₦57,200">₦57,200</span>
+                      </div>
+                      <ul class="pricing-features" style="margin-bottom: 1.5rem;">
+                        <li class="pricing-feature">
+                          <span class="material-symbols-outlined icon">bolt</span>
+                          <span class="text">5,000 extra AI credits</span>
+                        </li>
+                      </ul>
+                      <button class="pricing-btn primary" onclick="app.initiatePaystackCheckout({ action: 'buy_credits', amount: 57200 * 100, bundleAmount: 5000 })">Buy Now</button>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- 6. Widget Setup Tab -->
+            <div id="settings-tab-widget" style="display: none;">
+              <div class="glass-card" style="position: relative; overflow: hidden; min-height: 350px;">
+                <h3 style="margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                  Widget Setup
+                  <span class="pro-badge" style="font-size: 0.6rem; padding: 0.2rem 0.6rem;">Pro Only</span>
+                </h3>
+                
+                <!-- Pro Overlay (hidden for Pro users via applyAccessControl) -->
+                <div id="widget-pro-overlay"
+                  style="position: absolute; inset: 0; background: rgba(15, 23, 42, 0.88); backdrop-filter: blur(6px); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10;">
+                  <div
+                    style="width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, #7c3aed, #a78bfa); display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem; box-shadow: 0 0 24px rgba(124,58,237,0.6);">
+                    <span class="material-symbols-outlined" style="font-size: 2rem; color: white;">lock</span>
+                  </div>
+                  <h3 style="margin-bottom: 0.5rem; color: white; font-size: 1.25rem;">Pro Feature</h3>
+                  <p
+                    style="color: var(--text-dim); margin-bottom: 1.75rem; text-align: center; max-width: 280px; font-size: 0.875rem; line-height: 1.6;">
+                    Upgrade to Pro to embed the AI chat widget directly on your website.</p>
+                  <button id="btn-upgrade-pro" class="btn btn-primary" style="padding: 0.75rem 2rem; border-radius: 9999px;"
+                    onclick="app.initiatePaystackCheckout()">Upgrade Now</button>
+                </div>
+
+                <!-- Widget content — toggled by applyAccessControl -->
+                <div id="widget-content" class="locked">
+                  <h3 style="margin-bottom: 1rem;">Embed Noctra on Your Website</h3>
+                  <p style="margin-bottom: 2rem; color: var(--text-dim);">Copy and paste this code snippet right before the
+                    closing
+                    <code>&lt;/body&gt;</code> tag on your website to display the chat widget to your visitors.
+                  </p>
+                  <div
+                    style="background: rgba(0,0,0,0.4); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--border); font-family: monospace; font-size: 0.9rem; color: var(--primary); overflow-x: auto; position: relative;">
+                    <button class="btn btn-primary" id="btn-copy-widget" onclick="app.copyWidgetSnippet()"
+                      style="position: absolute; top: 0.5rem; right: 0.5rem; padding: 0.5rem 1rem; font-size: 0.75rem;">Copy</button>
+                    <code id="snippet-code"
+                      style="display: block; margin-top: 1.5rem;">&lt;!-- Code snippet will be generated here once connected to DB --&gt;</code>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -803,35 +1502,112 @@
       </section>
 
       <!-- ================= VIEW: WIDGET SETUP ================= -->
+      <style>
+        /* ---- Premium Pro Badge ---- */
+        .pro-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.3rem;
+          background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 50%, #c4b5fd 100%);
+          color: #fff;
+          padding: 0.3rem 0.85rem;
+          border-radius: 9999px;
+          font-size: 0.7rem;
+          font-weight: 800;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          box-shadow:
+            0 0 0 1px rgba(167, 139, 250, 0.3),
+            0 0 18px rgba(124, 58, 237, 0.55),
+            0 2px 8px rgba(0, 0, 0, 0.4);
+          animation: badgePulse 3s ease-in-out infinite;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .pro-badge::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+          transform: translateX(-100%);
+          animation: badgeShine 3s ease-in-out infinite;
+        }
+
+        .pro-badge .badge-icon {
+          font-size: 0.9rem;
+          font-variation-settings: 'FILL' 1, 'wght' 700;
+          filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.6));
+        }
+
+        @keyframes badgePulse {
+
+          0%,
+          100% {
+            box-shadow: 0 0 0 1px rgba(167, 139, 250, 0.3), 0 0 18px rgba(124, 58, 237, 0.55), 0 2px 8px rgba(0, 0, 0, 0.4);
+          }
+
+          50% {
+            box-shadow: 0 0 0 1px rgba(167, 139, 250, 0.5), 0 0 28px rgba(124, 58, 237, 0.8), 0 2px 8px rgba(0, 0, 0, 0.4);
+          }
+        }
+
+        @keyframes badgeShine {
+          0% {
+            transform: translateX(-100%);
+          }
+
+          40%,
+          100% {
+            transform: translateX(200%);
+          }
+        }
+
+        /* Widget content — dimmed/locked until Pro */
+        #widget-content {
+          transition: opacity 0.3s;
+        }
+
+        #widget-content.locked {
+          opacity: 0.4;
+          pointer-events: none;
+        }
+      </style>
+
       <section id="view-widget" class="app-view">
         <header class="db-header db-view-header">
-          <h1>Widget Setup <span class="pro-badge"
-              style="vertical-align: middle; margin-left: 0.5rem; background: var(--primary); color: var(--on-primary); padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.65rem; font-weight: bold; text-transform: uppercase;">Pro
-              Only</span></h1>
+          <h1 style="display: flex; align-items: center; gap: 0.75rem;">Widget Setup
+            <span class="pro-badge">
+              Pro Only
+            </span>
+          </h1>
         </header>
         <div class="glass-card" style="position: relative; overflow: hidden;">
-          <!-- Pro Overlay -->
+          <!-- Pro Overlay (hidden for Pro users via applyAccessControl) -->
           <div id="widget-pro-overlay"
-            style="position: absolute; inset: 0; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(4px); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10;">
-            <span class="material-symbols-outlined"
-              style="font-size: 3rem; color: var(--primary); margin-bottom: 1rem;">lock</span>
-            <h3 style="margin-bottom: 0.5rem; color: white;">Pro Feature</h3>
+            style="position: absolute; inset: 0; background: rgba(15, 23, 42, 0.88); backdrop-filter: blur(6px); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10;">
+            <div
+              style="width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, #7c3aed, #a78bfa); display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem; box-shadow: 0 0 24px rgba(124,58,237,0.6);">
+              <span class="material-symbols-outlined" style="font-size: 2rem; color: white;">lock</span>
+            </div>
+            <h3 style="margin-bottom: 0.5rem; color: white; font-size: 1.25rem;">Pro Feature</h3>
             <p
-              style="color: var(--text-dim); margin-bottom: 1.5rem; text-align: center; max-width: 300px; font-size: 0.9rem;">
+              style="color: var(--text-dim); margin-bottom: 1.75rem; text-align: center; max-width: 280px; font-size: 0.875rem; line-height: 1.6;">
               Upgrade to Pro to embed the AI chat widget directly on your website.</p>
-            <a href="/pricing" class="btn btn-primary" style="padding: 0.75rem 1.5rem;">Upgrade Now</a>
+            <button id="btn-upgrade-pro" class="btn btn-primary" style="padding: 0.75rem 2rem; border-radius: 9999px;"
+              onclick="app.initiatePaystackCheckout()">Upgrade Now</button>
           </div>
 
-          <div style="opacity: 0.4; pointer-events: none;">
+          <!-- Widget content — toggled by applyAccessControl -->
+          <div id="widget-content" class="locked">
             <h3 style="margin-bottom: 1rem;">Embed Noctra on Your Website</h3>
             <p style="margin-bottom: 2rem; color: var(--text-dim);">Copy and paste this code snippet right before the
               closing
               <code>&lt;/body&gt;</code> tag on your website to display the chat widget to your visitors.
             </p>
-
             <div
               style="background: rgba(0,0,0,0.4); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid var(--border); font-family: monospace; font-size: 0.9rem; color: var(--primary); overflow-x: auto; position: relative;">
-              <button class="btn btn-primary" id="btn-copy-widget"
+              <button class="btn btn-primary" id="btn-copy-widget" onclick="app.copyWidgetSnippet()"
                 style="position: absolute; top: 0.5rem; right: 0.5rem; padding: 0.5rem 1rem; font-size: 0.75rem;">Copy</button>
               <code id="snippet-code"
                 style="display: block; margin-top: 1.5rem;">&lt;!-- Code snippet will be generated here once connected to DB --&gt;</code>
@@ -843,17 +1619,141 @@
     </main>
   </div>
 
+  <!-- Mobile Bottom Navigation Bar -->
+  <nav class="mob-bottom-nav" role="navigation" aria-label="Mobile navigation">
+    <a href="javascript:void(0)" onclick="app.navigate('overview')" class="mob-nav-item active" data-target="overview">
+      <span class="material-symbols-outlined">home</span>
+      <span>Home</span>
+    </a>
+    <a href="javascript:void(0)" onclick="app.navigate('appointments')" class="mob-nav-item" data-target="appointments">
+      <span class="material-symbols-outlined">book_online</span>
+      <span>Bookings</span>
+    </a>
+    <a href="javascript:void(0)" onclick="app.navigate('conversations')" class="mob-nav-item" data-target="conversations">
+      <span class="material-symbols-outlined">forum</span>
+      <span>Chats</span>
+    </a>
+    <a href="javascript:void(0)" onclick="app.navigate('assistant')" class="mob-nav-item" data-target="assistant">
+      <img src="../assets/img/logo/logo.png" style="width: 1.2rem; height: 1.2rem; object-fit: contain; margin-bottom: 0.15rem;" alt="Noctra Copilot">
+      <span>Noctra Copilot</span>
+    </a>
+    <a href="javascript:void(0)" onclick="app.navigate('settings')" class="mob-nav-item" data-target="settings">
+      <span class="material-symbols-outlined">manage_accounts</span>
+      <span>Settings</span>
+    </a>
+  </nav>
+
+  <!-- Mobile panel navigation helpers (conversations view) -->
+  <script>
+    // Expose mobile panel helpers on window.app so the back button can use them
+    document.addEventListener('DOMContentLoaded', function () {
+      window.app = window.app || {};
+      window.app.showSessionPanel = function () {
+        var sp = document.getElementById('session-panel');
+        var cp = document.getElementById('chat-panel');
+        if (sp) sp.classList.add('panel-active');
+        if (cp) cp.classList.remove('panel-active');
+      };
+      window.app.showChatPanel = function () {
+        var sp = document.getElementById('session-panel');
+        var cp = document.getElementById('chat-panel');
+        if (sp) sp.classList.remove('panel-active');
+        if (cp) cp.classList.add('panel-active');
+      };
+    });
+  </script>
+
   <!-- Auth & App Logic -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
   <script>
     // Configure worker
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+
+    // Currency Detection for Dashboard
+    async function detectCurrency() {
+      const priceDisplays = document.querySelectorAll('.price-display');
+      if (priceDisplays.length === 0) return;
+
+      let userCountry = localStorage.getItem('owl_assist_country');
+      if (!userCountry) {
+        try {
+          const res = await fetch('https://ipapi.co/json/');
+          const data = await res.json();
+          userCountry = data.country_code;
+          if (userCountry) localStorage.setItem('owl_assist_country', userCountry);
+        } catch (error) {
+          userCountry = 'US';
+        }
+      }
+
+      priceDisplays.forEach(display => {
+        if (userCountry === 'NG') display.textContent = display.getAttribute('data-ngn');
+        else display.textContent = display.getAttribute('data-usd');
+      });
+    }
+
+    // Run detection when DOM is ready
+    document.addEventListener('DOMContentLoaded', detectCurrency);
   </script>
   <script src="../assets/js/clerk-auth.js"></script>
   <script src="../assets/js/supabase.js"></script>
+  <script src="https://js.paystack.co/v1/inline.js"></script>
   <script src="../assets/js/modals.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script>
+    if (window.marked) {
+      const renderer = new marked.Renderer();
+      renderer.link = function(href, title, text) {
+        let linkHref = href;
+        let linkTitle = title;
+        let linkText = text;
+        
+        if (typeof href === 'object' && href !== null) {
+          linkHref = href.href || '';
+          linkTitle = href.title || '';
+          linkText = href.text || '';
+        }
+        
+        let cleanHref = linkHref;
+        if (cleanHref && !cleanHref.startsWith('http://') && !cleanHref.startsWith('https://') && !cleanHref.startsWith('mailto:') && !cleanHref.startsWith('tel:')) {
+          cleanHref = 'https://' + cleanHref;
+        }
+        
+        const titleAttr = linkTitle ? ` title="${linkTitle}"` : '';
+        return `<a href="${cleanHref}" target="_blank" rel="noopener noreferrer"${titleAttr}>${linkText}</a>`;
+      };
+      
+      if (typeof marked.use === 'function') {
+        marked.use({ renderer, gfm: true, breaks: true });
+      } else {
+        marked.setOptions({ renderer: renderer, gfm: true, breaks: true });
+      }
+    }
+  </script>
   <script src="../assets/js/dashboard-app.js"></script>
+
+  <!-- FAQ Modal -->
+  <div id="faq-modal" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.7); backdrop-filter:blur(4px); align-items:center; justify-content:center; padding:1rem;">
+    <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:1.5rem; width:90%; max-width:500px; position:relative; max-height: 90vh; overflow-y: auto;">
+      <button onclick="app.closeFaqModal()" style="position:absolute; top:1rem; right:1rem; background:none; border:none; color:var(--text-dim); cursor:pointer; font-size:1.5rem; line-height:1;">&#x2715;</button>
+      <h3 id="faq-modal-title" style="margin:0 0 1.5rem;">Add FAQ</h3>
+      <input type="hidden" id="faq-edit-index" value="-1">
+      <div class="form-group" style="margin-bottom:1rem;">
+        <label style="display:block; margin-bottom:0.4rem; font-size:0.85rem; color:var(--text-sub);">Question</label>
+        <input type="text" id="faq-question-input" placeholder="e.g. What are your business hours?" style="width:100%; padding:0.75rem; border-radius:var(--radius-sm); border:1px solid var(--border); background:rgba(0,0,0,0.2); color:white;">
+      </div>
+      <div class="form-group" style="margin-bottom:1.5rem;">
+        <label style="display:block; margin-bottom:0.4rem; font-size:0.85rem; color:var(--text-sub);">Answer</label>
+        <textarea id="faq-answer-input" rows="4" placeholder="e.g. We are open Monday to Friday, 9am–5pm." style="width:100%; padding:0.75rem; border-radius:var(--radius-sm); border:1px solid var(--border); background:rgba(0,0,0,0.2); color:white; font-family:var(--font-family); resize:vertical;"></textarea>
+      </div>
+      <div style="display:flex; gap:1rem; justify-content:flex-end;">
+        <button onclick="app.closeFaqModal()" class="btn btn-outline">Cancel</button>
+        <button onclick="app.saveFaqFromModal()" class="btn btn-primary">Save FAQ</button>
+      </div>
+    </div>
+  </div>
 
 </body>
 

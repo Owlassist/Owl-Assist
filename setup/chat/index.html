@@ -22,6 +22,37 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
     rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script>
+    if (window.marked) {
+      const renderer = new marked.Renderer();
+      renderer.link = function(href, title, text) {
+        let linkHref = href;
+        let linkTitle = title;
+        let linkText = text;
+        
+        if (typeof href === 'object' && href !== null) {
+          linkHref = href.href || '';
+          linkTitle = href.title || '';
+          linkText = href.text || '';
+        }
+        
+        let cleanHref = linkHref;
+        if (cleanHref && !cleanHref.startsWith('http://') && !cleanHref.startsWith('https://') && !cleanHref.startsWith('mailto:') && !cleanHref.startsWith('tel:')) {
+          cleanHref = 'https://' + cleanHref;
+        }
+        
+        const titleAttr = linkTitle ? ` title="${linkTitle}"` : '';
+        return `<a href="${cleanHref}" target="_blank" rel="noopener noreferrer"${titleAttr}>${linkText}</a>`;
+      };
+      
+      if (typeof marked.use === 'function') {
+        marked.use({ renderer, gfm: true, breaks: true });
+      } else {
+        marked.setOptions({ renderer: renderer, gfm: true, breaks: true });
+      }
+    }
+  </script>
 
   <!-- Styles -->
   <link rel="stylesheet" href="../assets/css/style.css">
@@ -42,32 +73,68 @@
     }
 
     .public-header {
-      padding: 1.5rem;
-      border-bottom: 1px solid var(--border);
-      background: var(--glass);
+      padding: 0.85rem 1.25rem;
+      border-bottom: 1px solid rgba(0,0,0,0.2);
+      background: rgba(0, 0, 0, 0.3);
       backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
       display: flex;
       justify-content: space-between;
       align-items: center;
       z-index: 10;
+      flex-shrink: 0;
+      min-height: 0;
     }
 
     .biz-info {
       display: flex;
       align-items: center;
-      gap: 1rem;
+      gap: 0.75rem;
+      min-width: 0;
+      flex: 1;
     }
 
     .biz-logo {
-      width: 40px;
-      height: 40px;
+      width: 38px;
+      height: 38px;
+      flex-shrink: 0;
       border-radius: 50%;
       background: var(--primary-gradient);
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: 800;
-      font-size: 1.2rem;
+      font-size: 1.1rem;
+    }
+
+    .biz-name-wrap {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #biz-name {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 180px;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-shrink: 0;
+      margin-left: 0.5rem;
+    }
+
+    .owl-branding-text {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
     }
 
     .chat-container {
@@ -109,17 +176,117 @@
       border-bottom-left-radius: 0.25rem;
     }
 
+    /* Markdown styling for bot messages */
+    .message.bot p {
+      margin: 0 0 0.5rem 0;
+    }
+    .message.bot p:last-child {
+      margin-bottom: 0;
+    }
+    .message.bot a {
+      color: var(--primary, #8b5cf6);
+      text-decoration: underline;
+      font-weight: 600;
+      transition: opacity 0.2s;
+    }
+    .message.bot a:hover {
+      opacity: 0.8;
+    }
+    .message.bot ol, .message.bot ul {
+      margin-left: 1.25rem;
+      margin-top: 0.4rem;
+      margin-bottom: 0.4rem;
+      padding: 0;
+    }
+    .message.bot ul {
+      list-style-type: disc;
+    }
+    .message.bot ol {
+      list-style-type: decimal;
+    }
+    .message.bot li {
+      margin-bottom: 0.35rem;
+      color: var(--text-dim, rgba(255, 255, 255, 0.7));
+    }
+    .message.bot li::marker {
+      color: var(--primary, #8b5cf6);
+      font-weight: 700;
+    }
+    .message.bot table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0.75rem 0;
+      font-size: 0.85rem;
+      line-height: 1.4;
+      display: block;
+      overflow-x: auto;
+      border-radius: 0.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .message.bot th {
+      background: rgba(255, 255, 255, 0.08);
+      color: white;
+      font-weight: 600;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      text-align: left;
+    }
+    .message.bot td {
+      padding: 0.5rem 0.75rem;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      color: rgba(255, 255, 255, 0.75);
+    }
+    .message.bot tr:nth-child(even) {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .message.bot code {
+      font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+      font-size: 0.85em;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      color: #ff859d;
+    }
+    .message.bot pre {
+      margin: 0.75rem 0;
+      padding: 0.75rem;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 0.5rem;
+      overflow-x: auto;
+    }
+    .message.bot pre code {
+      background: transparent;
+      padding: 0;
+      border-radius: 0;
+      color: #e2e8f0;
+      display: block;
+    }
+    .message.bot h1, .message.bot h2, .message.bot h3, .message.bot h4 {
+      color: white;
+      margin-top: 0.75rem;
+      margin-bottom: 0.5rem;
+      font-weight: 700;
+    }
+    .message.bot h1 { font-size: 1.3rem; }
+    .message.bot h2 { font-size: 1.2rem; }
+    .message.bot h3 { font-size: 1.1rem; }
+    .message.bot h4 { font-size: 1rem; }
+
     .message.user {
       align-self: flex-end;
-      background: #4f46e5;
+      background: var(--bubble-user);
       color: white;
       border-bottom-right-radius: 0.25rem;
     }
 
     .chat-input-area {
       padding: 1.5rem 2rem;
-      background: var(--glass);
-      border-top: 1px solid var(--border);
+      background: rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-top: 1px solid rgba(0,0,0,0.2);
       display: flex;
       gap: 1rem;
     }
@@ -200,12 +367,10 @@
 
     @keyframes badgePulse {
       0%, 100% {
-        transform: scale(1);
-        filter: drop-shadow(0 0 4px rgba(99, 102, 241, 0.6));
+        filter: drop-shadow(0 0 3px rgba(99,102,241,0.5));
       }
       50% {
-        transform: scale(1.15);
-        filter: drop-shadow(0 0 10px rgba(124, 58, 237, 0.9));
+        filter: drop-shadow(0 0 8px rgba(99,102,241,0.8));
       }
     }
 
@@ -328,45 +493,73 @@
 
     /* Mobile Chat Refinement */
     @media (max-width: 768px) {
-      .public-header {
-        padding: 1rem;
-      }
-
-      .biz-name {
-        font-size: 1rem !important;
+      #biz-name {
+        font-size: 0.95rem !important;
+        max-width: 140px;
       }
 
       .chat-container {
-        padding: 1rem;
-        gap: 1rem;
+        padding: 0.85rem;
+        gap: 0.85rem;
       }
 
       .message {
-        max-width: 90%;
-        font-size: 0.9rem;
-        padding: 0.85rem 1rem;
+        max-width: 88%;
+        font-size: 0.875rem;
+        padding: 0.75rem 0.9rem;
       }
 
       .chat-input-area {
-        padding: 1rem;
-        gap: 0.75rem;
+        padding: 0.75rem 0.85rem;
+        gap: 0.5rem;
       }
 
       .chat-input {
-        padding: 0.65rem 1.25rem;
-        font-size: 0.9rem;
+        padding: 0.6rem 1rem;
+        font-size: 0.875rem;
       }
 
-      .send-btn {
-        width: 40px !important;
-        height: 40px !important;
+      #send-btn {
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px;
       }
 
       .lead-form-container,
       .booking-card {
         max-width: 100%;
-        padding: 1.25rem;
+        padding: 1rem;
       }
+    }
+
+    /* Extra small screens — hide 'Powered by' prefix but keep 'Owl Assist' name */
+    @media (max-width: 480px) {
+      .branding-prefix {
+        display: none;
+      }
+
+      #btn-reset-chat span.reset-label {
+        display: none;
+      }
+
+      #btn-reset-chat {
+        padding: 0.35rem 0.5rem !important;
+        min-width: unset;
+      }
+
+      #biz-name {
+        max-width: 110px;
+      }
+
+      .owl-branding-text {
+        font-size: 0.7rem;
+        gap: 0.25rem;
+      }
+    }
+
+    /* Ensure no horizontal overflow */
+    body, html {
+      overflow-x: hidden;
     }
 
     /* Overlay & Pre-chat Selector CSS */
@@ -571,22 +764,40 @@
   <header class="public-header">
     <div class="biz-info">
       <div class="biz-logo" id="biz-logo">O</div>
-      <div>
-        <h2 id="biz-name" style="font-size: 1.1rem; margin: 0;">Loading Assistant...</h2>
-        <span id="biz-status" style="font-size: 0.75rem; color: #22c55e;">● Online</span>
+      <div class="biz-name-wrap">
+        <h2 id="biz-name" class="biz-name" style="font-size: 1.05rem; margin: 0; display: flex; align-items: center;">Loading...</h2>
+        <span id="biz-status" style="font-size: 0.7rem; color: #22c55e;">● Online</span>
       </div>
     </div>
-    <div style="display: flex; align-items: center; gap: 0.5rem;">
-      <button id="btn-reset-chat" class="btn btn-outline" style="padding: 0.35rem 0.75rem; font-size: 0.75rem; display: none; border-radius: var(--radius-sm);" onclick="resetChatSession()">
-        <span class="material-symbols-outlined" style="font-size: 0.95rem; vertical-align: middle; margin-right: 0.25rem;">refresh</span>New Chat
+    <div class="header-actions" style="position: relative;">
+      <a id="owl-branding" class="owl-branding-text" href="https://owlassist.app" target="_blank" rel="noopener noreferrer" title="Powered by Owl Assist" style="text-decoration: none; cursor: pointer; transition: opacity 0.2s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity=''">
+        <span class="branding-prefix" style="color: var(--text-dim);">Powered by</span>
+        <img src="../assets/img/logo/logo.png" style="height: 13px; opacity: 0.65; flex-shrink: 0;" alt="Owl Assist">
+        <span style="color: var(--text-dim); font-weight: 600;">Owl Assist</span>
+      </a>
+
+      <!-- Hamburger Menu -->
+      <button onclick="toggleWidgetMenu(event)" class="btn btn-outline" style="padding: 0.35rem; border-radius: var(--radius-sm); border:none; background:transparent; display:flex; align-items:center; justify-content:center; cursor: pointer; z-index: 101;">
+        <span class="material-symbols-outlined" style="font-size: 1.6rem; pointer-events: none;">menu</span>
       </button>
-      <button id="btn-history-chat" class="btn btn-outline" style="padding: 0.35rem 0.75rem; font-size: 0.75rem; display: none; border-radius: var(--radius-sm);" onclick="openHistoryModal()">
-        <span class="material-symbols-outlined" style="font-size: 0.95rem; vertical-align: middle; margin-right: 0.25rem;">history</span>History
-      </button>
-      <div id="owl-branding" style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; color: var(--text-dim);">
-        Powered by <img src="../../assets/img/logo/logo.png" style="height: 14px; opacity: 0.6;"> Owl Assist
+
+      <!-- Dropdown Content -->
+      <div id="widget-dropdown" style="display:none; position:absolute; top:100%; right:0; margin-top:0.5rem; background:#1e1e32; border:1px solid var(--border); border-radius:var(--radius-sm); width:180px; box-shadow:0 8px 24px rgba(0,0,0,0.5); z-index:100; overflow:hidden; flex-direction:column;">
+        <button onclick="openWidgetFaqs()" class="widget-dropdown-item" style="width:100%; text-align:left; padding:0.75rem 1rem; border:none; background:transparent; color:white; font-size:0.85rem; cursor:pointer; border-bottom:1px solid rgba(255,255,255,0.05); display:flex; align-items:center; gap:0.5rem;">
+          <span class="material-symbols-outlined" style="font-size:1.1rem;">help</span> FAQs
+        </button>
+        <button id="btn-history-chat" onclick="openHistoryModal(); toggleWidgetMenu()" class="widget-dropdown-item" style="width:100%; text-align:left; padding:0.75rem 1rem; border:none; background:transparent; color:white; font-size:0.85rem; cursor:pointer; border-bottom:1px solid rgba(255,255,255,0.05); display:flex; align-items:center; gap:0.5rem;">
+          <span class="material-symbols-outlined" style="font-size:1.1rem;">history</span> Conversations
+        </button>
+        <button id="btn-reset-chat" onclick="resetChatSession(); toggleWidgetMenu()" class="widget-dropdown-item" style="width:100%; text-align:left; padding:0.75rem 1rem; border:none; background:transparent; color:white; font-size:0.85rem; cursor:pointer; display:none; align-items:center; gap:0.5rem;">
+          <span class="material-symbols-outlined" style="font-size:1.1rem;">refresh</span> New Chat
+        </button>
       </div>
     </div>
+    
+    <style>
+      .widget-dropdown-item:hover { background: rgba(255,255,255,0.05) !important; }
+    </style>
   </header>
 
   <!-- Customer Register Overlay -->
@@ -594,17 +805,21 @@
     <div class="glass-card welcome-card" style="max-width: 400px; padding: 2rem; text-align: center;">
       <div class="welcome-header">
         <div class="logo-animation">
-          <img src="../../assets/img/logo/logo.png" alt="Owl Assist" style="height: 50px; animation: float 3s ease-in-out infinite;">
+          <img src="../assets/img/logo/logo.png" alt="Owl Assist" style="height: 50px; animation: float 3s ease-in-out infinite;">
         </div>
         <h2 id="register-title">Start Conversation</h2>
-        <p id="register-desc">Enter your email address to begin chatting with our assistant.</p>
+        <p id="register-desc">Continue with your email to sync and save your conversations.</p>
       </div>
 
       <!-- Step 1: Email Input -->
       <div id="register-step-email" class="booking-form" style="display: flex; flex-direction: column; gap: 0.75rem;">
         <input type="email" id="cust-reg-email" placeholder="Your Email Address" required autocomplete="email" style="width: 100%; padding: 0.75rem; border-radius: var(--radius-sm); border: 1px solid var(--border); background: rgba(255,255,255,0.05); color: white;">
         <div id="email-error" style="color: #ff9966; font-size: 0.8rem; display: none; background: rgba(255,153,102,0.1); padding: 0.5rem; border-radius: 0.5rem; text-align: center;"></div>
-        <button class="btn btn-primary" id="btn-submit-email" style="width: 100%; margin-top: 0.5rem;">Continue</button>
+        <button class="btn btn-primary" id="btn-submit-email" style="width: 100%; margin-top: 0.5rem;">Continue with email</button>
+        
+        <div class="or-divider" style="margin: 0.75rem 0;"><span>OR</span></div>
+        <button class="btn btn-outline" id="btn-submit-guest" style="width: 100%;">Continue as Guest</button>
+        <p style="font-size: 0.7rem; color: var(--text-dim); margin: 0;">Guest sessions are temporary and will be lost if you close the browser.</p>
       </div>
 
       <!-- Step 2: Name Input (If new customer) -->
@@ -615,12 +830,14 @@
       </div>
 
       <!-- Step 3: Welcome Back (If existing customer) -->
-      <div id="register-step-welcome" class="booking-form" style="display: none; flex-direction: column; gap: 1rem;">
-        <h3 id="welcome-back-msg" style="margin: 0; color: white;">Welcome Back!</h3>
-        <p style="font-size: 0.85rem; color: var(--text-dim); margin: 0;">You can start a new conversation or view your previous conversation history.</p>
-        <button class="btn btn-primary" id="btn-start-new-chat" style="width: 100%;">Start New Chat</button>
-        <button class="btn btn-outline" id="btn-view-prev-history" style="width: 100%;">View History</button>
-        <button class="btn btn-outline" id="btn-change-email-welcome" style="width: 100%; font-size: 0.8rem;">Change Email</button>
+      <div id="register-step-welcome" class="booking-form" style="display: none; flex-direction: column; gap: 0.75rem;">
+        <button class="btn btn-primary" id="btn-start-new-chat" style="width: 100%;">Continue with Email</button>
+        <button class="btn btn-outline" id="btn-view-prev-history" style="width: 100%;">View Saved Conversations</button>
+        
+        <div class="or-divider" style="margin: 0.75rem 0;"><span>OR</span></div>
+        <button class="btn btn-outline" id="btn-submit-guest-welcome" style="width: 100%;">Continue as Guest</button>
+        <p style="font-size: 0.7rem; color: var(--text-dim); margin: 0;">Guest sessions are temporary and will be lost if you close the browser.</p>
+        <button class="btn btn-outline" id="btn-change-email-welcome" style="width: 100%; font-size: 0.8rem; border: none; margin-top: 0.5rem; background: transparent; color: var(--text-dim); text-decoration: underline;">Use Different Email</button>
       </div>
     </div>
   </div>
@@ -650,6 +867,8 @@
     </button>
   </div>
 
+  <!-- End Resume Modal -->
+
   <!-- Chat History Modal -->
   <div id="history-modal" class="overlay-container" style="display: none; justify-content: flex-end; padding: 0;">
     <div class="glass-card welcome-card" style="margin: 0; border-radius: 0; height: 100vh; max-width: 400px; animation: slideInRight 0.3s ease; display: flex; flex-direction: column;">
@@ -665,6 +884,20 @@
     </div>
   </div>
 
+  <!-- FAQ Modal -->
+  <div id="faq-widget-modal" class="overlay-container" style="display: none; justify-content: flex-end; padding: 0;">
+    <div class="glass-card welcome-card" style="margin: 0; border-radius: 0; height: 100vh; max-width: 400px; width: 100%; animation: slideInRight 0.3s ease; display: flex; flex-direction: column; background: var(--chat-bg);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding: 1.5rem; padding-bottom: 0;">
+        <h3 style="margin: 0; color: white;">Frequently Asked Questions</h3>
+        <button class="btn btn-icon" onclick="closeWidgetFaqs()" style="padding: 0.5rem; background: rgba(255,255,255,0.1); border-radius: 50%; color: white; border: none; cursor: pointer;">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div id="faq-widget-list" style="flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 0.75rem; padding: 1.5rem;">
+         <!-- FAQ items populate here -->
+      </div>
+    </div>
+  </div>
   <style>
     @keyframes slideInRight {
        from { transform: translateX(100%); }
@@ -709,6 +942,7 @@
     let businessId = null;
     let sessionId = null;
     let realtimeChannel = null;
+    let globalBusinessName = 'Owner';
     let leadFormShown = false;
     let leadFormSubmitted = false;
 
@@ -727,39 +961,74 @@
 
     function formatMessage(text) {
       if (!text) return '';
-      // Markdown bold
-      let formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
       
-      const linkStyle = 'color: #8b5cf6; text-decoration: underline; font-weight: 600; cursor: pointer;';
+      // Use marked if available, falling back to a clean text formatter if not loaded
+      if (window.marked && typeof window.marked.parse === 'function') {
+        try {
+          return window.marked.parse(text);
+        } catch (e) {
+          console.error("Marked parsing error:", e);
+        }
+      }
+
+      // Fallback in case marked hasn't loaded yet
+      const lines = text.split('\n');
+      let formattedLines = [];
       
-      // 1. Extract markdown links [text](url) and replace with placeholders
+      lines.forEach(line => {
+        let trimmed = line.trim();
+        let processedLine = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        processedLine = processedLine.replace(/\*(.*?)\*/g, '<em>$1</em>');
+        
+        const numMatch = trimmed.match(/^(\d+)\.\s+(.*)$/);
+        const bulletMatch = trimmed.match(/^[-*]\s+(.*)$/);
+        
+        if (numMatch) {
+            const num = numMatch[1];
+            const content = numMatch[2].replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>');
+            formattedLines.push(`<div style="margin-left: 0.5rem; margin-bottom: 0.4rem; display: flex; align-items: flex-start; gap: 0.5rem;"><span style="color: var(--primary); font-weight: 700; flex-shrink: 0;">${num}.</span><div style="flex: 1;">${content}</div></div>`);
+        } else if (bulletMatch) {
+            const content = bulletMatch[1].replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>');
+            formattedLines.push(`<div style="margin-left: 0.5rem; margin-bottom: 0.35rem; display: flex; align-items: flex-start; gap: 0.5rem;"><span style="color: var(--primary); font-size: 1.1rem; line-height: 1; flex-shrink: 0;">•</span><div style="flex: 1; color: var(--text-dim);">${content}</div></div>`);
+        } else {
+            formattedLines.push(processedLine);
+        }
+      });
+      
+      let html = formattedLines.join('<br>');
+      html = html.replace(/<\/div><br><div/g, '</div><div');
+      html = html.replace(/<br><div/g, '<div');
+      html = html.replace(/<\/div><br>/g, '</div>');
+
+      const linkStyle = 'color: var(--primary, #8b5cf6); text-decoration: underline; font-weight: 600; cursor: pointer;';
+      
+      // Extract markdown links [text](url) and replace with placeholders
       const placeholders = [];
-      formatted = formatted.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, linkText, url) => {
+      html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, linkText, url) => {
         const href = url.startsWith('http') ? url : `https://${url}`;
         placeholders.push(`<a href="${href}" target="_blank" style="${linkStyle}">${linkText}</a>`);
         return `__MD_LINK_${placeholders.length - 1}__`;
       });
 
-      // 2. Apply basic URL regex to the rest
+      // Apply basic URL regex to the rest
       const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+)/g;
-      formatted = formatted.replace(urlRegex, (url) => {
-        // Strip trailing punctuation
+      html = html.replace(urlRegex, (url) => {
         let cleanUrl = url;
         let trailing = '';
         while (cleanUrl.length > 0 && ['.', ',', ')', '!', '?', ';', ']'].includes(cleanUrl[cleanUrl.length - 1])) {
-           trailing = cleanUrl[cleanUrl.length - 1] + trailing;
-           cleanUrl = cleanUrl.slice(0, -1);
+            trailing = cleanUrl[cleanUrl.length - 1] + trailing;
+            cleanUrl = cleanUrl.slice(0, -1);
         }
         const href = cleanUrl.startsWith('http') ? cleanUrl : `https://${cleanUrl}`;
         return `<a href="${href}" target="_blank" style="${linkStyle}">${cleanUrl}</a>${trailing}`;
       });
 
-      // 3. Restore markdown links
-      placeholders.forEach((html, i) => {
-        formatted = formatted.replace(`__MD_LINK_${i}__`, html);
+      // Restore markdown links
+      placeholders.forEach((h, i) => {
+        html = html.replace(`__MD_LINK_${i}__`, h);
       });
 
-      return formatted;
+      return html;
     }
 
     function generateAccessCode() {
@@ -794,10 +1063,38 @@
                     (!businessData.subscription_expires_at || new Date(businessData.subscription_expires_at) > new Date());
       const showBadge = isPro && businessData.verified_badge_enabled !== false;
 
+      // Apply Custom Themes
+      if (businessData.theme_primary) {
+        document.documentElement.style.setProperty('--primary', businessData.theme_primary);
+        document.documentElement.style.setProperty('--bubble-user', businessData.theme_primary);
+      }
+      if (businessData.theme_bg) {
+        document.body.style.background = businessData.theme_bg;
+        // Also set the chat container bg (the messages area)
+        const chatContainer = document.getElementById('chat-messages');
+        if (chatContainer) chatContainer.style.background = businessData.theme_bg;
+      }
+      if (businessData.theme_chat_bubble) {
+        document.documentElement.style.setProperty('--bubble-bot', businessData.theme_chat_bubble);
+        // Set dropdown background to match bubble for consistency
+        const dd = document.getElementById('widget-dropdown');
+        if (dd) dd.style.background = businessData.theme_chat_bubble;
+      }
+
+      // Store FAQs
+      window._bizFaqs = Array.isArray(businessData.faqs) ? businessData.faqs : [];
+
+      const bizNameEl = document.getElementById('biz-name');
+      // Set text node first, then append badge span — ensures badge always appears AFTER the name
+      bizNameEl.textContent = bizName;
+      bizNameEl.dataset.name = bizName; // Store cleanly for use in greeting
+      globalBusinessName = bizName;
       if (showBadge) {
-        document.getElementById('biz-name').innerHTML = `${bizName}<span class="verified-badge" title="Official Verified Assistant"><img src="/assets/img/verified-badge.png" alt="Verified" onerror="this.parentElement.style.display='none'"></span>`;
-      } else {
-        document.getElementById('biz-name').innerHTML = bizName;
+        const badgeSpan = document.createElement('span');
+        badgeSpan.className = 'verified-badge';
+        badgeSpan.title = 'Official Verified Pro Assistant';
+        badgeSpan.innerHTML = '<img src="/assets/img/verified-badge.png" alt="Verified" onerror="this.parentElement.style.display=\'none\'">';
+        bizNameEl.appendChild(badgeSpan);
       }
 
       // Handle branding visibility based on premium remove_branding setting
@@ -812,9 +1109,11 @@
 
       const logoEl = document.getElementById('biz-logo');
       if (businessData.image_url && businessData.image_url !== "") {
+        window.globalBusinessImageUrl = businessData.image_url;
         logoEl.innerHTML = `<img src="${businessData.image_url}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
         logoEl.style.background = 'transparent';
       } else {
+        window.globalBusinessImageUrl = null;
         logoEl.innerText = bizName[0].toUpperCase();
       }
 
@@ -868,7 +1167,23 @@
         btn.disabled = true;
 
         try {
-          await startNewChatForCustomer(email, name);
+          sessionId = crypto.randomUUID?.() || Math.random().toString(36).substring(2, 15);
+          await window.owlDb.createLead({
+            business_id: businessId,
+            customer_name: name,
+            customer_email: email,
+            access_code: null,
+            session_id: sessionId,
+            status: 'chat'
+          });
+          localStorage.setItem('owl_session_' + businessId, sessionId);
+          localStorage.setItem('owl_customer_email_' + businessId, email);
+          localStorage.setItem('owl_customer_name_' + businessId, name);
+          sessionStorage.removeItem('owl_guest_' + businessId);
+          document.getElementById('btn-reset-chat').style.display = 'inline-flex';
+          document.getElementById('btn-history-chat').style.display = 'flex';
+          
+          await renderChatHistory([]);
           document.getElementById('customer-register-overlay').style.display = 'none';
         } catch(e) {
           console.error(e);
@@ -896,7 +1211,21 @@
         btn.disabled = true;
 
         try {
-          await startNewChatForCustomer(email, name);
+          sessionId = crypto.randomUUID?.() || Math.random().toString(36).substring(2, 15);
+          await window.owlDb.createLead({
+            business_id: businessId,
+            customer_name: name,
+            customer_email: email,
+            access_code: null,
+            session_id: sessionId,
+            status: 'chat'
+          });
+          localStorage.setItem('owl_session_' + businessId, sessionId);
+          sessionStorage.removeItem('owl_guest_' + businessId);
+          document.getElementById('btn-reset-chat').style.display = 'inline-flex';
+          document.getElementById('btn-history-chat').style.display = 'flex';
+          
+          await renderChatHistory([]);
           document.getElementById('customer-register-overlay').style.display = 'none';
         } catch(e) {
           console.error(e);
@@ -912,28 +1241,75 @@
         openHistoryModal();
       };
 
-      // Restoring active session
-      const logs = await window.owlDb.fetchChatLogs(businessId, null);
-      
-      if (logs && logs.length > 0) {
-        document.getElementById('btn-reset-chat').style.display = 'inline-flex';
-        document.getElementById('btn-history-chat').style.display = 'inline-flex';
-        await renderChatHistory(logs);
-      } else {
-        const savedEmail = localStorage.getItem('owl_customer_email_' + businessId);
-        if (savedEmail) {
-          try {
-            const res = await window.owlDb.checkCustomer(businessId, savedEmail);
-            if (res.registered) {
-              showWelcomeBackStep(savedEmail, res.name);
+      async function startGuestSession(btnId) {
+        const btn = document.getElementById(btnId);
+        const origText = btn.innerText;
+        btn.innerText = "Starting...";
+        btn.disabled = true;
+
+        try {
+          let existingSessionId = sessionStorage.getItem('owl_session_' + businessId);
+          let isExistingGuest = sessionStorage.getItem('owl_guest_' + businessId) === 'true';
+          
+          if (isExistingGuest && existingSessionId) {
+            sessionId = existingSessionId;
+            const logs = await window.owlDb.fetchChatLogs(businessId, sessionId);
+            if (logs && logs.length > 0) {
+              document.getElementById('btn-reset-chat').style.display = 'inline-flex';
+              const histBtn = document.getElementById('btn-history-chat');
+              if (histBtn) histBtn.style.display = 'none';
+              await renderChatHistory(logs);
+              document.getElementById('customer-register-overlay').style.display = 'none';
               return;
             }
-          } catch(e) {
-            console.error(e);
           }
+
+          // Use sessionStorage to store guest flag and sessionId
+          sessionStorage.setItem('owl_guest_' + businessId, 'true');
+          
+          sessionId = crypto.randomUUID?.() || Math.random().toString(36).substring(2, 15);
+          await window.owlDb.createLead({
+            business_id: businessId,
+            customer_name: "Guest",
+            customer_email: null,
+            access_code: null,
+            session_id: sessionId,
+            status: 'chat'
+          });
+          sessionStorage.setItem('owl_session_' + businessId, sessionId);
+          
+          document.getElementById('btn-reset-chat').style.display = 'inline-flex';
+          const histBtn2 = document.getElementById('btn-history-chat');
+          if (histBtn2) histBtn2.style.display = 'none'; // Hide history menu option for guest
+
+          await renderChatHistory([]);
+          document.getElementById('customer-register-overlay').style.display = 'none';
+        } catch(e) {
+          console.error(e);
+          alert("Could not start guest chat. Please try again.");
+        } finally {
+          btn.innerText = origText;
+          btn.disabled = false;
         }
-        showEmailStep();
       }
+
+      document.getElementById('btn-submit-guest').onclick = () => startGuestSession('btn-submit-guest');
+      document.getElementById('btn-submit-guest-welcome').onclick = () => startGuestSession('btn-submit-guest-welcome');
+
+      // Require prompt every time, tracked or not
+      const savedEmail = localStorage.getItem('owl_customer_email_' + businessId);
+      if (savedEmail) {
+        try {
+          const res = await window.owlDb.checkCustomer(businessId, savedEmail);
+          if (res.registered) {
+            showWelcomeBackStep(savedEmail, res.name);
+            return;
+          }
+        } catch(e) {
+          console.error(e);
+        }
+      }
+      showEmailStep();
     }
 
     let currentCustomerEmail = null;
@@ -970,10 +1346,9 @@
       document.getElementById('register-step-email').style.display = 'none';
       document.getElementById('register-step-name').style.display = 'none';
       document.getElementById('register-step-welcome').style.display = 'flex';
-      document.getElementById('welcome-back-msg').innerText = `Welcome back, ${name}!`;
-      document.getElementById('register-title').innerText = "Account Found";
-      document.getElementById('register-desc').innerText = "Would you like to start a new chat or review your previous conversations?";
-    }
+      document.getElementById('register-title').innerText = `Welcome back, ${name}!`;
+      document.getElementById('register-desc').innerText = "Continue with your saved email or start a guest session.";
+    };
 
     async function startNewChatForCustomer(email, name) {
       sessionId = crypto.randomUUID?.() || Math.random().toString(36).substring(2, 15);
@@ -989,7 +1364,6 @@
       localStorage.setItem('owl_customer_email_' + businessId, email);
       localStorage.setItem('owl_customer_name_' + businessId, name);
       document.getElementById('btn-reset-chat').style.display = 'inline-flex';
-      document.getElementById('btn-history-chat').style.display = 'inline-flex';
       await renderChatHistory([]);
     }
 
@@ -1009,7 +1383,7 @@
           try {
             await window.owlDb.chatWithAI(businessId, null, [], true, sessionId);
             greetingTyping.remove();
-            addMessage('bot', `Hello! Good to have you here. I'm the assistant for **${document.getElementById('biz-name').innerText.replace('verified', '').trim()}**. How may i assist you today?`);
+            addMessage('bot', `Hello! Good to have you here. I'm the assistant for **${document.getElementById('biz-name').dataset.name || 'this business'}**. How may i assist you today?`);
           } catch(e) {
             greetingTyping.remove();
             addMessage('bot', `Hello! Good to have you here. How may i assist you today?`);
@@ -1120,15 +1494,49 @@
         text = text.replace('[[SHOW_LEAD_FORM]]', '').trim();
       }
 
+      let needsSlots = false;
+      if (text.includes('[[SHOW_SLOTS]]')) {
+        needsSlots = true;
+        text = text.replace('[[SHOW_SLOTS]]', '').trim();
+      }
+
+      let needsBookSlot = null;
+      const bookMatch = text.match(/\[\[BOOK_SLOT:(.*?)\]\]/);
+      if (bookMatch) {
+        try {
+          needsBookSlot = JSON.parse(bookMatch[1]);
+        } catch (e) {
+          console.error(e);
+        }
+        text = text.replace(/\[\[BOOK_SLOT:.*?\]\]/g, '').trim();
+      }
+
       if (text) {
         const msgDiv = document.createElement('div');
         msgDiv.className = `message ${sender}`;
 
         // Remove any technical trigger tags from displayed text
-        let displayText = text.replace(/\[\[CONFIRM_BOOKING:.*?\]\]/g, '').trim();
+        let displayText = text.replace(/\[\[CONFIRM_BOOKING:.*?\]\]/g, '').replace(/\[\[BOOK_SLOT:.*?\]\]/g, '').trim();
 
         // Apply formatting
-        msgDiv.innerHTML = formatMessage(displayText.replace(/\n/g, '<br>'));
+        let formattedText = formatMessage(displayText);
+
+        let label = '';
+        if (sender === 'bot') {
+            // isActionable true means role is 'owner'
+            const displayName = isActionable ? globalBusinessName : 'Noctra';
+            const imageUrl = window.globalBusinessImageUrl || 'https://api.dicebear.com/7.x/bottts/svg?seed=Noctra';
+            const avatarHtml = isActionable && window.globalBusinessImageUrl 
+                ? `<img src="${window.globalBusinessImageUrl}" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; margin-right: 0.5rem; flex-shrink: 0;">`
+                : `<img src="../assets/img/logo/logo.png" style="width: 24px; height: 24px; border-radius: 50%; object-fit: contain; margin-right: 0.5rem; flex-shrink: 0; background: var(--primary); padding: 3px;">`;
+                
+            label = `<div style="display: flex; align-items: center; margin-bottom: 0.4rem;">
+                       ${avatarHtml}
+                       <div style="font-size: 0.7rem; color: var(--text-dim); font-weight: 600;">${displayName}</div>
+                     </div>`;
+        }
+
+        msgDiv.innerHTML = label + formattedText;
 
         if (isActionable) {
           msgDiv.style.borderLeft = '4px solid var(--primary)';
@@ -1143,7 +1551,201 @@
         leadFormShown = true;
       }
 
+      if (needsSlots) {
+        renderBookingSlots(chatMessages);
+      }
+
+      if (needsBookSlot) {
+        const slotWrap = document.createElement('div');
+        slotWrap.className = 'booking-card';
+        chatMessages.appendChild(slotWrap);
+        slotWrap.innerHTML = '<div style="text-align: center; color: var(--text-dim);">Booking slot...</div>';
+        
+        (async () => {
+          try {
+            const bookingRes = await fetch('/api/manage-slots', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({
+                    operation: 'create_booking',
+                    business_id: globalBusinessId,
+                    slot_id: needsBookSlot.slot_id,
+                    customer_name: needsBookSlot.customer_name,
+                    customer_email: needsBookSlot.customer_email,
+                    phone: needsBookSlot.phone || '',
+                    service_name: needsBookSlot.intent || 'Conversational Appointment'
+                })
+            });
+
+            const bookingResult = await bookingRes.json();
+            if (bookingResult && bookingResult.id) {
+              slotWrap.innerHTML = `
+                <div style="background: rgba(46, 213, 115, 0.1); border: 1px solid rgba(46, 213, 115, 0.25); padding: 1rem; border-radius: 0.5rem; color: #2ed573;">
+                  <div style="font-weight: 700; color: white;">🎉 Booking Confirmed!</div>
+                  <div style="font-size: 0.85rem; margin-top: 0.25rem;">Slot has been reserved successfully. We've sent a confirmation email to ${needsBookSlot.customer_email}.</div>
+                </div>
+              `;
+            } else if (bookingResult && bookingResult.error) {
+              slotWrap.innerHTML = `<div style="color: #ff9966; text-align: center; font-weight: 500;">Booking failed: ${bookingResult.details || bookingResult.error}</div>`;
+            } else {
+              slotWrap.innerHTML = '<div style="color: #ff9966; text-align: center; font-weight: 500;">Booking failed. Please try again manually.</div>';
+            }
+          } catch (err) {
+            console.error("Booking error:", err);
+            slotWrap.innerHTML = `<div style="color: #ff9966; text-align: center; font-weight: 500;">${err.message || 'Booking failed. Please try again.'}</div>`;
+          }
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        })();
+      }
+
       chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    async function renderBookingSlots(container, existingWrap = null) {
+      const slotsWrap = existingWrap || document.createElement('div');
+      if (!existingWrap) {
+        slotsWrap.className = 'booking-card';
+        container.appendChild(slotsWrap);
+      }
+      slotsWrap.innerHTML = '<div style="text-align: center; color: var(--text-dim);">Loading available times...</div>';
+      container.scrollTop = container.scrollHeight;
+
+      try {
+        const res = await fetch('/api/manage-slots', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            operation: 'get_available_slots',
+            business_id: businessId
+          })
+        });
+        const slotsList = await res.json();
+        
+        if (!slotsList || slotsList.length === 0) {
+          slotsWrap.innerHTML = '<div style="color: var(--text-dim); text-align: center;">No available time slots found. Please leave your details to get in touch!</div>';
+          return;
+        }
+
+        slotsWrap.innerHTML = `
+          <h4 style="margin: 0 0 1rem 0; font-size: 0.95rem; font-weight: 600; color: white;">Select a time:</h4>
+          <div class="slot-grid"></div>
+        `;
+        const grid = slotsWrap.querySelector('.slot-grid');
+        
+        slotsList.forEach(s => {
+          const btn = document.createElement('button');
+          btn.className = 'slot-btn';
+          const dateObj = new Date(s.slot_date + 'T' + s.slot_time);
+          const timeStr = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          const dateStr = dateObj.toLocaleDateString([], { month: 'short', day: 'numeric' });
+          
+          btn.innerHTML = `<strong>${timeStr}</strong><br><span style="font-size:0.75rem; opacity:0.7;">${dateStr}</span>`;
+          btn.onclick = () => selectSlot(s, slotsWrap, container);
+          grid.appendChild(btn);
+        });
+
+      } catch (err) {
+        console.error(err);
+        slotsWrap.innerHTML = '<div style="color: #ff9966; text-align: center;">Failed to load booking times.</div>';
+      }
+    }
+
+    async function selectSlot(slot, wrap, container) {
+      let name = localStorage.getItem('owl_customer_name_' + businessId) || '';
+      let email = localStorage.getItem('owl_customer_email_' + businessId) || '';
+
+      const dateObj = new Date(slot.slot_date + 'T' + slot.slot_time);
+      const dateFormatted = dateObj.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' }) + ' @ ' + dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      wrap.innerHTML = `
+        <div class="booking-form" style="margin-top: 0;">
+          <h4 style="margin: 0; font-size: 1rem; color: white;">Confirm Appointment</h4>
+          <p style="margin: 0.25rem 0 1rem 0; font-size: 0.85rem; color: var(--primary); font-weight: 600;">${dateFormatted}</p>
+          
+          <input type="text" id="owl-book-name" placeholder="Your Name" value="${name}" style="width: 100%; margin-bottom: 0.5rem; background: rgba(255,255,255,0.05); border: 1px solid var(--border); padding: 0.75rem; border-radius: 0.5rem; color: white;">
+          <input type="email" id="owl-book-email" placeholder="Your Email" value="${email}" style="width: 100%; margin-bottom: 0.5rem; background: rgba(255,255,255,0.05); border: 1px solid var(--border); padding: 0.75rem; border-radius: 0.5rem; color: white;">
+          <input type="tel" id="owl-book-phone" placeholder="Phone Number (Optional)" style="width: 100%; margin-bottom: 0.5rem; background: rgba(255,255,255,0.05); border: 1px solid var(--border); padding: 0.75rem; border-radius: 0.5rem; color: white;">
+          <textarea id="owl-book-intent" placeholder="Reason for booking..." rows="2" style="width: 100%; margin-bottom: 0.5rem; background: rgba(255,255,255,0.05); border: 1px solid var(--border); padding: 0.75rem; border-radius: 0.5rem; color: white; resize: none;"></textarea>
+          
+          <div style="display: flex; gap: 0.75rem; margin-top: 0.5rem;">
+            <button class="btn btn-primary" id="owl-confirm-booking-btn" style="flex: 1; padding: 0.65rem;">Confirm</button>
+            <button class="btn btn-outline" id="owl-cancel-booking-btn" style="flex: 1; padding: 0.65rem; color: white; border-color: var(--border);">Cancel</button>
+          </div>
+        </div>
+      `;
+
+      const confirmBtn = document.getElementById('owl-confirm-booking-btn');
+      const cancelBtn = document.getElementById('owl-cancel-booking-btn');
+
+      cancelBtn.onclick = () => {
+        renderBookingSlots(container, wrap);
+      };
+
+      confirmBtn.onclick = async () => {
+        const nameInput = document.getElementById('owl-book-name');
+        const emailInput = document.getElementById('owl-book-email');
+        const phoneInput = document.getElementById('owl-book-phone');
+        const intentInput = document.getElementById('owl-book-intent');
+        
+        name = nameInput ? nameInput.value.trim() : name;
+        email = emailInput ? emailInput.value.trim() : email;
+        const phone = phoneInput ? phoneInput.value.trim() : '';
+        const intent = intentInput ? intentInput.value.trim() : 'AI Appointed Session';
+        
+        if (!name || !email) {
+          alert('Please enter both your name and email.');
+          return;
+        }
+        
+        localStorage.setItem('owl_customer_name_' + businessId, name);
+        localStorage.setItem('owl_customer_email_' + businessId, email);
+
+        confirmBtn.disabled = true;
+        confirmBtn.innerText = 'Booking...';
+
+        try {
+          const res = await fetch('/api/manage-slots', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              operation: 'create_booking',
+              business_id: businessId,
+              slot_id: slot.id,
+              customer_name: name,
+              customer_email: email,
+              phone: phone,
+              service_name: intent,
+              session_id: sessionId
+            })
+          });
+          
+          if (res.ok) {
+            wrap.innerHTML = `
+              <div style="text-align: center; padding: 1rem 0;">
+                <span class="material-symbols-outlined" style="font-size: 2.5rem; color: #22c55e; margin-bottom: 0.5rem; font-variation-settings: 'FILL' 1;">check_circle</span>
+                <div style="font-weight: 700; color: white;">Booking Confirmed!</div>
+                <div style="font-size: 0.85rem; color: var(--text-dim); margin-top: 0.25rem;">${dateFormatted}</div>
+                <div style="font-size: 0.8rem; color: #22c55e; margin-top: 0.5rem; font-weight: 500;">Details sent to your email.</div>
+              </div>
+            `;
+            
+            chatHistory.push({ role: 'user', content: `[SYSTEM: User booked slot on ${dateFormatted}]` });
+          } else {
+            let errorMsg = 'Booking failed. Please try again.';
+            try {
+              const errJson = await res.json();
+              if (errJson && errJson.details) {
+                errorMsg = errJson.details;
+              }
+            } catch(e) {}
+            throw new Error(errorMsg);
+          }
+        } catch (err) {
+          console.error(err);
+          wrap.innerHTML = `<div style="color: #ff9966; text-align: center; font-weight: 500;">${err.message || 'Booking failed. Please try again.'}</div>`;
+        }
+      };
     }
 
     function showLeadForm() {
@@ -1226,21 +1828,42 @@
       return typingDiv;
     }
 
+    let currentChatController = null;
+
     async function handleSend() {
+      if (currentChatController) {
+        currentChatController.abort();
+        currentChatController = null;
+        return;
+      }
+
       const text = userInput.value.trim();
-      if (!text || !businessId || !sessionId) return;
+      if (!text || !businessId) return;
 
       addMessage('user', text);
       userInput.value = '';
 
-      // Real AI Chat
+      userInput.disabled = true;
+      userInput.placeholder = 'Noctra is processing...';
+
+      if (sendBtn) {
+        sendBtn.innerHTML = '<span class="material-symbols-outlined" style="color: #ef4444;">stop_circle</span>';
+        sendBtn.title = 'Stop generating';
+      }
+
+      currentChatController = new AbortController();
+
       const typing = showTyping();
       try {
-        const response = await window.owlDb.chatWithAI(businessId, text, chatHistory, false, sessionId);
+        const response = await window.owlDb.chatWithAI(businessId, text, chatHistory, false, sessionId, currentChatController.signal);
         typing.remove();
 
+        if (!sessionId && response.session_id) {
+            sessionId = response.session_id;
+            connectRealtimeListener(sessionId);
+        }
+
         if (response.reply === "") {
-          // Handoff is active, do nothing
           chatHistory.push({ role: 'user', content: text });
           return;
         }
@@ -1248,15 +1871,26 @@
         const aiReply = response.reply || "I'm sorry, I'm having trouble processing that right now.";
         addMessage('bot', aiReply);
 
-        // Save to history (keep it optimized)
         chatHistory.push({ role: 'user', content: text });
         chatHistory.push({ role: 'bot', content: aiReply });
         if (chatHistory.length > 10) chatHistory.splice(0, 2);
 
       } catch (err) {
         typing.remove();
-        console.error("AI Chat Error:", err);
-        addMessage('bot', `I'm having a bit of trouble connecting at the moment. Please try again soon.`);
+        if (err.name === 'AbortError') {
+          addMessage('bot', `*Generation stopped by user.*`);
+        } else {
+          console.error("AI Chat Error:", err);
+          addMessage('bot', `I'm having a bit of trouble connecting at the moment. Please try again soon.`);
+        }
+      } finally {
+        currentChatController = null;
+        userInput.disabled = false;
+        userInput.placeholder = 'Ask about services or book an appointment...';
+        if (sendBtn) {
+          sendBtn.innerHTML = '<span class="material-symbols-outlined">send</span>';
+          sendBtn.title = '';
+        }
       }
     }
 
@@ -1268,9 +1902,10 @@
     // Actually perform the session reset (split out so terminated overlay can call it too)
     async function doResetSession(skipOverlayReshow = false) {
       sessionStorage.removeItem('owl_chat_session_id');
+      sessionStorage.removeItem('owl_guest_' + businessId);
+      sessionStorage.removeItem('owl_session_' + businessId);
       if (businessId) {
         localStorage.removeItem('owl_session_' + businessId);
-        localStorage.removeItem('owl_code_' + businessId);
       }
 
       sessionId = null;
@@ -1278,13 +1913,24 @@
       chatMessages.innerHTML = '';
 
       document.getElementById('btn-reset-chat').style.display = 'none';
-      document.getElementById('btn-history-chat').style.display = 'none';
 
       const savedEmail = localStorage.getItem('owl_customer_email_' + businessId);
       const savedName = localStorage.getItem('owl_customer_name_' + businessId);
       if (savedEmail && savedName) {
         try {
-          await startNewChatForCustomer(savedEmail, savedName);
+          sessionId = crypto.randomUUID?.() || Math.random().toString(36).substring(2, 15);
+          await window.owlDb.createLead({
+            business_id: businessId,
+            customer_name: savedName,
+            customer_email: savedEmail,
+            access_code: null,
+            session_id: sessionId,
+            status: 'chat'
+          });
+          localStorage.setItem('owl_session_' + businessId, sessionId);
+          document.getElementById('btn-reset-chat').style.display = 'inline-flex';
+          document.getElementById('btn-history-chat').style.display = 'flex';
+          await renderChatHistory([]);
         } catch(e) {
           console.error(e);
           showEmailStep();
@@ -1303,6 +1949,7 @@
 
     // ── Conversation History Panel ──────────────────────────────────────
     async function openHistoryModal() {
+      closeWidgetFaqs(); // Close FAQs modal if open
       const historyList = document.getElementById('history-list');
       historyList.innerHTML = '<p style="color: var(--text-dim); text-align: center; margin-top: 2rem;">Loading conversations...</p>';
       document.getElementById('history-modal').style.display = 'flex';
@@ -1321,6 +1968,7 @@
         div.className = 'history-item';
         div.onclick = () => loadHistoricalSession(sess.session_id);
 
+        // Format relative time
         const ts = sess.last_ts ? new Date(sess.last_ts) : null;
         let timeStr = '';
         if (ts) {
@@ -1334,6 +1982,7 @@
           else timeStr = `${diffDays}d ago`;
         }
 
+        // Truncate last message preview to 80 chars
         const preview = sess.last_message
           ? (sess.last_message.length > 80 ? sess.last_message.substring(0, 77) + '...' : sess.last_message)
           : 'Conversation';
@@ -1357,15 +2006,15 @@
 
     async function loadHistoricalSession(sessId) {
       closeHistoryModal();
-      sessionId = sessId;
+      sessionId = sessId; // update in-memory global
 
       const regOverlay = document.getElementById('customer-register-overlay');
       if (regOverlay) regOverlay.style.display = 'none';
       document.getElementById('btn-reset-chat').style.display = 'inline-flex';
-      document.getElementById('btn-history-chat').style.display = 'inline-flex';
       chatMessages.innerHTML = '';
 
       const typing = showTyping();
+      // Fetch directly from DB using the session ID we already know
       const supabase = await window.owlDb.getSupabase();
       const { data: logs, error } = await supabase
         .from('chat_logs')
@@ -1379,8 +2028,87 @@
         return;
       }
 
+    // Render using the existing renderChatHistory function
       await renderChatHistory(logs);
     }
+
+    // ── Widget Dropdown Menu & FAQs ─────────────────────────────────────────
+    function toggleWidgetMenu(e) {
+      if (e) e.stopPropagation();
+      const dd = document.getElementById('widget-dropdown');
+      if (dd) {
+        const isOpen = dd.style.display === 'flex';
+        dd.style.display = isOpen ? 'none' : 'flex';
+      }
+    }
+
+    function closeWidgetDropdown() {
+      const dd = document.getElementById('widget-dropdown');
+      if (dd) dd.style.display = 'none';
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+      const dd = document.getElementById('widget-dropdown');
+      const btn = e.target.closest('button[onclick*="toggleWidgetMenu"]');
+      if (dd && dd.style.display === 'flex' && !dd.contains(e.target) && !btn) {
+        dd.style.display = 'none';
+      }
+    });
+
+    function openWidgetFaqs() {
+      closeWidgetDropdown(); // close dropdown first
+      closeHistoryModal();   // Close history modal if open
+      const faqList = document.getElementById('faq-widget-list');
+      if (!faqList) return;
+      
+      const faqs = window._bizFaqs || [];
+      if (faqs.length === 0) {
+        faqList.innerHTML = '<p style="color: var(--text-dim); text-align: center; margin-top: 2rem;">No FAQs available at this time.</p>';
+      } else {
+        faqList.innerHTML = '';
+        faqs.forEach((faq, idx) => {
+          const div = document.createElement('div');
+          div.style.background = 'rgba(255, 255, 255, 0.05)';
+          div.style.border = '1px solid rgba(255, 255, 255, 0.1)';
+          div.style.borderRadius = '0.75rem';
+          div.style.padding = '1rem';
+          div.style.cursor = 'pointer';
+          div.style.transition = 'background 0.2s';
+          
+          div.innerHTML = `
+            <div style="font-weight: 600; font-size: 0.9rem; color: white; display: flex; justify-content: space-between; align-items: flex-start;">
+              <span>${faq.question}</span>
+              <span class="material-symbols-outlined" id="faq-icon-${idx}" style="font-size: 1.1rem; color: var(--text-dim); transition: transform 0.2s; flex-shrink:0; margin-left:0.5rem;">expand_more</span>
+            </div>
+            <div id="faq-ans-${idx}" style="display: none; font-size: 0.85rem; color: var(--text-light); margin-top: 0.75rem; line-height: 1.5; white-space: pre-wrap;">${faq.answer}</div>
+          `;
+          
+          div.onclick = () => {
+            const ans = document.getElementById(`faq-ans-${idx}`);
+            const icon = document.getElementById(`faq-icon-${idx}`);
+            if (ans.style.display === 'none') {
+              ans.style.display = 'block';
+              icon.style.transform = 'rotate(180deg)';
+              div.style.background = 'rgba(255, 255, 255, 0.1)';
+            } else {
+              ans.style.display = 'none';
+              icon.style.transform = 'rotate(0deg)';
+              div.style.background = 'rgba(255, 255, 255, 0.05)';
+            }
+          };
+          
+          faqList.appendChild(div);
+        });
+      }
+      
+      document.getElementById('faq-widget-modal').style.display = 'flex';
+    }
+
+    function closeWidgetFaqs() {
+      document.getElementById('faq-widget-modal').style.display = 'none';
+    }
+
   </script>
 </body>
 

@@ -67,6 +67,20 @@ Deno.serve(async (req) => {
         .single();
 
       if (leadErr) throw leadErr;
+
+      // Log lead submission to chat_logs
+      if (session_id) {
+        const { error: logErr } = await supabase
+          .from('chat_logs')
+          .insert([{
+            session_id: session_id,
+            business_id: business_id,
+            role: 'system',
+            content: `[SYSTEM: User submitted lead form. Name: ${customer_name}, Email: ${customer_email || 'Not provided'}, Phone: ${phone || 'Not provided'}, Inquiry: ${service_name || 'Not provided'}]`
+          }]);
+        if (logErr) console.error("❌ Error inserting lead chat log:", logErr);
+      }
+
       return new Response(JSON.stringify(lead), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
@@ -194,6 +208,19 @@ Deno.serve(async (req) => {
         .from('business_slots')
         .update({ is_booked: true })
         .eq('id', slot_id);
+
+      // Log booking to chat_logs
+      if (session_id) {
+        const { error: logErr } = await supabase
+          .from('chat_logs')
+          .insert([{
+            session_id: session_id,
+            business_id: business_id,
+            role: 'system',
+            content: `[SYSTEM: User booked slot. Name: ${customer_name}, Email: ${customer_email}, Phone: ${payload.phone || 'Not provided'}, Time: ${slot.slot_date}T${slot.slot_time}, Service: ${service_name || 'Premium Session'}]`
+          }]);
+        if (logErr) console.error("❌ Error inserting booking chat log:", logErr);
+      }
 
       return new Response(JSON.stringify(booking), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }

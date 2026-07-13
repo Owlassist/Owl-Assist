@@ -26,7 +26,7 @@
 
   <div class="auth-page">
     <div class="auth-sidebar">
-      <a href="/home" class="auth-logo" style="margin-bottom: 4rem;">
+      <a href="/" class="auth-logo" style="margin-bottom: 4rem;">
         <img src="../../assets/img/logo/logo.png" alt="Owl Assist Logo">
         Owl Assist
       </a>
@@ -51,7 +51,7 @@
 
     <div class="auth-main">
       <div class="auth-card">
-        <a href="/home" class="auth-logo mobile-only" style="margin-bottom: 1.5rem;">
+        <a href="/" class="auth-logo mobile-only" style="margin-bottom: 1.5rem;">
           <img src="../../assets/img/logo/logo.png" alt="Owl Assist Logo">
           Owl Assist
         </a>
@@ -94,6 +94,13 @@
             <input type="password" id="password" name="password" placeholder="••••••••" required>
           </div>
 
+          <div class="form-group check-group" style="display: flex; gap: 0.6rem; align-items: flex-start; margin-top: 1.25rem; margin-bottom: 1.25rem;">
+            <input type="checkbox" id="terms-checkbox" style="width: 1.15rem; height: 1.15rem; margin-top: 0.15rem; cursor: pointer; accent-color: var(--primary);" required>
+            <label for="terms-checkbox" style="font-size: 0.8rem; color: #adb4ce; cursor: pointer; user-select: none; line-height: 1.45;">
+              I agree to Owl Assist's <a href="/legal/terms-of-service" target="_blank" style="color: var(--primary); text-decoration: underline; font-weight: 500;">Terms of service</a> and <a href="/legal/privacy-policy" target="_blank" style="color: var(--primary); text-decoration: underline; font-weight: 500;">privacy policy</a>
+            </label>
+          </div>
+
           <div class="auth-actions" style="margin-top: 1rem;">
             <button type="submit" id="submit-btn" class="btn btn-primary btn-large" style="width: 100%;">Create Account</button>
             
@@ -103,7 +110,7 @@
             </div>
 
             <div class="social-grid">
-              <button type="button" onclick="handleOAuth('oauth_google')" class="btn btn-outline" style="font-size: 0.8rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; width: 100%;">
+              <button type="button" id="google-btn" onclick="handleOAuth('oauth_google')" class="btn btn-outline" style="font-size: 0.8rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; width: 100%;">
                 <!-- Google SVG -->
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -166,6 +173,9 @@
     // --- Sign Up Form ---
     document.getElementById('signup-form').addEventListener('submit', async (e) => {
       e.preventDefault();
+
+      const checkbox = document.getElementById('terms-checkbox');
+      if (!checkbox || !checkbox.checked) return;
 
       const btn = document.getElementById('submit-btn');
       const originalText = btn.innerText;
@@ -241,6 +251,12 @@
 
     // --- OAuth Logic ---
     async function handleOAuth(strategy) {
+      const checkbox = document.getElementById('terms-checkbox');
+      if (!checkbox || !checkbox.checked) {
+        if (window.OwlModal) OwlModal.alert('Terms Agreement Required', 'You must agree to the Terms of Service and Privacy Policy to continue.');
+        else alert('You must agree to the Terms of Service and Privacy Policy to continue.');
+        return;
+      }
       try {
         await window.owlAuth.signInWithProvider(strategy);
       } catch (err) {
@@ -248,6 +264,27 @@
         const msg = err.errors?.[0]?.message || err.message || 'OAuth failed';
         if (window.OwlModal) OwlModal.alert('OAuth Error', msg); else alert('Error: ' + msg);
       }
+    }
+
+    // --- Checkbox & Button State Logic ---
+    const checkbox = document.getElementById('terms-checkbox');
+    const submitBtn = document.getElementById('submit-btn');
+    const googleBtn = document.getElementById('google-btn');
+
+    function updateButtonStates() {
+      const isChecked = checkbox.checked;
+      submitBtn.disabled = !isChecked;
+      googleBtn.disabled = !isChecked;
+      
+      submitBtn.style.opacity = isChecked ? '1' : '0.5';
+      submitBtn.style.cursor = isChecked ? 'pointer' : 'not-allowed';
+      googleBtn.style.opacity = isChecked ? '1' : '0.5';
+      googleBtn.style.cursor = isChecked ? 'pointer' : 'not-allowed';
+    }
+
+    if (checkbox) {
+      checkbox.addEventListener('change', updateButtonStates);
+      updateButtonStates(); // Run once on load
     }
   </script>
 

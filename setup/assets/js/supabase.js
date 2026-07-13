@@ -423,12 +423,11 @@ async function createBooking(details) {
 /**
  * Chat with Gemini Flash AI using our secure Edge Function
  */
-async function chatWithAI(businessId, message, history = [], getGreeting = false, sessionId = null) {
+async function chatWithAI(businessId, message, history = [], getGreeting = false, sessionId = null, abortSignal = null) {
   const isLocal = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
   const url = isLocal ? 'https://fensjqscutikgccajwkh.supabase.co/functions/v1/chat-ai' : '/api/chat-ai';
 
-  // Use proxy for HttpOnly cookies instead of supabase.functions.invoke
-  const res = await fetch(url, {
+  const fetchOpts = {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
@@ -438,7 +437,12 @@ async function chatWithAI(businessId, message, history = [], getGreeting = false
       history: history,
       getGreeting: getGreeting
     })
-  });
+  };
+  if (abortSignal) {
+    fetchOpts.signal = abortSignal;
+  }
+
+  const res = await fetch(url, fetchOpts);
   
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Failed to fetch from AI");

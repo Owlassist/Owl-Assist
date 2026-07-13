@@ -287,10 +287,7 @@
           <label>Website URL (Auto-Scraping)</label>
           <input type="url" id="settings-url" placeholder="https://yourwebsite.com">
         </div>
-        <div class="mob-input-group">
-          <label>External Booking Link</label>
-          <input type="url" id="settings-booking-url" placeholder="https://your-booking-link.com/...">
-        </div>
+
         <div class="mob-input-group">
           <label>Upload Document Knowledge (PDF)</label>
           <div
@@ -398,6 +395,37 @@
   <script src="../assets/js/clerk-auth.js"></script>
   <script src="../assets/js/supabase.js"></script>
   <script src="../assets/js/modals.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script>
+    if (window.marked) {
+      const renderer = new marked.Renderer();
+      renderer.link = function(href, title, text) {
+        let linkHref = href;
+        let linkTitle = title;
+        let linkText = text;
+        
+        if (typeof href === 'object' && href !== null) {
+          linkHref = href.href || '';
+          linkTitle = href.title || '';
+          linkText = href.text || '';
+        }
+        
+        let cleanHref = linkHref;
+        if (cleanHref && !cleanHref.startsWith('http://') && !cleanHref.startsWith('https://') && !cleanHref.startsWith('mailto:') && !cleanHref.startsWith('tel:')) {
+          cleanHref = 'https://' + cleanHref;
+        }
+        
+        const titleAttr = linkTitle ? ` title="${linkTitle}"` : '';
+        return `<a href="${cleanHref}" target="_blank" rel="noopener noreferrer"${titleAttr}>${linkText}</a>`;
+      };
+      
+      if (typeof marked.use === 'function') {
+        marked.use({ renderer, gfm: true, breaks: true });
+      } else {
+        marked.setOptions({ renderer: renderer, gfm: true, breaks: true });
+      }
+    }
+  </script>
   <script src="../assets/js/dashboard-app.js"></script>
 
   <script>

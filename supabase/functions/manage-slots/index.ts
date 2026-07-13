@@ -40,7 +40,7 @@ Deno.serve(async (req) => {
     console.log(`🚀 Operation: ${operation} | Business: ${business_id}`);
 
     // Security Check: Only public operations are allowed without an Auth header
-    const publicOps = ['create_booking', 'create_lead', 'get_session_by_code', 'check_customer', 'get_customer_sessions'];
+    const publicOps = ['create_booking', 'create_lead', 'get_session_by_code', 'check_customer', 'get_customer_sessions', 'get_available_slots'];
     if (!publicOps.includes(operation)) {
       const authHeader = req.headers.get('Authorization');
       if (!authHeader) {
@@ -59,12 +59,28 @@ Deno.serve(async (req) => {
       // Register customer in customers table so they can retrieve their history later
       if (customer_email && customer_name) {
         const emailLower = customer_email.trim().toLowerCase();
+        
+        const { data: existingCust } = await supabase.from('customers').select('short_id').eq('business_id', business_id).eq('email', emailLower).maybeSingle();
+        
+        let shortId = existingCust?.short_id;
+        if (!shortId) {
+           const { data: bizData } = await supabase.from('businesses').select('name').eq('id', business_id).maybeSingle();
+           let prefix = "BUS";
+           if (bizData && bizData.name) {
+              prefix = bizData.name.replace(/[^a-zA-Z]/g, '').substring(0, 3).toUpperCase() || "BUS";
+           }
+           prefix = prefix.padEnd(3, 'X');
+           const randomStr = Math.random().toString(36).substring(2, 6).toUpperCase();
+           shortId = `${prefix}-CST-${randomStr}`;
+        }
+        
         const { error: custErr } = await supabase
           .from('customers')
           .upsert({
             business_id: business_id,
             email: emailLower,
-            name: customer_name.trim()
+            name: customer_name.trim(),
+            short_id: shortId
           }, { onConflict: 'business_id,email' });
 
         if (custErr) {
@@ -133,6 +149,24 @@ Deno.serve(async (req) => {
       }
 
       // ─────────────────────────────────────────────────────────
+      // Insert Notification for Business
+      // ─────────────────────────────────────────────────────────
+      if (!existingBooking || (existingBooking.status === 'chat' && targetStatus === 'pending')) {
+         const typeText = targetStatus === 'chat' ? 'new_chat' : 'new_lead';
+         const titleText = targetStatus === 'chat' ? 'New Chat Started' : 'New Lead Captured';
+         const msgText = targetStatus === 'chat' ? `${customer_name || 'A guest'} started a new chat session.` : `${customer_name} submitted their contact details.`;
+         const linkText = targetStatus === 'chat' ? '#view-conversations' : '#view-bookings';
+
+         await supabase.from('notifications').insert([{
+            business_id: business_id,
+            type: typeText,
+            title: titleText,
+            message: msgText,
+            link: linkText
+         }]);
+      }
+
+      // ─────────────────────────────────────────────────────────
       // Mark Lead Form as Submitted in Chat Logs (for UI state)
       // ─────────────────────────────────────────────────────────
       if (session_id && targetStatus !== 'chat') {
@@ -142,7 +176,7 @@ Deno.serve(async (req) => {
             session_id: session_id,
             business_id: business_id,
             role: 'system',
-            content: `[SYSTEM: User submitted lead form. Name: ${customer_name}]`
+            content: `[SYSTEM: User submitted lead form. Name: ${customer_name}, Email: ${customer_email || 'Not provided'}, Phone: ${phone || 'Not provided'}, Inquiry: ${service_name || 'Not provided'}]`
           }]);
         if (logErr) console.error("❌ Error inserting lead chat log:", logErr);
       }
@@ -270,11 +304,24 @@ Deno.serve(async (req) => {
     // ─────────────────────────────────────────────────────────
 
     if (operation === 'add') {
-      const { data, error } = await supabase
-        .from('business_slots')
-        .insert([{ business_id, slot_date: date, slot_time: time }]);
-      if (error) throw error;
-      return new Response(JSON.stringify(data), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      if (slots && Array.isArray(slots)) {
+        const { data, error } = await supabase
+          .from('business_slots')
+          .insert(slots.map((s: any) => ({
+            business_id: s.business_id,
+            slot_date: s.slot_date,
+            slot_time: s.slot_time,
+            is_booked: s.is_booked || false
+          })));
+        if (error) throw error;
+        return new Response(JSON.stringify(data), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      } else {
+        const { data, error } = await supabase
+          .from('business_slots')
+          .insert([{ business_id, slot_date: date, slot_time: time }]);
+        if (error) throw error;
+        return new Response(JSON.stringify(data), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      }
     }
 
     if (operation === 'delete') {
@@ -287,7 +334,7 @@ Deno.serve(async (req) => {
     }
 
     if (operation === 'create_booking') {
-      const { customer_name, customer_email, service_name } = payload;
+      const { customer_name, customer_email, service_name, phone } = payload;
 
       const { data: slot, error: slotErr } = await supabase
         .from('business_slots')
@@ -305,6 +352,7 @@ Deno.serve(async (req) => {
           business_id: business_id,
           customer_name: customer_name,
           customer_email: customer_email,
+          phone: phone || '',
           service_name: service_name || "Premium Session",
           booking_time: `${slot.slot_date}T${slot.slot_time}`,
           session_id: session_id || null,
@@ -319,6 +367,19 @@ Deno.serve(async (req) => {
         .from('business_slots')
         .update({ is_booked: true })
         .eq('id', slot_id);
+
+      // Log booking to chat_logs
+      if (session_id) {
+        const { error: logErr } = await supabase
+          .from('chat_logs')
+          .insert([{
+            session_id: session_id,
+            business_id: business_id,
+            role: 'system',
+            content: `[SYSTEM: User booked slot. Name: ${customer_name}, Email: ${customer_email}, Phone: ${phone || 'Not provided'}, Time: ${slot.slot_date}T${slot.slot_time}, Service: ${service_name || 'Premium Session'}]`
+          }]);
+        if (logErr) console.error("❌ Error inserting booking chat log:", logErr);
+      }
 
       return new Response(JSON.stringify(booking), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
@@ -401,6 +462,26 @@ Deno.serve(async (req) => {
 
       if (error) throw error;
       return new Response('Availability Saved', { status: 200, headers: corsHeaders });
+    }
+
+    if (operation === 'get_available_slots') {
+      if (!business_id) throw new Error("Missing business_id");
+      const todayStr = new Date().toISOString().split('T')[0];
+      const { data: slotsList, error: slotsErr } = await supabase
+        .from('business_slots')
+        .select('*')
+        .eq('business_id', business_id)
+        .eq('is_booked', false)
+        .gte('slot_date', todayStr)
+        .order('slot_date', { ascending: true })
+        .order('slot_time', { ascending: true })
+        .limit(6);
+
+      if (slotsErr) throw slotsErr;
+      return new Response(JSON.stringify(slotsList || []), {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
     }
 
     if (operation === 'delete_lead') {

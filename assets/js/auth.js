@@ -61,7 +61,7 @@ export const authActions = {
   async signOut() {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
-    window.location.href = '../home';
+    window.location.href = '/';
   },
 
   /**

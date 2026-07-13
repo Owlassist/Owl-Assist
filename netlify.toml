@@ -41,14 +41,6 @@
   force = true
 
 # ============================================================
-# Root → /home (visible redirect so URL shows /home)
-# ============================================================
-[[redirects]]
-  from = "/"
-  to = "/home"
-  status = 302
-
-# ============================================================
 # Clean vanity URLs: /chat/username → chat/index.html?u=username
 # Must come BEFORE the generic /*  rule below
 # ============================================================
@@ -70,8 +62,8 @@
 # ============================================================
 [[redirects]]
   from = "/home"
-  to = "/index.html"
-  status = 200
+  to = "/"
+  status = 301
 
 [[redirects]]
   from = "/faq"
@@ -81,6 +73,21 @@
 [[redirects]]
   from = "/pricing"
   to = "/pricing.html"
+  status = 200
+
+[[redirects]]
+  from = "/legal/privacy-policy"
+  to = "/legal/privacy-policy.html"
+  status = 200
+
+[[redirects]]
+  from = "/legal/terms-of-service"
+  to = "/legal/terms-of-service.html"
+  status = 200
+
+[[redirects]]
+  from = "/legal/cookie-policy"
+  to = "/legal/cookie-policy.html"
   status = 200
 
 # ============================================================
